@@ -11,13 +11,7 @@ Patch1: old_dev_t_int.patch
 Patch2: old_dev_t_short.patch
 Patch3: makefile.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: sysfsutils-devel
-#BuildRequires: device-mapper >= 1.01
-#BuildRequires: libselinux-devel
-#BuildRequires: dlm
-#Requires: lvm2 >= 2.01
-#ExcludeArch: s390 s390x ppc
-#%define _exec_prefix /usr
+BuildRequires: sysfsutils-devel,device-mapper
 
 %description
 %{name} provides tools to manage multipath devices by instructing the 
