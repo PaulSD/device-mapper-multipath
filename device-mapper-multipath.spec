@@ -6,7 +6,12 @@ License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 Source0: multipath-tools-%{version}.tar.bz2
+Patch0: old_dev_t_long.patch
+Patch1: old_dev_t_int.patch
+Patch2: old_dev_t_short.patch
+Patch3: makefile.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+BuildRequires: sysfsutils-devel
 #BuildRequires: device-mapper >= 1.01
 #BuildRequires: libselinux-devel
 #BuildRequires: dlm
@@ -25,26 +30,36 @@ The tools are :
 %prep
 %setup -q -n multipath-tools-%{version}
 
+%ifarch ppc64 x86_64
+%patch0 -p1
+%endif
+
+%ifarch ppc ia64
+%patch1 -p1
+%endif
+
+%ifarch i386 s390 s390x
+%patch2 -p1
+%endif
+
+%patch3 -p1
+
 %build
-#%configure --with-clvmd=all --with-cluster=shared --with-user= --with-group=
 make DESTDIR=$RPM_BUILD_ROOT
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
-
-#mkdir -p -m755 $RPM_BUILD_ROOT/etc/rc.d/init.d
-#install scripts/clvmd_init_rhel4 $RPM_BUILD_ROOT/etc/rc.d/init.d/clvmd
+make install DESTDIR=$RPM_BUILD_ROOT bindir=/sbin rcdir=/etc/rc.d/init.d
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 #%post
-#/sbin/chkconfig --add clvmd
+#/sbin/chkconfig --add multipathd
 
 #%preun
 #if [ "$1" = 0 ]; then
-#        /sbin/chkconfig --del clvmd
+#        /sbin/chkconfig --del multipathd
 #fi
 
 %files
@@ -52,9 +67,12 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/multipath
 /sbin/kpartx
 /sbin/multipathd
+/sbin/pp_balance_units
+%{_mandir}/man8/kpartx.8.gz
 %{_mandir}/man8/multipath.8.gz
-%config /etc/hotplug.d/scsi/multipath.hotplug
+%{_mandir}/man8/multipathd.8.gz
 %config /etc/rc.d/init.d/multipathd
+%doc AUTHOR COPYING README* FAQ multipath.conf.* multipath/01_udev multipath/02_multipath multipath/multipath.dev
 
 %changelog
 * Tue Mar 01 2005 Alasdair Kergon <agk@redhat.com> - 0.4.2-1.0
