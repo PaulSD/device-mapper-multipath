@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.4
-Release: 0.pre8.0
+Release: 0.pre8.1
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -46,6 +46,7 @@ make DESTDIR=$RPM_BUILD_ROOT
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT bindir=/sbin rcdir=/etc/rc.d/init.d
+rm -f $RPM_BUILD_ROOT/sbin/pp_balance_units
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -63,7 +64,6 @@ fi
 /sbin/multipath
 /sbin/kpartx
 /sbin/multipathd
-/sbin/pp_balance_units
 %{_mandir}/man8/kpartx.8.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
@@ -71,6 +71,9 @@ fi
 %doc AUTHOR COPYING README* FAQ multipath.conf.* multipath/01_udev multipath/02_multipath multipath/multipath.dev
 
 %changelog
+* Fri Apr 08 2005 Alasdair Kergon <agk@redhat.com> - 0.4.4-0.pre8.1
+- Remove pp_balance_units.
+
 * Mon Apr 04 2005 Alasdair Kergon <agk@redhat.com> - 0.4.4-0.pre8.0
 - Incorporate numerous upstream fixes.
 - Update init script to distribution standards.
