@@ -1,16 +1,16 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.4
-Release: 0.pre8.1
+Release: 1.0
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.4-pre8.tar.bz2
+Source0: multipath-tools-0.4.4.1.tar.bz2
 Patch0: old_dev_t_long.patch
 Patch1: old_dev_t_int.patch
 Patch2: old_dev_t_short.patch
 Patch3: makefile.patch
-Patch4: kpartx_endian.patch
+Patch4: move_cache_file.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: sysfsutils-devel,device-mapper
 
@@ -23,7 +23,7 @@ The tools are :
 * kpartx :      Makes multipath devices partitionable.
 
 %prep
-%setup -q -n multipath-tools-0.4.4-pre8
+%setup -q -n multipath-tools-0.4.4.1
 
 %ifarch ppc64 x86_64
 %patch0 -p1
@@ -47,6 +47,8 @@ make DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT bindir=/sbin rcdir=/etc/rc.d/init.d
 rm -f $RPM_BUILD_ROOT/sbin/pp_balance_units
+rm -f $RPM_BUILD_ROOT/sbin/pp_emc
+install -m 0700 -d $RPM_BUILD_ROOT/var/cache/multipath
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -69,8 +71,12 @@ fi
 %{_mandir}/man8/multipathd.8.gz
 %config /etc/rc.d/init.d/multipathd
 %doc AUTHOR COPYING README* FAQ multipath.conf.* multipath/01_udev multipath/02_multipath multipath/multipath.dev
+/var/cache/multipath
 
 %changelog
+* Tue Apr 19 2005 Alasdair Kergon <agk@redhat.com> - 0.4.4-1.0
+- Move cache file into /var/cache/multipath.
+
 * Fri Apr 08 2005 Alasdair Kergon <agk@redhat.com> - 0.4.4-0.pre8.1
 - Remove pp_balance_units.
 
