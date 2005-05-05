@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.4
-Release: 2.1
+Release: 2.2
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -57,7 +57,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 /sbin/chkconfig --add multipathd
-/sbin/chkconfig --levels 0123456 off
+/sbin/chkconfig --levels 0123456 multipathd off
 
 %preun
 if [ "$1" = 0 ]; then
@@ -77,6 +77,9 @@ fi
 /var/cache/multipath
 
 %changelog
+* Thu May 05 2005 Alasdair Kergon <agk@redhat.com> - 0.4.4-2.2
+- Fix last fix.
+
 * Wed May 04 2005 Alasdair Kergon <agk@redhat.com> - 0.4.4-2.1
 - By default, disable the multipathd service.
 
