@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.4
-Release: 2.2
+Release: 2.3
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -12,6 +12,7 @@ Patch2: old_dev_t_short.patch
 Patch3: makefile.patch
 Patch4: move_cache_file.patch
 Patch5: cache_open_mode.patch
+Patch6: init.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: sysfsutils-devel,device-mapper
 
@@ -41,6 +42,7 @@ The tools are :
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -57,7 +59,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 /sbin/chkconfig --add multipathd
-/sbin/chkconfig --levels 0123456 multipathd off
 
 %preun
 if [ "$1" = 0 ]; then
@@ -77,6 +78,9 @@ fi
 /var/cache/multipath
 
 %changelog
+* Fri May 06 2005 Bill Nottingham <notting@redhat.com> - 0.4.4-2.3
+- Fix last fix.
+
 * Thu May 05 2005 Alasdair Kergon <agk@redhat.com> - 0.4.4-2.2
 - Fix last fix.
 
