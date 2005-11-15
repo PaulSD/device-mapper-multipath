@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.4
-Release: 2.3
+Release: 2.4
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -13,6 +13,7 @@ Patch3: makefile.patch
 Patch4: move_cache_file.patch
 Patch5: cache_open_mode.patch
 Patch6: init.patch
+Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: sysfsutils-devel,device-mapper
 
@@ -22,7 +23,13 @@ device-mapper multipath kernel module what to do.
 The tools are :
 * multipath :   Scan the system for multipath devices and assemble them.
 * multipathd :  Detects when paths fail and execs multipath to update things.
-* kpartx :      Makes multipath devices partitionable.
+
+%package -n kpartx
+Summary: kpartx probes device-mapper volumes for partitions.
+Group: System Environment/Base
+
+%description -n kpartx
+kpartx probes device-mapper volumes for partitions.
 
 %prep
 %setup -q -n multipath-tools-0.4.4.2
@@ -68,7 +75,6 @@ fi
 %files
 %defattr(-,root,root,-)
 /sbin/multipath
-/sbin/kpartx
 /sbin/multipathd
 %{_mandir}/man8/kpartx.8.gz
 %{_mandir}/man8/multipath.8.gz
@@ -77,7 +83,14 @@ fi
 %doc AUTHOR COPYING README* FAQ multipath.conf.* multipath/01_udev multipath/02_multipath multipath/multipath.dev
 /var/cache/multipath
 
+%files -n kpartx
+%defattr(-,root,root,-)
+/sbin/kpartx
+
 %changelog
+* Tue Nov 15 2005 Peter Jones <pjones@redhat.com> - 0.4.4-2.4
+- split kpartx out into its own package
+
 * Fri May 06 2005 Bill Nottingham <notting@redhat.com> - 0.4.4-2.3
 - Fix last fix.
 
