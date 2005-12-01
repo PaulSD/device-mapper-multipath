@@ -13,7 +13,7 @@ Patch3: makefile.patch
 Patch4: move_cache_file.patch
 Patch5: cache_open_mode.patch
 Patch6: init.patch
-Requires: kpartx = %{version}-%{release}
+Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: sysfsutils-devel,device-mapper
 
@@ -23,13 +23,6 @@ device-mapper multipath kernel module what to do.
 The tools are :
 * multipath :   Scan the system for multipath devices and assemble them.
 * multipathd :  Detects when paths fail and execs multipath to update things.
-
-%package -n kpartx
-Summary: kpartx probes device-mapper volumes for partitions.
-Group: System Environment/Base
-
-%description -n kpartx
-kpartx probes device-mapper volumes for partitions.
 
 %prep
 %setup -q -n multipath-tools-0.4.4.2
@@ -74,6 +67,7 @@ fi
 
 %files
 %defattr(-,root,root,-)
+/sbin/kpartx
 /sbin/multipath
 /sbin/multipathd
 %{_mandir}/man8/kpartx.8.gz
@@ -85,9 +79,12 @@ fi
 
 %files -n kpartx
 %defattr(-,root,root,-)
-/sbin/kpartx
 
 %changelog
+* Tue Nov 15 2005 Peter Jones <pjones@redhat.com> - 0.4.4-2.5
+- unsplit kpartx.  parted knows how to do this now, so we don't
+  need this in a separate package.
+
 * Tue Nov 15 2005 Peter Jones <pjones@redhat.com> - 0.4.4-2.4
 - split kpartx out into its own package
 
