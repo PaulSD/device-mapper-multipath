@@ -77,9 +77,6 @@ fi
 %doc AUTHOR COPYING README* FAQ multipath.conf.* multipath/01_udev multipath/02_multipath multipath/multipath.dev
 /var/cache/multipath
 
-%files -n kpartx
-%defattr(-,root,root,-)
-
 %changelog
 * Tue Nov 15 2005 Peter Jones <pjones@redhat.com> - 0.4.4-2.5
 - unsplit kpartx.  parted knows how to do this now, so we don't
