@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.4
-Release: 2.5
+Release: 2.6
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -15,7 +15,7 @@ Patch5: cache_open_mode.patch
 Patch6: init.patch
 Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: sysfsutils-devel,device-mapper
+BuildRequires: sysfsutils-devel, device-mapper >= 1.02.02-2
 
 %description
 %{name} provides tools to manage multipath devices by instructing the 
@@ -78,6 +78,9 @@ fi
 /var/cache/multipath
 
 %changelog
+* Sun Dec  4 2005 Peter Jones <pjones@redhat.com> - 0.4.4-2.6
+- rebuild for newer libs
+
 * Tue Nov 15 2005 Peter Jones <pjones@redhat.com> - 0.4.4-2.5
 - unsplit kpartx.  parted knows how to do this now, so we don't
   need this in a separate package.
