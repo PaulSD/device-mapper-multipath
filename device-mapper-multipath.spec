@@ -1,18 +1,12 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
-Version: 0.4.4
-Release: 2.6.1
+Version: 0.4.5
+Release: 9.0
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.4.2.tar.bz2
-Patch0: old_dev_t_long.patch
-Patch1: old_dev_t_int.patch
-Patch2: old_dev_t_short.patch
-Patch3: makefile.patch
-Patch4: move_cache_file.patch
-Patch5: cache_open_mode.patch
-Patch6: init.patch
+Source0: multipath-tools-0.4.5.52.tgz
+Patch0: fedora.patch
 Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: sysfsutils-devel, device-mapper >= 1.02.02-2
@@ -25,24 +19,9 @@ The tools are :
 * multipathd :  Detects when paths fail and execs multipath to update things.
 
 %prep
-%setup -q -n multipath-tools-0.4.4.2
+%setup -q -n multipath-tools-0.4.5.52
 
-%ifarch ppc64 x86_64
 %patch0 -p1
-%endif
-
-%ifarch ppc ia64
-%patch1 -p1
-%endif
-
-%ifarch i386 s390 s390x
-%patch2 -p1
-%endif
-
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -50,9 +29,6 @@ make DESTDIR=$RPM_BUILD_ROOT
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT bindir=/sbin rcdir=/etc/rc.d/init.d
-rm -f $RPM_BUILD_ROOT/sbin/pp_balance_units
-rm -f $RPM_BUILD_ROOT/sbin/pp_emc
-install -m 0700 -d $RPM_BUILD_ROOT/var/cache/multipath
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -68,16 +44,27 @@ fi
 %files
 %defattr(-,root,root,-)
 /sbin/kpartx
+/sbin/kpartx.static
 /sbin/multipath
+/sbin/multipath.static
 /sbin/multipathd
+/sbin/mpath_prio_alua
+/sbin/mpath_prio_emc
+/sbin/mpath_prio_netapp
+/etc/udev/rules.d/40-multipath.rules
+%{_mandir}/man8/mpath_prio_alua.8.gz
 %{_mandir}/man8/kpartx.8.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
 %config /etc/rc.d/init.d/multipathd
-%doc AUTHOR COPYING README* FAQ multipath.conf.* multipath/01_udev multipath/02_multipath multipath/multipath.dev
+%config(noreplace) /etc/multipath.conf
+%doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 /var/cache/multipath
 
 %changelog
+* Fri Dec 16 2005 Benjamin Marzinski <bmarzins@redhat.com>
+- Updated to latest upstream source (t)_4_5_post52)
+
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
