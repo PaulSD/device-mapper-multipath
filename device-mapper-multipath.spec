@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.5
-Release: 12.0
+Release: 12.0.1
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -62,6 +62,9 @@ fi
 /var/cache/multipath
 
 %changelog
+* Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 0.4.5-12.0.1
+- bump again for double-long bug on ppc(64)
+
 * Tue Feb 07 2006 Benjamin Marzinski <bmarzins@redhat.com> -0.4.5-12.0
 - Updated to latest upstream source (t0_4_5_post56)
 
