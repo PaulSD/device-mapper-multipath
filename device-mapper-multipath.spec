@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.5
-Release: 12.1
+Release: 12.2
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -9,6 +9,7 @@ Source0: multipath-tools-0.4.5.56.tgz
 Patch0: fedora.patch
 Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+Prereq: chkconfig
 BuildRequires: sysfsutils-devel, device-mapper >= 1.02.02-2
 BuildRequires: libselinux-devel
 
@@ -63,6 +64,9 @@ fi
 /var/cache/multipath
 
 %changelog
+* Mon Feb 27 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.5-12.2
+- Prereq: chkconfig
+
 * Mon Feb 20 2006 Karsten Hopp <karsten@redhat.de> 0.4.5-12.1
 - BuildRequires: libselinux-devel
 
