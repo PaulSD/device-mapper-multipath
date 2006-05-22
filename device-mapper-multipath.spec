@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.5
-Release: 12.2
+Release: 12.3
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -11,7 +11,8 @@ Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: chkconfig
 BuildRequires: sysfsutils-devel, device-mapper >= 1.02.02-2
-BuildRequires: libselinux-devel
+BuildRequires: libselinux-devel, libsepol-devel
+BuildRequires: readline-devel
 
 %description
 %{name} provides tools to manage multipath devices by instructing the 
@@ -64,6 +65,9 @@ fi
 /var/cache/multipath
 
 %changelog
+* Mon May 22 2006 Alasdair Kergon <agk@redhat.com> - 0.4.5-12.3
+- BuildRequires: libsepol-devel, readline-devel
+
 * Mon Feb 27 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.5-12.2
 - Prereq: chkconfig
 
