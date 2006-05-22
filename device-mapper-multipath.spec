@@ -1,11 +1,11 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.5
-Release: 12.3
+Release: 16.0
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.5.56.tgz
+Source0: multipath-tools-0.4.5.59.tgz
 Patch0: fedora.patch
 Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -20,9 +20,10 @@ device-mapper multipath kernel module what to do.
 The tools are :
 * multipath :   Scan the system for multipath devices and assemble them.
 * multipathd :  Detects when paths fail and execs multipath to update things.
+* kpartx :      Makes multipath devices partitionable.
 
 %prep
-%setup -q -n multipath-tools-0.4.5.56
+%setup -q -n multipath-tools-0.4.5.59
 
 %patch0 -p1
 
@@ -46,14 +47,18 @@ fi
 
 %files
 %defattr(-,root,root,-)
-/sbin/kpartx
-/sbin/kpartx.static
 /sbin/multipath
 /sbin/multipath.static
+/sbin/mpath_ctl
+/sbin/kpartx
+/sbin/kpartx.static
 /sbin/multipathd
 /sbin/mpath_prio_alua
 /sbin/mpath_prio_emc
 /sbin/mpath_prio_netapp
+/sbin/mpath_prio_hds_modular
+/sbin/mpath_get_name
+/sbin/kpartx_get_name
 /etc/udev/rules.d/40-multipath.rules
 %{_mandir}/man8/mpath_prio_alua.8.gz
 %{_mandir}/man8/kpartx.8.gz
@@ -61,10 +66,13 @@ fi
 %{_mandir}/man8/multipathd.8.gz
 %config /etc/rc.d/init.d/multipathd
 %config(noreplace) /etc/multipath.conf
-%doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
+%doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic multipath/multipath.dev
 /var/cache/multipath
 
 %changelog
+* Mon May 22 2006 Alasdair Kergon <agk@redhat.com> - 0.4.5-16.0
+- Newer upstream source (t0_4_5_post59).
+
 * Mon May 22 2006 Alasdair Kergon <agk@redhat.com> - 0.4.5-12.3
 - BuildRequires: libsepol-devel, readline-devel
 
