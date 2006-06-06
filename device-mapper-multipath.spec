@@ -1,12 +1,11 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
-Version: 0.4.5
-Release: 16.0
+Version: 0.4.7
+Release: 1.0
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.5.59.tgz
-Patch0: fedora.patch
+Source0: multipath-tools-0.4.7.1.tgz
 Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: chkconfig
@@ -23,9 +22,7 @@ The tools are :
 * kpartx :      Makes multipath devices partitionable.
 
 %prep
-%setup -q -n multipath-tools-0.4.5.59
-
-%patch0 -p1
+%setup -q -n multipath-tools-0.4.7.1
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -49,7 +46,6 @@ fi
 %defattr(-,root,root,-)
 /sbin/multipath
 /sbin/multipath.static
-/sbin/mpath_ctl
 /sbin/kpartx
 /sbin/kpartx.static
 /sbin/multipathd
@@ -57,6 +53,7 @@ fi
 /sbin/mpath_prio_emc
 /sbin/mpath_prio_netapp
 /sbin/mpath_prio_hds_modular
+/sbin/mpath_prio_tpc
 /sbin/mpath_get_name
 /sbin/kpartx_get_name
 /etc/udev/rules.d/40-multipath.rules
@@ -66,10 +63,12 @@ fi
 %{_mandir}/man8/multipathd.8.gz
 %config /etc/rc.d/init.d/multipathd
 %config(noreplace) /etc/multipath.conf
-%doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic multipath/multipath.dev
-/var/cache/multipath
+%doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 
 %changelog
+* Mon Jun 06 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-1.0
+- Updated to Christophe's latest source
+
 * Mon May 22 2006 Alasdair Kergon <agk@redhat.com> - 0.4.5-16.0
 - Newer upstream source (t0_4_5_post59).
 
