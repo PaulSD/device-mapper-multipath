@@ -1,11 +1,11 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 1.0
+Release: 2.0
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.7.1.tgz
+Source0: multipath-tools-0.4.7.2.tgz
 Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: chkconfig
@@ -22,7 +22,7 @@ The tools are :
 * kpartx :      Makes multipath devices partitionable.
 
 %prep
-%setup -q -n multipath-tools-0.4.7.1
+%setup -q -n multipath-tools-0.4.7.2
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -66,6 +66,9 @@ fi
 %doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 
 %changelog
+* Wed Jun 28 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-2.0
+- Updated to latest upstream source, fixes kpartx udev rule issue
+
 * Mon Jun 06 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-1.0
 - Updated to Christophe's latest source
 
