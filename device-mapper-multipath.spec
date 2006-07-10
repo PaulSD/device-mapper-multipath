@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 2.1
+Release: 2.2
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -66,6 +66,9 @@ fi
 %doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 
 %changelog
+* Mon Jul 11 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-2.2
+- fix tagging issue.
+
 * Mon Jul 10 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-2.1
 - changed BuildRequires from sysfsutils-devel to libsysfs-devel
 
