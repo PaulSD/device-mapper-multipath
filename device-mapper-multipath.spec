@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 3.0
+Release: 3.1
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -11,7 +11,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: chkconfig
 BuildRequires: libsysfs-devel, device-mapper >= 1.02.02-2
 BuildRequires: libselinux-devel, libsepol-devel
-BuildRequires: readline-devel
+BuildRequires: readline-devel, ncurses-devel
 
 %description
 %{name} provides tools to manage multipath devices by instructing the 
@@ -66,6 +66,9 @@ fi
 %doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 
 %changelog
+* Wed Jul 12 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-3.1
+- Added ncurses-devel to BuildRequires
+
 * Wed Jul 12 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-3.0
 - Updated to latest source. deals with change in libsysfs API
 
