@@ -1,11 +1,11 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 2.2.1
+Release: 3.0
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.7.2.tgz
+Source0: multipath-tools-0.4.7.3.tgz
 Obsoletes: kpartx = 0.4.4-2.4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: chkconfig
@@ -22,7 +22,7 @@ The tools are :
 * kpartx :      Makes multipath devices partitionable.
 
 %prep
-%setup -q -n multipath-tools-0.4.7.2
+%setup -q -n multipath-tools-0.4.7.3
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -66,10 +66,13 @@ fi
 %doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 
 %changelog
+* Wed Jul 12 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-3.0
+- Updated to latest source. deals with change in libsysfs API
+
 * Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 0.4.7-2.2.1
 - rebuild
 
-* Mon Jul 11 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-2.2
+* Mon Jul 10 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-2.2
 - fix tagging issue.
 
 * Mon Jul 10 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-2.1
