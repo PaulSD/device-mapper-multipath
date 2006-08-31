@@ -1,17 +1,18 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 4.0
+Release: 4.1
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 Source0: multipath-tools-0.4.7.4.tgz
-Obsoletes: kpartx = 0.4.4-2.4
+Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: chkconfig
 BuildRequires: libsysfs-devel, device-mapper >= 1.02.02-2
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
+Patch0: multipath-tools-0.4.7.4-badptr.patch
 
 %description
 %{name} provides tools to manage multipath devices by instructing the 
@@ -19,10 +20,18 @@ device-mapper multipath kernel module what to do.
 The tools are :
 * multipath :   Scan the system for multipath devices and assemble them.
 * multipathd :  Detects when paths fail and execs multipath to update things.
-* kpartx :      Makes multipath devices partitionable.
+
+%package -n kpartx
+Summary: Partition device manager for device-mapper devices.
+Group: System Environment/Base
+Provides: kpartx = %{version}-%{release}
+
+%description -n kpartx
+kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
 %setup -q -n multipath-tools-0.4.7.4
+%patch0 -p1 -b .badptr
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -46,8 +55,6 @@ fi
 %defattr(-,root,root,-)
 /sbin/multipath
 /sbin/multipath.static
-/sbin/kpartx
-/sbin/kpartx.static
 /sbin/multipathd
 /sbin/mpath_prio_alua
 /sbin/mpath_prio_emc
@@ -55,17 +62,27 @@ fi
 /sbin/mpath_prio_hds_modular
 /sbin/mpath_prio_tpc
 /sbin/mpath_get_name
-/sbin/kpartx_get_name
 /etc/udev/rules.d/40-multipath.rules
 %{_mandir}/man8/mpath_prio_alua.8.gz
-%{_mandir}/man8/kpartx.8.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
 %config /etc/rc.d/init.d/multipathd
 %config(noreplace) /etc/multipath.conf
 %doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 
+%files -n kpartx
+%defattr(-,root,root,-)
+/sbin/kpartx
+/sbin/kpartx.static
+/sbin/kpartx_get_name
+%{_mandir}/man8/kpartx.8.gz
+
 %changelog
+* Thu Aug 31 2006 Peter Jones <pjones@redhat.com> - 0.4.7-4.1
+- Split kpartx out into its own package so dmraid can use it without
+  installing multipathd
+- Fix a segfault in kpartx
+
 * Mon Jul 17 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-4.0
 - Updated to latest source. Fixes bug in default multipath.conf
 
