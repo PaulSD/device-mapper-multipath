@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 4.1
+Release: 5
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -13,6 +13,7 @@ BuildRequires: libsysfs-devel, device-mapper >= 1.02.02-2
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
 Patch0: multipath-tools-0.4.7.4-badptr.patch
+Patch1: multipath-tools-0.4.7.4-uint64.patch
 
 %description
 %{name} provides tools to manage multipath devices by instructing the 
@@ -32,6 +33,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %prep
 %setup -q -n multipath-tools-0.4.7.4
 %patch0 -p1 -b .badptr
+%patch1 -p1 -b .uint64
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -78,6 +80,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Sep  7 2006 Peter Jones <pjones@redhat.com> - 0.4.7-5
+- Fix kpartx to handle with drives >2TB correctly.
+
 * Thu Aug 31 2006 Peter Jones <pjones@redhat.com> - 0.4.7-4.1
 - Split kpartx out into its own package so dmraid can use it without
   installing multipathd
