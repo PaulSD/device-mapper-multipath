@@ -1,19 +1,17 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 5
+Release: 7.fc7
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.7.4.tgz
+Source0: multipath-tools-0.4.7.head1.tgz
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: chkconfig
 BuildRequires: libsysfs-devel, device-mapper >= 1.02.02-2
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
-Patch0: multipath-tools-0.4.7.4-badptr.patch
-Patch1: multipath-tools-0.4.7.4-uint64.patch
 
 %description
 %{name} provides tools to manage multipath devices by instructing the 
@@ -31,9 +29,7 @@ Provides: kpartx = %{version}-%{release}
 kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
-%setup -q -n multipath-tools-0.4.7.4
-%patch0 -p1 -b .badptr
-%patch1 -p1 -b .uint64
+%setup -q -n multipath-tools-0.4.7.head1
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -80,6 +76,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Dec 13 2006 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.7-7.fc7
+- Update to latest code (t0_4_7_head1)
+
 * Thu Sep  7 2006 Peter Jones <pjones@redhat.com> - 0.4.7-5
 - Fix kpartx to handle with drives >2TB correctly.
 
