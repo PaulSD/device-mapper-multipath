@@ -1,11 +1,11 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 7.fc7
+Release: 8.fc7
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.7.head1.tgz
+Source0: multipath-tools-0.4.7.head2.tgz
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: chkconfig
@@ -29,7 +29,7 @@ Provides: kpartx = %{version}-%{release}
 kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
-%setup -q -n multipath-tools-0.4.7.head1
+%setup -q -n multipath-tools-0.4.7.head2
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -76,6 +76,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Jan 15 2007 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.7-8.fc7
+- Update to latest code (t0_4_7_head2)
+
 * Wed Dec 13 2006 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.7-7.fc7
 - Update to latest code (t0_4_7_head1)
 
