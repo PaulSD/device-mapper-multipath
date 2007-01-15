@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 8.fc7
+Release: 9.fc7
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -59,7 +59,8 @@ fi
 /sbin/mpath_prio_netapp
 /sbin/mpath_prio_hds_modular
 /sbin/mpath_prio_tpc
-/sbin/mpath_get_name
+/sbin/mpath_wait
+/sbin/mpath_ctl
 /etc/udev/rules.d/40-multipath.rules
 %{_mandir}/man8/mpath_prio_alua.8.gz
 %{_mandir}/man8/multipath.8.gz
@@ -67,15 +68,18 @@ fi
 %config /etc/rc.d/init.d/multipathd
 %config(noreplace) /etc/multipath.conf
 %doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
+%dir /var/lib/multipath
 
 %files -n kpartx
 %defattr(-,root,root,-)
 /sbin/kpartx
 /sbin/kpartx.static
-/sbin/kpartx_get_name
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Jan 15 2007 Benjamin Marzinksi <bmarzins@redhat.com> - 0.4.7-9.fc7
+- Fixed spec file.
+
 * Mon Jan 15 2007 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.7-8.fc7
 - Update to latest code (t0_4_7_head2)
 
