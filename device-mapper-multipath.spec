@@ -1,14 +1,15 @@
 Summary: Tools to manage multipath devices using device-mapper.
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 9.fc7
+Release: 10.fc7
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 Source0: multipath-tools-0.4.7.head2.tgz
 Requires: kpartx = %{version}-%{release}
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Prereq: chkconfig
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires(post): chkconfig
+Requires(preun): chkconfig
 BuildRequires: libsysfs-devel, device-mapper >= 1.02.02-2
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
@@ -77,6 +78,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Jan 31 2007 Benjamin Marzinksi <bmarzins@redhat.com> - 0.4.7-10.fc7
+- Update BuildRoot and PreReq lines.
+
 * Mon Jan 15 2007 Benjamin Marzinksi <bmarzins@redhat.com> - 0.4.7-9.fc7
 - Fixed spec file.
 
