@@ -1,7 +1,7 @@
-Summary: Tools to manage multipath devices using device-mapper.
+Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 10.fc7
+Release: 11.fc7
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -10,7 +10,8 @@ Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
 Requires(preun): chkconfig
-BuildRequires: libsysfs-devel, device-mapper >= 1.02.02-2
+Requires: device-mapper >= 1.02.02-2
+BuildRequires: libsysfs-devel, device-mapper-devel
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
 
@@ -22,7 +23,7 @@ The tools are :
 * multipathd :  Detects when paths fail and execs multipath to update things.
 
 %package -n kpartx
-Summary: Partition device manager for device-mapper devices.
+Summary: Partition device manager for device-mapper devices
 Group: System Environment/Base
 Provides: kpartx = %{version}-%{release}
 
@@ -78,6 +79,10 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Feb 05 2007 Alasdair Kergon <agk@redhat.com> - 0.4.7-11.fc7
+- Add build dependency on new device-mapper-devel package.
+- Add dependency on device-mapper.
+
 * Wed Jan 31 2007 Benjamin Marzinksi <bmarzins@redhat.com> - 0.4.7-10.fc7
 - Update BuildRoot and PreReq lines.
 
