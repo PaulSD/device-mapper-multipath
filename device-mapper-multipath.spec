@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 11.fc7
+Release: 12%{?dist}
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -79,6 +79,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Nov 14 2007 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.7-12
+- Fixed the dist tag so building will work properly.
+
 * Mon Feb 05 2007 Alasdair Kergon <agk@redhat.com> - 0.4.7-11.fc7
 - Add build dependency on new device-mapper-devel package.
 - Add dependency on device-mapper.
