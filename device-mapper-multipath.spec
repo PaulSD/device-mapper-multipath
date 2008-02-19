@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPL
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -79,6 +79,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 0.4.7-13
+- Autorebuild for GCC 4.3
+
 * Wed Nov 14 2007 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.7-12
 - Fixed the dist tag so building will work properly.
 
