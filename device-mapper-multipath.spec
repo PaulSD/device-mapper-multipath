@@ -1,11 +1,12 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 13%{?dist}
-License: GPL
+Release: 14%{?dist}
+License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 Source0: multipath-tools-0.4.7.head2.tgz
+Patch0: multipath-tools-0.4.7.head2-sparc64fix.patch
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
@@ -32,6 +33,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
 %setup -q -n multipath-tools-0.4.7.head2
+%patch0 -p1 -b .sparc64
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -79,6 +81,10 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Feb 29 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 0.4.7-14
+- fix sparc64
+- fix license tag
+
 * Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 0.4.7-13
 - Autorebuild for GCC 4.3
 
