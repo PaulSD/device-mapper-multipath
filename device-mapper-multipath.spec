@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.7
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -41,6 +41,8 @@ make DESTDIR=$RPM_BUILD_ROOT
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT bindir=/sbin rcdir=/etc/rc.d/init.d
+rm -f $RPM_BUILD_ROOT/sbin/multipath.static
+rm -f $RPM_BUILD_ROOT/sbin/kpartx.static
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -56,7 +58,6 @@ fi
 %files
 %defattr(-,root,root,-)
 /sbin/multipath
-/sbin/multipath.static
 /sbin/multipathd
 /sbin/mpath_prio_alua
 /sbin/mpath_prio_emc
@@ -77,10 +78,12 @@ fi
 %files -n kpartx
 %defattr(-,root,root,-)
 /sbin/kpartx
-/sbin/kpartx.static
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue May 06 2008 Alasdair Kergon <agk@redhat.com> - 0.4.7-15
+- Remove unnecessary multipath & kpartx static binaries. (bz 234928)
+
 * Fri Feb 29 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 0.4.7-14
 - fix sparc64
 - fix license tag
