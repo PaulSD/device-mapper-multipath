@@ -7,6 +7,7 @@ Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 Source0: multipath-tools-0.4.7.head2.tgz
 Patch0: multipath-tools-0.4.7.head2-sparc64fix.patch
+Patch1: multipath-tools-0.4.7.head2-nostatic.patch
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
@@ -34,6 +35,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %prep
 %setup -q -n multipath-tools-0.4.7.head2
 %patch0 -p1 -b .sparc64
+%patch1 -p1 -b .nostatic
 
 %build
 make DESTDIR=$RPM_BUILD_ROOT
@@ -41,8 +43,6 @@ make DESTDIR=$RPM_BUILD_ROOT
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT bindir=/sbin rcdir=/etc/rc.d/init.d
-rm -f $RPM_BUILD_ROOT/sbin/multipath.static
-rm -f $RPM_BUILD_ROOT/sbin/kpartx.static
 
 %clean
 rm -rf $RPM_BUILD_ROOT
