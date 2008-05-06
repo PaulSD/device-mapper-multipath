@@ -1,0 +1,37 @@
+--- multipath-tools-0.4.7.head2/kpartx/Makefile	2006-10-12 17:16:09.000000000 +0100
++++ multipath-tools-0.4.7.head2.new/kpartx/Makefile	2008-05-06 18:59:14.000000000 +0100
+@@ -24,7 +24,6 @@
+ 
+ glibc: clean $(OBJS)
+ 	$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS)
+-	$(CC) $(OBJS) -o $(EXEC).static -static $(LDFLAGS) -lselinux -lsepol
+ 	
+ klibc: clean $(OBJS)
+ 	$(CC) -static -o $(EXEC) $(CRT0) $(OBJS) $(KLIBC) $(LIBGCC)
+@@ -36,7 +35,6 @@
+ install:
+ 	install -d $(DESTDIR)$(bindir)
+ 	install -m 755 $(EXEC) $(DESTDIR)$(bindir)
+-	install -m 755 $(EXEC).static $(DESTDIR)$(bindir)
+ 	install -d $(DESTDIR)$(mandir)
+ 	install -m 644 $(EXEC).8 $(DESTDIR)$(mandir)
+ 
+--- multipath-tools-0.4.7.head2/multipath/Makefile	2006-11-30 23:25:13.000000000 +0000
++++ multipath-tools-0.4.7.head2.new/multipath/Makefile	2008-05-06 18:58:53.000000000 +0100
+@@ -21,7 +21,6 @@
+ 
+ glibc: clean $(OBJS)
+ 	$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS)
+-	$(CC) $(OBJS) -o $(EXEC).static -static $(LDFLAGS) -lselinux -lsepol
+ 	$(CC) mpath_faker.c -o mpath_ctl $(CFLAGS) -static
+ 
+ klibc: $(OBJS)
+@@ -36,7 +35,7 @@
+ 
+ install:
+ 	install -d $(DESTDIR)$(bindir)
+-	install -m 755 $(EXEC) $(EXEC).static mpath_ctl mpath_wait $(DESTDIR)$(bindir)/
++	install -m 755 $(EXEC) mpath_ctl mpath_wait $(DESTDIR)$(bindir)/
+ 	install -d $(DESTDIR)/etc/udev/rules.d
+ 	install -m 644 multipath.rules $(DESTDIR)/etc/udev/rules.d/40-multipath.rules
+ 	install -d $(DESTDIR)$(mandir)
