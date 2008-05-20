@@ -2,7 +2,7 @@ Index: multipath-tools-080519/libmultipath/Makefile
 ===================================================================
 --- multipath-tools-080519.orig/libmultipath/Makefile
 +++ multipath-tools-080519/libmultipath/Makefile
-@@ -23,14 +23,16 @@ endif
+@@ -23,14 +23,15 @@ endif
  all: $(LIBS)
  
  $(LIBS): $(OBJS)
@@ -14,7 +14,6 @@ Index: multipath-tools-080519/libmultipath/Makefile
 +	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(prefix)/lib/$(LIBS)
  	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(libdir)
 -	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(libdir)/$(LIBS)
-+	ldconfig
  
  uninstall:
 -	rm -f $(DESTDIR)$(libdir)/$(LIBS)
