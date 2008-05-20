@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -103,6 +103,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon May 19 2008 Benjamin Marzinksi <bmarzins@redhat.com> 0.4.8-2
+- Forgot to commit some patches.
+
 * Mon May 19 2008 Benjamin Marzinski <bmarzins@redhat.com> 0.4.8-1
 - Updated to latest Upstream 0.4.8 code: multipath-tools-080519.tgz
   (git commit id: 42704728855376d2f7da2de1967d7bc71bc54a2f)
