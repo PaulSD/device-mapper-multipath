@@ -1,0 +1,43 @@
+Index: multipath-tools-080515/multipath/Makefile
+===================================================================
+--- multipath-tools-080515.orig/multipath/Makefile
++++ multipath-tools-080515/multipath/Makefile
+@@ -23,7 +23,7 @@ install:
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
+ 	$(INSTALL_PROGRAM) -m 755 $(EXEC) mpath_wait $(DESTDIR)$(bindir)/
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)/etc/udev/rules.d
+-	$(INSTALL_PROGRAM) -m 644 multipath.rules $(DESTDIR)/etc/udev/rules.d/
++	$(INSTALL_PROGRAM) -m 644 multipath.rules $(DESTDIR)/etc/udev/rules.d/40-multipath.rules
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)
+ 	$(INSTALL_PROGRAM) -m 644 $(EXEC).8.gz $(DESTDIR)$(mandir)
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man5dir)
+@@ -34,7 +34,7 @@ install:
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)/var/lib/multipath
+ 
+ uninstall:
+-	rm $(DESTDIR)/etc/udev/rules.d/multipath.rules
++	rm $(DESTDIR)/etc/udev/rules.d/40-multipath.rules
+ 	rm $(DESTDIR)$(bindir)/$(EXEC)
+ 	rm $(DESTDIR)$(bindir)/mpath_wait
+ 	rm $(DESTDIR)$(mandir)/$(EXEC).8.gz
+Index: multipath-tools-080515/multipath/multipath.rules
+===================================================================
+--- multipath-tools-080515.orig/multipath/multipath.rules
++++ multipath-tools-080515/multipath/multipath.rules
+@@ -1,7 +1,9 @@
+-#
+-# udev rules for multipathing.
+-# The persistent symlinks are created with the kpartx rules
+-#
+-
+-# socket for uevents
+-RUN+="socket:/org/kernel/dm/multipath_event"
++# multipath wants the devmaps presented as meaninglful device names
++# so name them after their devmap name
++SUBSYSTEM!="block", GOTO="end_mpath"
++KERNEL!="dm-[0-9]*", ACTION=="add", PROGRAM=="/bin/bash -c '/sbin/lsmod | /bin/grep ^dm_multipath'", RUN+="/sbin/multipath -v0 %M:%m"
++KERNEL!="dm-[0-9]*", GOTO="end_mpath"
++PROGRAM!="/sbin/mpath_wait %M %m", GOTO="end_mpath"
++ACTION=="add", RUN+="/sbin/dmsetup ls --target multipath --exec '/sbin/kpartx -a -p p' -j %M -m %m"
++PROGRAM!="/bin/bash -c '/sbin/dmsetup info -c --noheadings -j %M -m %m | /bin/grep -q .*:.*:.*:.*:.*:.*:.*:part[0-9]*-mpath-'", GOTO="end_mpath"
++LABEL="end_mpath"

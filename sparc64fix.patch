@@ -1,6 +1,7 @@
-diff -up multipath-tools-0.4.7.head2/kpartx/lopart.c.BAD multipath-tools-0.4.7.head2/kpartx/lopart.c
---- multipath-tools-0.4.7.head2/kpartx/lopart.c.BAD	2008-02-29 13:35:19.000000000 -0500
-+++ multipath-tools-0.4.7.head2/kpartx/lopart.c	2008-02-29 13:36:44.000000000 -0500
+Index: multipath-tools-080515/kpartx/lopart.c
+===================================================================
+--- multipath-tools-080515.orig/kpartx/lopart.c
++++ multipath-tools-080515/kpartx/lopart.c
 @@ -30,7 +30,7 @@
  #if defined(__hppa__) || defined(__powerpc64__) || defined (__alpha__) \
   || defined (__x86_64__)

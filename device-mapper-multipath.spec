@@ -1,25 +1,33 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
-Version: 0.4.7
-Release: 15%{?dist}
+Version: 0.4.8
+Release: 1%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-0.4.7.head2.tgz
-Patch0: multipath-tools-0.4.7.head2-sparc64fix.patch
-Patch1: multipath-tools-0.4.7.head2-nostatic.patch
+Source0: multipath-tools-080519.tgz
+Patch0: makefiles_fix.patch
+Patch1: linking_change.patch
+Patch2: uevent_fix.patch
+Patch3: sparc64fix.patch
+Patch4: directio_fix.patch
+Patch5: config_files.patch
+Patch6: redhatification.patch
+Patch7: mpath_wait.patch
+Patch8: multipath_rules.patch
+Patch9: cciss_id.patch
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
 Requires(preun): chkconfig
 Requires: device-mapper >= 1.02.02-2
-BuildRequires: libsysfs-devel, device-mapper-devel
+BuildRequires: libaio-devel, device-mapper-devel
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
 
 %description
-%{name} provides tools to manage multipath devices by instructing the 
-device-mapper multipath kernel module what to do. 
+%{name} provides tools to manage multipath devices by
+instructing the device-mapper multipath kernel module what to do. 
 The tools are :
 * multipath :   Scan the system for multipath devices and assemble them.
 * multipathd :  Detects when paths fail and execs multipath to update things.
@@ -33,12 +41,20 @@ Provides: kpartx = %{version}-%{release}
 kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
-%setup -q -n multipath-tools-0.4.7.head2
-%patch0 -p1 -b .sparc64
-%patch1 -p1 -b .nostatic
+%setup -q -n multipath-tools-080519
+%patch0 -p1 -b .makefiles_fix
+%patch1 -p1 -b .linking_change
+%patch2 -p1 -b .uevent_fix
+%patch3 -p1 -b .sparc64fix
+%patch4 -p1 -b .directio_fix
+%patch5 -p1 -b .config_files
+%patch6 -p1 -b .redhatification
+%patch7 -p1 -b .mpath_wait
+%patch8 -p1 -b .multipath_rules
+%patch9 -p1 -b .cciss_id
 
 %build
-make DESTDIR=$RPM_BUILD_ROOT
+make %{?_smp_mflags} DESTDIR=$RPM_BUILD_ROOT
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -48,32 +64,38 @@ make install DESTDIR=$RPM_BUILD_ROOT bindir=/sbin rcdir=/etc/rc.d/init.d
 rm -rf $RPM_BUILD_ROOT
 
 %post
+/sbin/ldconfig
 /sbin/chkconfig --add multipathd
 
 %preun
 if [ "$1" = 0 ]; then
+	/sbin/service multipathd stop /dev/null 2>&1
         /sbin/chkconfig --del multipathd
+fi
+
+%postun
+/sbin/ldconfig
+if [ "$1" - ge "1" ]; then
+	/sbin/service multipathd condrestart >/dev/null 2>&1 || :
 fi
 
 %files
 %defattr(-,root,root,-)
 /sbin/multipath
 /sbin/multipathd
-/sbin/mpath_prio_alua
-/sbin/mpath_prio_emc
-/sbin/mpath_prio_netapp
-/sbin/mpath_prio_hds_modular
-/sbin/mpath_prio_tpc
+/sbin/cciss_id
 /sbin/mpath_wait
-/sbin/mpath_ctl
-/etc/udev/rules.d/40-multipath.rules
-%{_mandir}/man8/mpath_prio_alua.8.gz
+/lib/libmultipath.so
+/lib/multipath
+/etc/rc.d/init.d/multipathd
+%{_mandir}/man5/multipath.conf.5.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
-%config /etc/rc.d/init.d/multipathd
+%config /etc/udev/rules.d/40-multipath.rules
 %config(noreplace) /etc/multipath.conf
-%doc AUTHOR COPYING README* FAQ Multipath-usage.txt multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
+%doc AUTHOR COPYING README* FAQ multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 %dir /var/lib/multipath
+
 
 %files -n kpartx
 %defattr(-,root,root,-)
@@ -81,6 +103,10 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon May 19 2008 Benjamin Marzinski <bmarzins@redhat.com> 0.4.8-1
+- Updated to latest Upstream 0.4.8 code: multipath-tools-080519.tgz
+  (git commit id: 42704728855376d2f7da2de1967d7bc71bc54a2f)
+
 * Tue May 06 2008 Alasdair Kergon <agk@redhat.com> - 0.4.7-15
 - Remove unnecessary multipath & kpartx static binaries. (bz 234928)
 
