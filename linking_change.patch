@@ -11,9 +11,9 @@ Index: multipath-tools-080519/libmultipath/Makefile
  
  install:
 +	$(INSTALL_PROGRAM) -d $(DESTDIR)$(prefix)/lib
-+	$(INSTALL_PROGRAM) -o root -g root -m 755 $(LIBS) $(DESTDIR)$(prefix)/lib/$(LIBS)
- 	$(INSTALL_PROGRAM) -o root -g root -m 755 -d $(DESTDIR)$(libdir)
--	$(INSTALL_PROGRAM) -o root -g root -m 755 $(LIBS) $(DESTDIR)$(libdir)/$(LIBS)
++	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(prefix)/lib/$(LIBS)
+ 	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(libdir)
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(libdir)/$(LIBS)
 +	ldconfig
  
  uninstall:
