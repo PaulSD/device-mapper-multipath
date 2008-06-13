@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.8
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -103,6 +103,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Jun 13 2008 Alasdair Kergon <agk@redhat.com> - 0.4.8-5
+- Rebuild (rogue vendor tag). (451292)
+
 * Mon May 19 2008 Benjamin Marzinksi <bmarzins@redhat.com> 0.4.8-4
 - Fixed Makefile issues.
 
