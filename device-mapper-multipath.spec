@@ -1,21 +1,24 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.8
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-080519.tgz
-Patch0: makefiles_fix.patch
-Patch1: linking_change.patch
-Patch2: uevent_fix.patch
-Patch3: sparc64fix.patch
-Patch4: directio_fix.patch
-Patch5: config_files.patch
-Patch6: redhatification.patch
-Patch7: mpath_wait.patch
-Patch8: multipath_rules.patch
-Patch9: cciss_id.patch
+Source0: multipath-tools-080804.tgz
+Patch0: linking_change.patch
+Patch1: uevent_fix.patch
+Patch2: sparc64fix.patch
+Patch3: directio_fix.patch
+Patch4: config_files.patch
+Patch5: redhatification.patch
+Patch6: mpath_wait.patch
+Patch7: multipath_rules.patch
+Patch8: cciss_id.patch
+Patch9: scsi_id_change.patch
+Patch10: static_libaio.patch
+Patch11: config_space_fix.patch
+Patch12: fix_devt.patch
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
@@ -41,17 +44,20 @@ Provides: kpartx = %{version}-%{release}
 kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
-%setup -q -n multipath-tools-080519
-%patch0 -p1 -b .makefiles_fix
-%patch1 -p1 -b .linking_change
-%patch2 -p1 -b .uevent_fix
-%patch3 -p1 -b .sparc64fix
-%patch4 -p1 -b .directio_fix
-%patch5 -p1 -b .config_files
-%patch6 -p1 -b .redhatification
-%patch7 -p1 -b .mpath_wait
-%patch8 -p1 -b .multipath_rules
-%patch9 -p1 -b .cciss_id
+%setup -q -n multipath-tools
+%patch0 -p1 -b .linking_change
+%patch1 -p1 -b .uevent_fix
+%patch2 -p1 -b .sparc64fix
+%patch3 -p1 -b .directio_fix
+%patch4 -p1 -b .config_files
+%patch5 -p1 -b .redhatification
+%patch6 -p1 -b .mpath_wait
+%patch7 -p1 -b .multipath_rules
+%patch8 -p1 -b .cciss_id
+%patch9 -p1 -b .scsi_id_change
+%patch10 -p1 -b .static_libaio
+%patch11 -p1 -b .config_space_fix
+%patch12 -p1 -b .fix_devt
 
 %build
 make %{?_smp_mflags} DESTDIR=$RPM_BUILD_ROOT
@@ -75,7 +81,7 @@ fi
 
 %postun
 /sbin/ldconfig
-if [ "$1" - ge "1" ]; then
+if [ "$1" -ge "1" ]; then
 	/sbin/service multipathd condrestart >/dev/null 2>&1 || :
 fi
 
@@ -103,6 +109,12 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Aug 20 2008 Benjamin Marzinski <bmarzins@redhat.com> 0.4.8-6
+- Updated to latest upstream 0.4.8 code: multipath-tools-080804.tgz
+  (git commit id: eb87cbd0df8adf61d1c74c025f7326d833350f78)
+- fixed 451817, 456397 (scsi_id_change.patch), 457530 (config_space_fix.patch)
+  457589 (static_libaio.patch)
+
 * Fri Jun 13 2008 Alasdair Kergon <agk@redhat.com> - 0.4.8-5
 - Rebuild (rogue vendor tag). (451292)
 
