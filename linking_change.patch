@@ -1,7 +1,7 @@
-Index: multipath-tools-080519/libmultipath/Makefile
+Index: multipath-tools/libmultipath/Makefile
 ===================================================================
---- multipath-tools-080519.orig/libmultipath/Makefile
-+++ multipath-tools-080519/libmultipath/Makefile
+--- multipath-tools.orig/libmultipath/Makefile
++++ multipath-tools/libmultipath/Makefile
 @@ -23,14 +23,15 @@ endif
  all: $(LIBS)
  
@@ -21,29 +21,48 @@ Index: multipath-tools-080519/libmultipath/Makefile
  
  clean:
  	rm -f core *.a *.o *.gz *.so
-Index: multipath-tools-080519/multipath/Makefile
+Index: multipath-tools/multipath/Makefile
 ===================================================================
---- multipath-tools-080519.orig/multipath/Makefile
-+++ multipath-tools-080519/multipath/Makefile
-@@ -6,7 +6,7 @@ include ../Makefile.inc
+--- multipath-tools.orig/multipath/Makefile
++++ multipath-tools/multipath/Makefile
+@@ -6,9 +6,8 @@ include ../Makefile.inc
  
  OBJS = main.o
  
 -CFLAGS += -I$(multipathdir) -Wl,-rpath,$(libdir)
+-LDFLAGS += -lpthread -ldevmapper -laio -ldl \
+-	   -lmultipath -L$(multipathdir)
 +CFLAGS += -I$(multipathdir)
- LDFLAGS += -lpthread -ldevmapper -laio -ldl \
- 	   -lmultipath -L$(multipathdir)
++LDFLAGS += -lpthread -ldevmapper -ldl -lmultipath -L$(multipathdir)
  
-Index: multipath-tools-080519/multipathd/Makefile
+ EXEC = multipath
+ 
+Index: multipath-tools/multipathd/Makefile
 ===================================================================
---- multipath-tools-080519.orig/multipathd/Makefile
-+++ multipath-tools-080519/multipathd/Makefile
-@@ -5,7 +5,7 @@ include ../Makefile.inc
+--- multipath-tools.orig/multipathd/Makefile
++++ multipath-tools/multipathd/Makefile
+@@ -5,8 +5,8 @@ include ../Makefile.inc
  #
  # basic flags setting
  #
 -CFLAGS += -I$(multipathdir) -Wl,-rpath,$(libdir)
+-LDFLAGS += -lpthread -ldevmapper -lreadline -lncurses -laio -ldl \
 +CFLAGS += -I$(multipathdir)
- LDFLAGS += -lpthread -ldevmapper -lreadline -lncurses -laio -ldl \
++LDFLAGS += -lpthread -ldevmapper -lreadline -lncurses -ldl \
  	   -lmultipath -L$(multipathdir)
+ 
+ #
+Index: multipath-tools/libmultipath/checkers/Makefile
+===================================================================
+--- multipath-tools.orig/libmultipath/checkers/Makefile
++++ multipath-tools/libmultipath/checkers/Makefile
+@@ -17,6 +17,9 @@ CFLAGS += -I..
+ 
+ all: $(LIBS)
+ 
++libcheckdirectio.so: libsg.o directio.o
++	$(CC) $(SHARED_FLAGS) -o $@ $^ -laio
++
+ libcheck%.so: libsg.o %.o
+ 	$(CC) $(SHARED_FLAGS) -o $@ $^
  

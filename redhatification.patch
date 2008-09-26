@@ -1,17 +1,17 @@
-Index: multipath-tools-080519/libmultipath/defaults.h
+Index: multipath-tools/libmultipath/defaults.h
 ===================================================================
---- multipath-tools-080519.orig/libmultipath/defaults.h
-+++ multipath-tools-080519/libmultipath/defaults.h
+--- multipath-tools.orig/libmultipath/defaults.h
++++ multipath-tools/libmultipath/defaults.h
 @@ -1,4 +1,4 @@
 -#define DEFAULT_GETUID		"/lib/udev/scsi_id -g -u -s /block/%n"
 +#define DEFAULT_GETUID		"/sbin/scsi_id -g -u -s /block/%n"
  #define DEFAULT_UDEVDIR		"/dev"
  #define DEFAULT_MULTIPATHDIR	"/lib/multipath"
  #define DEFAULT_SELECTOR	"round-robin 0"
-Index: multipath-tools-080519/libmultipath/hwtable.c
+Index: multipath-tools/libmultipath/hwtable.c
 ===================================================================
---- multipath-tools-080519.orig/libmultipath/hwtable.c
-+++ multipath-tools-080519/libmultipath/hwtable.c
+--- multipath-tools.orig/libmultipath/hwtable.c
++++ multipath-tools/libmultipath/hwtable.c
 @@ -172,7 +172,7 @@ static struct hwentry default_hw[] = {
  		/* HP Smart Array */
  		.vendor        = "HP",
@@ -39,7 +39,7 @@ Index: multipath-tools-080519/libmultipath/hwtable.c
  		.features      = "1 queue_if_no_path",
  		.hwhandler     = DEFAULT_HWHANDLER,
  		.selector      = DEFAULT_SELECTOR,
-@@ -705,6 +705,22 @@ static struct hwentry default_hw[] = {
+@@ -722,6 +722,22 @@ static struct hwentry default_hw[] = {
  		.checker_name  = RDAC,
  		.prio_name     = PRIO_RDAC,
  	},
@@ -62,10 +62,10 @@ Index: multipath-tools-080519/libmultipath/hwtable.c
  	/*
  	 * EOL
  	 */
-Index: multipath-tools-080519/multipath.conf.annotated
+Index: multipath-tools/multipath.conf.annotated
 ===================================================================
---- multipath-tools-080519.orig/multipath.conf.annotated
-+++ multipath-tools-080519/multipath.conf.annotated
+--- multipath-tools.orig/multipath.conf.annotated
++++ multipath-tools/multipath.conf.annotated
 @@ -55,9 +55,9 @@
  #	# scope   : multipath
  #	# desc    : the default program and args to callout to obtain a unique 
@@ -87,10 +87,10 @@ Index: multipath-tools-080519/multipath.conf.annotated
  #
  #		#
  #		# name    : path_selector
-Index: multipath-tools-080519/multipath.conf.defaults
+Index: multipath-tools/multipath.conf.defaults
 ===================================================================
---- multipath-tools-080519.orig/multipath.conf.defaults
-+++ multipath-tools-080519/multipath.conf.defaults
+--- multipath-tools.orig/multipath.conf.defaults
++++ multipath-tools/multipath.conf.defaults
 @@ -6,7 +6,7 @@
  #	polling_interval	5
  #	selector		"round-robin 0"
@@ -452,10 +452,10 @@ Index: multipath-tools-080519/multipath.conf.defaults
 +#		prio			rdac
 +#	}
  #}
-Index: multipath-tools-080519/multipath.conf.synthetic
+Index: multipath-tools/multipath.conf.synthetic
 ===================================================================
---- multipath-tools-080519.orig/multipath.conf.synthetic
-+++ multipath-tools-080519/multipath.conf.synthetic
+--- multipath-tools.orig/multipath.conf.synthetic
++++ multipath-tools/multipath.conf.synthetic
 @@ -7,7 +7,7 @@
  #	polling_interval 	10
  #	selector		"round-robin 0"
@@ -474,10 +474,10 @@ Index: multipath-tools-080519/multipath.conf.synthetic
  #		path_checker		directio
  #		path_selector		"round-robin 0"
  #		hardware_handler	"0"
-Index: multipath-tools-080519/Makefile.inc
+Index: multipath-tools/Makefile.inc
 ===================================================================
---- multipath-tools-080519.orig/Makefile.inc
-+++ multipath-tools-080519/Makefile.inc
+--- multipath-tools.orig/Makefile.inc
++++ multipath-tools/Makefile.inc
 @@ -20,7 +20,7 @@ libudevdir  = ${prefix}/lib/udev
  multipathdir = $(TOPDIR)/libmultipath
  mandir      = $(prefix)/usr/share/man/man8
@@ -487,10 +487,10 @@ Index: multipath-tools-080519/Makefile.inc
  libdir	    = $(prefix)/lib/multipath
  
  GZIP        = /bin/gzip -9 -c
-Index: multipath-tools-080519/multipathd/Makefile
+Index: multipath-tools/multipathd/Makefile
 ===================================================================
---- multipath-tools-080519.orig/multipathd/Makefile
-+++ multipath-tools-080519/multipathd/Makefile
+--- multipath-tools.orig/multipathd/Makefile
++++ multipath-tools/multipathd/Makefile
 @@ -35,6 +35,7 @@ install:
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
  	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)
@@ -499,10 +499,10 @@ Index: multipath-tools-080519/multipathd/Makefile
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).8.gz $(DESTDIR)$(mandir)
  
-Index: multipath-tools-080519/multipathd/multipathd.init.redhat
+Index: multipath-tools/multipathd/multipathd.init.redhat
 ===================================================================
---- multipath-tools-080519.orig/multipathd/multipathd.init.redhat
-+++ multipath-tools-080519/multipathd/multipathd.init.redhat
+--- multipath-tools.orig/multipathd/multipathd.init.redhat
++++ multipath-tools/multipathd/multipathd.init.redhat
 @@ -1,13 +1,9 @@
  #!/bin/bash
 -
@@ -561,10 +561,10 @@ Index: multipath-tools-080519/multipathd/multipathd.init.redhat
  esac
  
  exit $RETVAL
-Index: multipath-tools-080519/multipath/Makefile
+Index: multipath-tools/multipath/Makefile
 ===================================================================
---- multipath-tools-080519.orig/multipath/Makefile
-+++ multipath-tools-080519/multipath/Makefile
+--- multipath-tools.orig/multipath/Makefile
++++ multipath-tools/multipath/Makefile
 @@ -28,6 +28,10 @@ install:
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).8.gz $(DESTDIR)$(mandir)
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man5dir)
@@ -576,10 +576,10 @@ Index: multipath-tools-080519/multipath/Makefile
  
  uninstall:
  	rm $(DESTDIR)/etc/udev/rules.d/multipath.rules
-Index: multipath-tools-080519/multipath/multipath.conf.redhat
+Index: multipath-tools/multipath/multipath.conf.redhat
 ===================================================================
 --- /dev/null
-+++ multipath-tools-080519/multipath/multipath.conf.redhat
++++ multipath-tools/multipath/multipath.conf.redhat
 @@ -0,0 +1,97 @@
 +# This is a basic configuration file with some examples, for device mapper
 +# multipath.
@@ -678,10 +678,10 @@ Index: multipath-tools-080519/multipath/multipath.conf.redhat
 +#		path_grouping_policy	multibus
 +#	}
 +#}
-Index: multipath-tools-080519/kpartx/Makefile
+Index: multipath-tools/kpartx/Makefile
 ===================================================================
---- multipath-tools-080519.orig/kpartx/Makefile
-+++ multipath-tools-080519/kpartx/Makefile
+--- multipath-tools.orig/kpartx/Makefile
++++ multipath-tools/kpartx/Makefile
 @@ -20,10 +20,10 @@ $(EXEC): $(OBJS)
  install: $(EXEC) $(EXEC).8
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)

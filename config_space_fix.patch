@@ -7,14 +7,14 @@ Index: multipath-tools/libmultipath/parser.c
  			else
  				in_string = 1;
 +		} else if (!in_string && (*cp == '{' || *cp == '}')) {
-+			cp++;
 +			token = MALLOC(2);
-+
+ 
 +			if (!token)
 +				goto out;
- 
++
 +			*(token) = *cp;
 +			*(token + 1) = '\0';
++			cp++;
  		} else {
  			while ((in_string ||
  				(!isspace((int) *cp) && isascii((int) *cp) &&

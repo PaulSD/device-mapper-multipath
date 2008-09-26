@@ -1,8 +1,8 @@
-Index: multipath-tools-080515/multipathd/main.c
+Index: multipath-tools/multipathd/main.c
 ===================================================================
---- multipath-tools-080515.orig/multipathd/main.c
-+++ multipath-tools-080515/multipathd/main.c
-@@ -619,14 +619,20 @@ uxsock_trigger (char * str, char ** repl
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
+@@ -602,14 +602,20 @@ uxsock_trigger (char * str, char ** repl
  static int
  uev_discard(char * devpath)
  {

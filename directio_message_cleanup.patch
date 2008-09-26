@@ -1,0 +1,15 @@
+Index: multipath-tools/libmultipath/checkers/directio.c
+===================================================================
+--- multipath-tools.orig/libmultipath/checkers/directio.c
++++ multipath-tools/libmultipath/checkers/directio.c
+@@ -148,8 +148,9 @@ check_state(int fd, struct directio_cont
+ 	}
+ 	ct->running++;
+ 
++	errno = 0;
+ 	r = io_getevents(ct->ioctx, 1L, 1L, &event, &timeout);
+-	LOG(3, "async io getevents returns %li (errno=%s)", r, strerror(errno));
++	LOG(3, "async io_getevents returns %li (%s)", r, strerror(errno));
+ 
+ 	if (r < 1L) {
+ 		if (ct->running > ASYNC_TIMEOUT_SEC || sync) {

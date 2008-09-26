@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.8
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -9,16 +9,16 @@ Source0: multipath-tools-080804.tgz
 Patch0: linking_change.patch
 Patch1: uevent_fix.patch
 Patch2: sparc64fix.patch
-Patch3: directio_fix.patch
-Patch4: config_files.patch
-Patch5: redhatification.patch
-Patch6: mpath_wait.patch
-Patch7: multipath_rules.patch
-Patch8: cciss_id.patch
-Patch9: scsi_id_change.patch
-Patch10: static_libaio.patch
-Patch11: config_space_fix.patch
-Patch12: fix_devt.patch
+Patch3: config_files.patch
+Patch4: redhatification.patch
+Patch5: mpath_wait.patch
+Patch6: multipath_rules.patch
+Patch7: cciss_id.patch
+Patch8: scsi_id_change.patch
+Patch9: config_space_fix.patch
+Patch10: fix_devt.patch
+Patch11: directio_message_cleanup.patch
+Patch12: binding_error.patch
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
@@ -48,16 +48,16 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0 -p1 -b .linking_change
 %patch1 -p1 -b .uevent_fix
 %patch2 -p1 -b .sparc64fix
-%patch3 -p1 -b .directio_fix
-%patch4 -p1 -b .config_files
-%patch5 -p1 -b .redhatification
-%patch6 -p1 -b .mpath_wait
-%patch7 -p1 -b .multipath_rules
-%patch8 -p1 -b .cciss_id
-%patch9 -p1 -b .scsi_id_change
-%patch10 -p1 -b .static_libaio
-%patch11 -p1 -b .config_space_fix
-%patch12 -p1 -b .fix_devt
+%patch3 -p1 -b .config_files
+%patch4 -p1 -b .redhatification
+%patch5 -p1 -b .mpath_wait
+%patch6 -p1 -b .multipath_rules
+%patch7 -p1 -b .cciss_id
+%patch8 -p1 -b .scsi_id_change
+%patch9 -p1 -b .config_space_fix
+%patch10 -p1 -b .fix_devt
+%patch11 -p1 -b .directio_message
+%patch12 -p1 -b .binding_error
 
 %build
 make %{?_smp_mflags} DESTDIR=$RPM_BUILD_ROOT
@@ -109,6 +109,14 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Sep 26 2008 Benjamin Marzinski <bmarzins@redhat.com> 0.4.8-7
+- Since libaio is now in /lib, not /usr/lib, multipath no longer needs to
+  statically link against it. Fixed an error with binding file and WWIDs
+  that include spaces. Cleaned up the messages from the directio checker
+  function.  Fixed the udev rules. Fixed a regression in multipath.conf
+  parsing
+- Fixed 457530, 457589
+
 * Wed Aug 20 2008 Benjamin Marzinski <bmarzins@redhat.com> 0.4.8-6
 - Updated to latest upstream 0.4.8 code: multipath-tools-080804.tgz
   (git commit id: eb87cbd0df8adf61d1c74c025f7326d833350f78)
