@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.8
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -109,6 +109,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Feb 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.8-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+
 * Fri Sep 26 2008 Benjamin Marzinski <bmarzins@redhat.com> 0.4.8-7
 - Since libaio is now in /lib, not /usr/lib, multipath no longer needs to
   statically link against it. Fixed an error with binding file and WWIDs
