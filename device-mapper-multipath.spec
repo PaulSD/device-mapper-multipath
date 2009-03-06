@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.8
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -19,6 +19,7 @@ Patch9: config_space_fix.patch
 Patch10: fix_devt.patch
 Patch11: directio_message_cleanup.patch
 Patch12: binding_error.patch
+Patch13: fix_kpartx.patch
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
@@ -58,6 +59,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch10 -p1 -b .fix_devt
 %patch11 -p1 -b .directio_message
 %patch12 -p1 -b .binding_error
+%patch13 -p1 -b .ext_part
 
 %build
 make %{?_smp_mflags} DESTDIR=$RPM_BUILD_ROOT
@@ -109,6 +111,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Mar 6 2009 Milan Broz <mbroz@redhat.com> - 0.4.8-9
+- Fix kpartx extended partition handling (475283)
+
 * Tue Feb 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.8-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
