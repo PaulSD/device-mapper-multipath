@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.8
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -20,6 +20,7 @@ Patch10: fix_devt.patch
 Patch11: directio_message_cleanup.patch
 Patch12: binding_error.patch
 Patch13: fix_kpartx.patch
+Patch14: fix_umask.patch
 Requires: kpartx = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
@@ -60,6 +61,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch11 -p1 -b .directio_message
 %patch12 -p1 -b .binding_error
 %patch13 -p1 -b .ext_part
+%patch14 -p1 -b .umask
 
 %build
 make %{?_smp_mflags} DESTDIR=$RPM_BUILD_ROOT
@@ -111,6 +113,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Apr 7 2009 Milan Broz <mbroz@redhat.com> - 0.4.8-10
+- Fix insecure permissions on multipathd.sock (CVE-2009-0115)
+
 * Fri Mar 6 2009 Milan Broz <mbroz@redhat.com> - 0.4.8-9
 - Fix kpartx extended partition handling (475283)
 
