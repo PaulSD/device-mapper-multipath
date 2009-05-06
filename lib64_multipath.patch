@@ -1,0 +1,12 @@
+diff --git a/libmultipath/defaults.h b/libmultipath/defaults.h
+index d7f93cb..357c519 100644
+--- a/libmultipath/defaults.h
++++ b/libmultipath/defaults.h
+@@ -1,6 +1,6 @@
+ #define DEFAULT_GETUID		"/lib/udev/scsi_id --whitelisted --device=/dev/%n"
+ #define DEFAULT_UDEVDIR		"/dev"
+-#define DEFAULT_MULTIPATHDIR	"/lib/multipath"
++#define DEFAULT_MULTIPATHDIR	"/lib64/multipath"
+ #define DEFAULT_SELECTOR	"round-robin 0"
+ #define DEFAULT_FEATURES	"0"
+ #define DEFAULT_HWHANDLER	"0"

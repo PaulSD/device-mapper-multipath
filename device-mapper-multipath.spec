@@ -1,31 +1,29 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
-Version: 0.4.8
-Release: 10%{?dist}
+Version: 0.4.9
+Release: 1%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
-Source0: multipath-tools-080804.tgz
-Patch0: linking_change.patch
-Patch1: uevent_fix.patch
-Patch2: sparc64fix.patch
-Patch3: config_files.patch
-Patch4: redhatification.patch
-Patch5: mpath_wait.patch
-Patch6: multipath_rules.patch
-Patch7: cciss_id.patch
-Patch8: scsi_id_change.patch
-Patch9: config_space_fix.patch
-Patch10: fix_devt.patch
-Patch11: directio_message_cleanup.patch
-Patch12: binding_error.patch
-Patch13: fix_kpartx.patch
-Patch14: fix_umask.patch
-Requires: kpartx = %{version}-%{release}
+
+Source0: multipath-tools-090429.tgz
+Patch0: lib64_multipath.patch
+Patch1: redhatification.patch
+Patch2: mpath_wait.patch
+Patch3: multipath_rules.patch
+Patch4: cciss_id.patch
+Patch5: directio_message_cleanup.patch
+Patch6: binding_error.patch
+Patch7: fix_kpartx.patch
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires: %{name}-libs = %{version}-%{release}
+Requires: kpartx = %{version}-%{release}
+Requires: device-mapper >= 1.02.02-2
 Requires(post): chkconfig
 Requires(preun): chkconfig
-Requires: device-mapper >= 1.02.02-2
+Requires(preun): initscripts
+Requires(postun): initscripts
 BuildRequires: libaio-devel, device-mapper-devel
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
@@ -37,6 +35,15 @@ The tools are :
 * multipath :   Scan the system for multipath devices and assemble them.
 * multipathd :  Detects when paths fail and execs multipath to update things.
 
+%package libs
+Summary: %{name} modules and shared library
+License: GPL+
+Group: System Environment/Libraries
+
+%description libs
+%{name}-libs provides the path checker and prioritizer modules. It also
+contains the multipath shared library, libmultipath.
+
 %package -n kpartx
 Summary: Partition device manager for device-mapper devices
 Group: System Environment/Base
@@ -47,28 +54,29 @@ kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
 %setup -q -n multipath-tools
-%patch0 -p1 -b .linking_change
-%patch1 -p1 -b .uevent_fix
-%patch2 -p1 -b .sparc64fix
-%patch3 -p1 -b .config_files
-%patch4 -p1 -b .redhatification
-%patch5 -p1 -b .mpath_wait
-%patch6 -p1 -b .multipath_rules
-%patch7 -p1 -b .cciss_id
-%patch8 -p1 -b .scsi_id_change
-%patch9 -p1 -b .config_space_fix
-%patch10 -p1 -b .fix_devt
-%patch11 -p1 -b .directio_message
-%patch12 -p1 -b .binding_error
-%patch13 -p1 -b .ext_part
-%patch14 -p1 -b .umask
+%if %{_lib} == "lib64"
+%patch0 -p1 -b .lib64_multipath
+%endif
+%patch1 -p1 -b .redhatification
+%patch2 -p1 -b .mpath_wait
+%patch3 -p1 -b .multipath_rules
+%patch4 -p1 -b .cciss_id
+%patch5 -p1 -b .directio_message
+%patch6 -p1 -b .binding_error
+%patch7 -p1 -b .fix_kpartx
 
 %build
-make %{?_smp_mflags} DESTDIR=$RPM_BUILD_ROOT
+%define _sbindir /sbin
+%define _libdir /%{_lib}
+%define _libmpathdir %{_libdir}/multipath
+make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT bindir=/sbin rcdir=/etc/rc.d/init.d
+make install DESTDIR=$RPM_BUILD_ROOT bindir=%{_sbindir} syslibdir=%{_libdir} libdir=%{_libmpathdir} rcdir=%{_initrddir}
+install -m 0644 multipath/multipath.conf.redhat $RPM_BUILD_ROOT/etc/multipath.conf
+install -m 0755 multipathd/multipathd.init.redhat $RPM_BUILD_ROOT/%{_initrddir}/multipathd
+install -d $RPM_BUILD_ROOT/var/lib/multipath
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -79,25 +87,23 @@ rm -rf $RPM_BUILD_ROOT
 
 %preun
 if [ "$1" = 0 ]; then
-	/sbin/service multipathd stop /dev/null 2>&1
+        /sbin/service multipathd stop /dev/null 2>&1
         /sbin/chkconfig --del multipathd
 fi
 
 %postun
 /sbin/ldconfig
 if [ "$1" -ge "1" ]; then
-	/sbin/service multipathd condrestart >/dev/null 2>&1 || :
+        /sbin/service multipathd condrestart >/dev/null 2>&1 || :
 fi
 
 %files
 %defattr(-,root,root,-)
-/sbin/multipath
-/sbin/multipathd
-/sbin/cciss_id
-/sbin/mpath_wait
-/lib/libmultipath.so
-/lib/multipath
-/etc/rc.d/init.d/multipathd
+%{_sbindir}/multipath
+%{_sbindir}/multipathd
+%{_sbindir}/cciss_id
+%{_sbindir}/mpath_wait
+%{_initrddir}/multipathd
 %{_mandir}/man5/multipath.conf.5.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
@@ -106,6 +112,11 @@ fi
 %doc AUTHOR COPYING README* FAQ multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
 %dir /var/lib/multipath
 
+%files libs
+%defattr(-,root,root,-)
+%{_libdir}/libmultipath.so
+%{_libmpathdir}
+%dir %{_libmpathdir}
 
 %files -n kpartx
 %defattr(-,root,root,-)
@@ -113,6 +124,12 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Apr 29 2009 Mike Snitzer <snitzer@redhat.com> - 0.4.9-1
+- Updated to latest upstream 0.4.9 code: multipath-tools-090429.tgz
+  (git commit id: 7395bcda3a218df2eab1617df54628af0dc3456e)
+- split the multipath libs out to a device-mapper-multipath-libs package
+- if appropriate, install multipath libs in /lib64 and /lib64/multipath
+
 * Thu Apr 7 2009 Milan Broz <mbroz@redhat.com> - 0.4.8-10
 - Fix insecure permissions on multipathd.sock (CVE-2009-0115)
 
@@ -144,7 +161,7 @@ fi
 
 * Mon May 19 2008 Benjamin Marzinksi <bmarzins@redhat.com> 0.4.8-3
 - Fixed ownership build error.
-	
+
 * Mon May 19 2008 Benjamin Marzinksi <bmarzins@redhat.com> 0.4.8-2
 - Forgot to commit some patches.
 

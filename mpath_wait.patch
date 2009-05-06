@@ -1,8 +1,8 @@
-Index: multipath-tools-080515/multipath/Makefile
-===================================================================
---- multipath-tools-080515.orig/multipath/Makefile
-+++ multipath-tools-080515/multipath/Makefile
-@@ -21,7 +21,7 @@ $(EXEC): $(OBJS)
+diff --git a/multipath/Makefile b/multipath/Makefile
+index e0031a2..fe377d8 100644
+--- a/multipath/Makefile
++++ b/multipath/Makefile
+@@ -20,7 +20,7 @@ $(EXEC): $(OBJS)
  
  install:
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
@@ -11,7 +11,7 @@ Index: multipath-tools-080515/multipath/Makefile
  	$(INSTALL_PROGRAM) -d $(DESTDIR)/etc/udev/rules.d
  	$(INSTALL_PROGRAM) -m 644 multipath.rules $(DESTDIR)/etc/udev/rules.d/
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)
-@@ -36,6 +36,7 @@ install:
+@@ -31,6 +31,7 @@ install:
  uninstall:
  	rm $(DESTDIR)/etc/udev/rules.d/multipath.rules
  	rm $(DESTDIR)$(bindir)/$(EXEC)
@@ -19,10 +19,11 @@ Index: multipath-tools-080515/multipath/Makefile
  	rm $(DESTDIR)$(mandir)/$(EXEC).8.gz
  	rm $(DESTDIR)$(man5dir)/$(EXEC).conf.5.gz
  
-Index: multipath-tools-080515/multipath/mpath_wait
-===================================================================
+diff --git a/multipath/mpath_wait b/multipath/mpath_wait
+new file mode 100644
+index 0000000..d4047cc
 --- /dev/null
-+++ multipath-tools-080515/multipath/mpath_wait
++++ b/multipath/mpath_wait
 @@ -0,0 +1,17 @@
 +#!/bin/bash
 +

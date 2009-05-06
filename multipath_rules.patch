@@ -1,8 +1,8 @@
-Index: multipath-tools/multipath/Makefile
-===================================================================
---- multipath-tools.orig/multipath/Makefile
-+++ multipath-tools/multipath/Makefile
-@@ -23,7 +23,7 @@ install:
+diff --git a/multipath/Makefile b/multipath/Makefile
+index fe377d8..b2c4fa6 100644
+--- a/multipath/Makefile
++++ b/multipath/Makefile
+@@ -22,14 +22,14 @@ install:
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
  	$(INSTALL_PROGRAM) -m 755 $(EXEC) mpath_wait $(DESTDIR)$(bindir)/
  	$(INSTALL_PROGRAM) -d $(DESTDIR)/etc/udev/rules.d
@@ -11,8 +11,7 @@ Index: multipath-tools/multipath/Makefile
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).8.gz $(DESTDIR)$(mandir)
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man5dir)
-@@ -34,7 +34,7 @@ install:
- 	$(INSTALL_PROGRAM) -d $(DESTDIR)/var/lib/multipath
+ 	$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5.gz $(DESTDIR)$(man5dir)
  
  uninstall:
 -	rm $(DESTDIR)/etc/udev/rules.d/multipath.rules
@@ -20,10 +19,10 @@ Index: multipath-tools/multipath/Makefile
  	rm $(DESTDIR)$(bindir)/$(EXEC)
  	rm $(DESTDIR)$(bindir)/mpath_wait
  	rm $(DESTDIR)$(mandir)/$(EXEC).8.gz
-Index: multipath-tools/multipath/multipath.rules
-===================================================================
---- multipath-tools.orig/multipath/multipath.rules
-+++ multipath-tools/multipath/multipath.rules
+diff --git a/multipath/multipath.rules b/multipath/multipath.rules
+index ac97749..ad2ff2a 100644
+--- a/multipath/multipath.rules
++++ b/multipath/multipath.rules
 @@ -1,7 +1,8 @@
 -#
 -# udev rules for multipathing.
@@ -31,10 +30,11 @@ Index: multipath-tools/multipath/multipath.rules
 -#
 -
 -# socket for uevents
+-SUBSYSTEM=="block", RUN+="socket:/org/kernel/dm/multipath_event"
 +# multipath wants the devmaps presented as meaninglful device names
 +# so name them after their devmap name
 +SUBSYSTEM!="block", GOTO="end_mpath"
- RUN+="socket:/org/kernel/dm/multipath_event"
++RUN+="socket:/org/kernel/dm/multipath_event"
 +KERNEL!="dm-[0-9]*", GOTO="end_mpath"
 +PROGRAM!="/sbin/mpath_wait %M %m", GOTO="end_mpath"
 +ACTION=="add", RUN+="/sbin/dmsetup ls --target multipath --exec '/sbin/kpartx -a -p p' -j %M -m %m"
