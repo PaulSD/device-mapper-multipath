@@ -124,7 +124,7 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
-* Thu Apr 29 2009 Mike Snitzer <snitzer@redhat.com> - 0.4.9-1
+* Wed May 6 2009 Mike Snitzer <snitzer@redhat.com> - 0.4.9-1
 - Updated to latest upstream 0.4.9 code: multipath-tools-090429.tgz
   (git commit id: 7395bcda3a218df2eab1617df54628af0dc3456e)
 - split the multipath libs out to a device-mapper-multipath-libs package
