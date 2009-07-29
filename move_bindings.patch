@@ -1,0 +1,38 @@
+Index: multipath-tools-090724/libmultipath/defaults.h
+===================================================================
+--- multipath-tools-090724.orig/libmultipath/defaults.h
++++ multipath-tools-090724/libmultipath/defaults.h
+@@ -19,6 +19,6 @@
+ #define DEFAULT_PIDFILE		"/var/run/multipathd.pid"
+ #define DEFAULT_SOCKET		"/var/run/multipathd.sock"
+ #define DEFAULT_CONFIGFILE	"/etc/multipath.conf"
+-#define DEFAULT_BINDINGS_FILE	"/var/lib/multipath/bindings"
++#define DEFAULT_BINDINGS_FILE	"/etc/multipath/bindings"
+ 
+ char * set_default (char * str);
+Index: multipath-tools-090724/multipath.conf.annotated
+===================================================================
+--- multipath-tools-090724.orig/multipath.conf.annotated
++++ multipath-tools-090724/multipath.conf.annotated
+@@ -163,7 +163,7 @@
+ #	# name    : user_friendly_names
+ #	# scope   : multipath
+ #	# desc    : If set to "yes", using the bindings file
+-#	#           /var/lib/multipath/bindings to assign a persistent and
++#	#           /etc/multipath/bindings to assign a persistent and
+ #	#           unique alias to the multipath, in the form of mpath<n>.
+ #	#           If set to "no" use the WWID as the alias. In either case
+ #	#           this be will be overriden by any specific aliases in this
+Index: multipath-tools-090724/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools-090724.orig/multipath/multipath.conf.5
++++ multipath-tools-090724/multipath/multipath.conf.5
+@@ -222,7 +222,7 @@ for never stop queueing. Default is 0.
+ If set to 
+ .I yes
+ , using the bindings file
+-.I /var/lib/multipath/bindings
++.I /etc/multipath/bindings
+ to assign a persistent and unique alias to the multipath, in the form of mpath<n>.
+ If set to 
+ .I no

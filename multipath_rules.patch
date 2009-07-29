@@ -1,8 +1,13 @@
-diff --git a/multipath/Makefile b/multipath/Makefile
-index fe377d8..b2c4fa6 100644
---- a/multipath/Makefile
-+++ b/multipath/Makefile
-@@ -22,14 +22,14 @@ install:
+---
+ multipath/Makefile        |    4 ++--
+ multipath/multipath.rules |   13 +++++++------
+ 2 files changed, 9 insertions(+), 8 deletions(-)
+
+Index: multipath-tools-090724/multipath/Makefile
+===================================================================
+--- multipath-tools-090724.orig/multipath/Makefile
++++ multipath-tools-090724/multipath/Makefile
+@@ -22,7 +22,7 @@ install:
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
  	$(INSTALL_PROGRAM) -m 755 $(EXEC) mpath_wait $(DESTDIR)$(bindir)/
  	$(INSTALL_PROGRAM) -d $(DESTDIR)/etc/udev/rules.d
@@ -11,7 +16,8 @@ index fe377d8..b2c4fa6 100644
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).8.gz $(DESTDIR)$(mandir)
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man5dir)
- 	$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5.gz $(DESTDIR)$(man5dir)
+@@ -32,7 +32,7 @@ install:
+ 	fi
  
  uninstall:
 -	rm $(DESTDIR)/etc/udev/rules.d/multipath.rules
@@ -19,10 +25,10 @@ index fe377d8..b2c4fa6 100644
  	rm $(DESTDIR)$(bindir)/$(EXEC)
  	rm $(DESTDIR)$(bindir)/mpath_wait
  	rm $(DESTDIR)$(mandir)/$(EXEC).8.gz
-diff --git a/multipath/multipath.rules b/multipath/multipath.rules
-index ac97749..ad2ff2a 100644
---- a/multipath/multipath.rules
-+++ b/multipath/multipath.rules
+Index: multipath-tools-090724/multipath/multipath.rules
+===================================================================
+--- multipath-tools-090724.orig/multipath/multipath.rules
++++ multipath-tools-090724/multipath/multipath.rules
 @@ -1,7 +1,8 @@
 -#
 -# udev rules for multipathing.

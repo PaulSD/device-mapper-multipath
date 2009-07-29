@@ -1,12 +1,43 @@
-diff --git a/libmultipath/defaults.h b/libmultipath/defaults.h
-index d7f93cb..357c519 100644
---- a/libmultipath/defaults.h
-+++ b/libmultipath/defaults.h
+Index: multipath-tools-090724/libmultipath/defaults.h
+===================================================================
+--- multipath-tools-090724.orig/libmultipath/defaults.h
++++ multipath-tools-090724/libmultipath/defaults.h
 @@ -1,6 +1,6 @@
  #define DEFAULT_GETUID		"/lib/udev/scsi_id --whitelisted --device=/dev/%n"
  #define DEFAULT_UDEVDIR		"/dev"
 -#define DEFAULT_MULTIPATHDIR	"/lib/multipath"
-+#define DEFAULT_MULTIPATHDIR	"/lib64/multipath"
++#define DEFAULT_MULTIPATHDIR	"/" LIB_STRING "/multipath"
  #define DEFAULT_SELECTOR	"round-robin 0"
  #define DEFAULT_FEATURES	"0"
  #define DEFAULT_HWHANDLER	"0"
+Index: multipath-tools-090724/Makefile.inc
+===================================================================
+--- multipath-tools-090724.orig/Makefile.inc
++++ multipath-tools-090724/Makefile.inc
+@@ -13,6 +13,8 @@ ifeq ($(TOPDIR),)
+ 	TOPDIR	= ..
+ endif
+ 
++	LIB=lib64
++
+ prefix      = 
+ exec_prefix = $(prefix)
+ bindir      = $(exec_prefix)/sbin
+@@ -21,14 +23,14 @@ multipathdir = $(TOPDIR)/libmultipath
+ mandir      = $(prefix)/usr/share/man/man8
+ man5dir     = $(prefix)/usr/share/man/man5
+ rcdir	    = $(prefix)/etc/init.d
+-syslibdir   = $(prefix)/lib
+-libdir	    = $(prefix)/lib/multipath
++syslibdir   = $(prefix)/$(LIB)
++libdir	    = $(prefix)/$(LIB)/multipath
+ 
+ GZIP        = /bin/gzip -9 -c
+ INSTALL_PROGRAM = install
+ 
+ OPTFLAGS     = -pipe -g -Wall -Wunused -Wstrict-prototypes
+-CFLAGS	     = $(OPTFLAGS) -fPIC
++CFLAGS	     = $(OPTFLAGS) -fPIC -DLIB_STRING=\"${LIB}\"
+ SHARED_FLAGS = -shared
+ 
+ %.o:	%.c

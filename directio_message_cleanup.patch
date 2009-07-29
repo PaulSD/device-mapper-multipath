@@ -1,8 +1,8 @@
-diff --git a/libmultipath/checkers/directio.c b/libmultipath/checkers/directio.c
-index 4728424..7624c4e 100644
---- a/libmultipath/checkers/directio.c
-+++ b/libmultipath/checkers/directio.c
-@@ -148,10 +148,11 @@ check_state(int fd, struct directio_context *ct, int sync)
+Index: multipath-tools-090724/libmultipath/checkers/directio.c
+===================================================================
+--- multipath-tools-090724.orig/libmultipath/checkers/directio.c
++++ multipath-tools-090724/libmultipath/checkers/directio.c
+@@ -148,10 +148,11 @@ check_state(int fd, struct directio_cont
  	}
  	ct->running++;
  

@@ -1,20 +1,27 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
-Source0: multipath-tools-090429.tgz
-Patch0: lib64_multipath.patch
-Patch1: redhatification.patch
-Patch2: mpath_wait.patch
-Patch3: multipath_rules.patch
-Patch4: cciss_id.patch
-Patch5: directio_message_cleanup.patch
-Patch6: binding_error.patch
-Patch7: fix_kpartx.patch
+Source0: multipath-tools-090729.tgz
+Patch0: fix_missed_uevs.patch
+Patch1: log_all_messages.patch
+Patch2: queue_without_daemon.patch
+Patch3: path_checker.patch
+Patch4: root_init_script.patch
+Patch5: uninstall.patch
+Patch6: lib64_multipath.patch
+Patch7: directio_message_cleanup.patch
+Patch8: fix_kpartx.patch
+Patch9: redhatification.patch
+Patch10: mpath_wait.patch
+Patch11: multipath_rules.patch
+Patch12: cciss_id.patch
+Patch13: stop_warnings.patch
+Patch14: move_bindings.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: %{name}-libs = %{version}-%{release}
@@ -54,16 +61,23 @@ kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
 %setup -q -n multipath-tools
+%patch0 -p1 -b .fix_missed_uevs
+%patch1 -p1 -b .log_all_messages
+%patch2 -p1 -b .queue_without_daemon
+%patch3 -p1 -b .path_checker
+%patch4 -p1 -b .root_init_script
+%patch5 -p1 -b .uninstall.patch
 %if %{_lib} == "lib64"
-%patch0 -p1 -b .lib64_multipath
+%patch6 -p1 -b .lib64_multipath
 %endif
-%patch1 -p1 -b .redhatification
-%patch2 -p1 -b .mpath_wait
-%patch3 -p1 -b .multipath_rules
-%patch4 -p1 -b .cciss_id
-%patch5 -p1 -b .directio_message
-%patch6 -p1 -b .binding_error
-%patch7 -p1 -b .fix_kpartx
+%patch7 -p1 -b .directio_message_cleanup
+%patch8 -p1 -b .fix_kpartx
+%patch9 -p1 -b .redhatification
+%patch10 -p1 -b .mpath_wait
+%patch11 -p1 -b .multipath_rules
+%patch12 -p1 -b .cciss_id
+%patch13 -p1 -b .stop_warnings
+%patch14 -p1 -b .move_bindings
 
 %build
 %define _sbindir /sbin
@@ -76,7 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT bindir=%{_sbindir} syslibdir=%{_libdir} libdir=%{_libmpathdir} rcdir=%{_initrddir}
 install -m 0644 multipath/multipath.conf.redhat $RPM_BUILD_ROOT/etc/multipath.conf
 install -m 0755 multipathd/multipathd.init.redhat $RPM_BUILD_ROOT/%{_initrddir}/multipathd
-install -d $RPM_BUILD_ROOT/var/lib/multipath
+install -d $RPM_BUILD_ROOT/etc/multipath
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -110,7 +124,7 @@ fi
 %config /etc/udev/rules.d/40-multipath.rules
 %config(noreplace) /etc/multipath.conf
 %doc AUTHOR COPYING README* FAQ multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
-%dir /var/lib/multipath
+%dir /etc/multipath
 
 %files libs
 %defattr(-,root,root,-)
@@ -124,6 +138,12 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Jul 29 2009 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.9-3
+- Updated to latest upstream 0.4.9 code : multipath-tools-090729.tgz
+  (git commit id: d678c139719d5631194b50e49f16ca97162ecd0f)
+- moved multipath bindings file from /var/lib/multipath to /etc/multipath
+- Fixed 354961, 432520
+
 * Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.9-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 

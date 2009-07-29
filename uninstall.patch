@@ -1,0 +1,26 @@
+Index: multipath-tools-090724/libmultipath/checkers/Makefile
+===================================================================
+--- multipath-tools-090724.orig/libmultipath/checkers/Makefile
++++ multipath-tools-090724/libmultipath/checkers/Makefile
+@@ -27,7 +27,7 @@ install:
+ 	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(libdir)
+ 
+ uninstall:
+-	rm -f $(DESTDIR)$(libdir)/$(LIBS)
++	for file in $(LIBS); do rm -f $(DESTDIR)$(libdir)/$$file; done
+ 
+ clean:
+ 	rm -f core *.a *.o *.gz *.so
+Index: multipath-tools-090724/libmultipath/prioritizers/Makefile
+===================================================================
+--- multipath-tools-090724.orig/libmultipath/prioritizers/Makefile
++++ multipath-tools-090724/libmultipath/prioritizers/Makefile
+@@ -28,7 +28,7 @@ install: $(LIBS)
+ 	$(INSTALL_PROGRAM) -m 755 libprio*.so $(DESTDIR)$(libdir)
+ 
+ uninstall:
+-	rm -f $(DESTDIR)$(libdir)/libprio*.so
++	for file in $(LIBS); do rm -f $(DESTDIR)$(libdir)/$$file; done
+ 
+ clean:
+ 	rm -f core *.a *.o *.gz *.so

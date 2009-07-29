@@ -1,0 +1,24 @@
+Index: multipath-tools-090724/libmultipath/log_pthread.c
+===================================================================
+--- multipath-tools-090724.orig/libmultipath/log_pthread.c
++++ multipath-tools-090724/libmultipath/log_pthread.c
+@@ -56,6 +56,7 @@ static void * log_thread (void * et)
+ 
+ 		flush_logqueue();
+ 	}
++	return NULL;
+ }
+ 
+ void log_thread_start (pthread_attr_t *attr)
+Index: multipath-tools-090724/libmultipath/uevent.c
+===================================================================
+--- multipath-tools-090724.orig/libmultipath/uevent.c
++++ multipath-tools-090724/libmultipath/uevent.c
+@@ -101,6 +101,7 @@ uevq_thread(void * et)
+ 
+ 		service_uevq();
+ 	}
++	return NULL;
+ }
+ 
+ int uevent_listen(int (*uev_trigger)(struct uevent *, void * trigger_data),

@@ -1,7 +1,13 @@
-Index: multipath-tools-080519/cciss_id/cciss_id.c
+---
+ Makefile            |    3 -
+ cciss_id/Makefile   |   47 +++++++++++++++++++
+ cciss_id/cciss_id.c |  128 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 177 insertions(+), 1 deletion(-)
+
+Index: multipath-tools-090724/cciss_id/cciss_id.c
 ===================================================================
 --- /dev/null
-+++ multipath-tools-080519/cciss_id/cciss_id.c
++++ multipath-tools-090724/cciss_id/cciss_id.c
 @@ -0,0 +1,128 @@
 +/*
 + *****************************************************************************
@@ -31,11 +37,11 @@ Index: multipath-tools-080519/cciss_id/cciss_id.c
 +#include <sys/types.h>
 +#include <sys/stat.h>
 +#include <sys/ioctl.h>
-+#include <fcntl.h> 
-+#include <unistd.h> 
-+#include <stdio.h>  
-+#include <stdlib.h>  
-+#include <errno.h>  
++#include <fcntl.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <errno.h>
 +#include <string.h>
 +
 +#include <linux/cciss_ioctl.h>
@@ -45,13 +51,13 @@ Index: multipath-tools-080519/cciss_id/cciss_id.c
 +#define PATH_CCISSDEV	"/dev/cciss/" 	/* Path of CCISS devices */
 +int main(int argc, char *argv[])
 +{
-+	const int resp_len = LEN_PAGE83_CCISSDEV; 
++	const int resp_len = LEN_PAGE83_CCISSDEV;
 +	unsigned char resp[resp_len+1];
 +	char dev_name[LEN_DEVICEFILE] = "\0" ;
 +	unsigned int lun_id = 0;
 +	int fd, status, i;
 +	struct stat file_stat;
-+	
++
 +	LogvolInfo_struct    lvi;	// logical "volume" info
 +	IOCTL_Command_struct cic; 	// cciss ioctl command
 +
@@ -59,26 +65,26 @@ Index: multipath-tools-080519/cciss_id/cciss_id.c
 +		fprintf(stderr, "Usage: %s /dev/cciss/cNdN\n", argv[0]);
 +		return -1;
 +	}
-+	
++
 +	if ( strncmp(PATH_CCISSDEV, argv[1], strlen(PATH_CCISSDEV) ) != 0 ) {
 +		if ( strchr(argv[1], '!') ) {
-+			sprintf(dev_name, "%s%s", PATH_CCISSDEV, 
-+				strchr(argv[1], '!')+1);	
-+		}	
++			sprintf(dev_name, "%s%s", PATH_CCISSDEV,
++				strchr(argv[1], '!')+1);
++		}
 +                //fprintf(stderr, "dev_name is: -%s-", dev_name);
 +        } else {
 +		sprintf(dev_name, "%s", argv[1]);
 +	}
 +
 +	if (stat(dev_name, &file_stat) < 0) {
-+		fprintf (stderr, "Stat failed for file %s. Errno=%d\n", dev_name, errno);	
++		fprintf (stderr, "Stat failed for file %s. Errno=%d\n", dev_name, errno);
 +		return -1;
-+	} 
++	}
 +	if (!S_ISBLK(file_stat.st_mode)) {
 +		fprintf (stderr, "File %s is not a block device. \n", dev_name);
 +                return -1;
 +	}
-+	
++
 +
 +	if((fd = open(dev_name,  O_RDWR)) < 0) {
 +		fprintf(stderr, "Open failed for file %s. Errno=%d\n", dev_name, errno);
@@ -96,15 +102,15 @@ Index: multipath-tools-080519/cciss_id/cciss_id.c
 +	memset(&cic, 0, sizeof(IOCTL_Command_struct));
 +	memset(resp, 0, resp_len+1);
 +	cic.LUN_info.LogDev.Mode = 0x01; /* logical volume addressing */
-+	cic.LUN_info.LogDev.VolId = lun_id & 0x3FFFFFFF; 
++	cic.LUN_info.LogDev.VolId = lun_id & 0x3FFFFFFF;
 +	cic.Request.CDBLen = 6;
 +	cic.Request.Type.Type =  TYPE_CMD; // It is a command.
-+	cic.Request.Type.Attribute = ATTR_SIMPLE; 
++	cic.Request.Type.Attribute = ATTR_SIMPLE;
 +	cic.Request.Type.Direction = XFER_READ; // Read
 +	cic.Request.Timeout = 0; // Don't time out
 +	cic.Request.CDB[0] = 0x12;
 +	cic.Request.CDB[1] = 0x01; /* EVPD (enable vital product data) */
-+	cic.Request.CDB[2] = 0x83; 
++	cic.Request.CDB[2] = 0x83;
 +	cic.Request.CDB[4] = resp_len & 0xFF;
 +	cic.buf_size = resp_len;
 +	cic.buf = resp;
@@ -124,17 +130,17 @@ Index: multipath-tools-080519/cciss_id/cciss_id.c
 +		printf("3");
 +		for(i=8; i<24; i++)
 +			/* printf("Buff[%d] =%x\n", i, resp[i]); */
-+			printf("%02x", resp[i]); 
++			printf("%02x", resp[i]);
 +		printf("\n");
 +	}
-+	
++
 +	close(fd);
 +	return 0;
 +}
-Index: multipath-tools-080519/cciss_id/Makefile
+Index: multipath-tools-090724/cciss_id/Makefile
 ===================================================================
 --- /dev/null
-+++ multipath-tools-080519/cciss_id/Makefile
++++ multipath-tools-090724/cciss_id/Makefile
 @@ -0,0 +1,47 @@
 +
 +# *****************************************************************************
@@ -183,10 +189,10 @@ Index: multipath-tools-080519/cciss_id/Makefile
 +
 +clean:
 +	rm -f core.* *.o $(EXEC) *.gz
-Index: multipath-tools-080519/Makefile
+Index: multipath-tools-090724/Makefile
 ===================================================================
---- multipath-tools-080519.orig/Makefile
-+++ multipath-tools-080519/Makefile
+--- multipath-tools-090724.orig/Makefile
++++ multipath-tools-090724/Makefile
 @@ -25,7 +25,8 @@ BUILDDIRS = \
  	libmultipath/checkers \
  	multipath \
