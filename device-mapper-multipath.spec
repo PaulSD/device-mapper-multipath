@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -13,7 +13,7 @@ Patch2: queue_without_daemon.patch
 Patch3: path_checker.patch
 Patch4: root_init_script.patch
 Patch5: uninstall.patch
-Patch6: lib64_multipath.patch
+Patch6: select_lib.patch
 Patch7: directio_message_cleanup.patch
 Patch8: fix_kpartx.patch
 Patch9: redhatification.patch
@@ -67,9 +67,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch3 -p1 -b .path_checker
 %patch4 -p1 -b .root_init_script
 %patch5 -p1 -b .uninstall.patch
-%if %{_lib} == "lib64"
-%patch6 -p1 -b .lib64_multipath
-%endif
+%patch6 -p1 -b .select_lib
 %patch7 -p1 -b .directio_message_cleanup
 %patch8 -p1 -b .fix_kpartx
 %patch9 -p1 -b .redhatification
@@ -83,7 +81,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %define _sbindir /sbin
 %define _libdir /%{_lib}
 %define _libmpathdir %{_libdir}/multipath
-make %{?_smp_mflags}
+make %{?_smp_mflags} LIB=%{_lib}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -144,6 +142,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Jul 30 2009 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.9-4
+- Fixed build issue on i686 machines.
+
 * Wed Jul 29 2009 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.9-3
 - Updated to latest upstream 0.4.9 code : multipath-tools-090729.tgz
   (git commit id: d678c139719d5631194b50e49f16ca97162ecd0f)

@@ -1,7 +1,7 @@
-Index: multipath-tools-090724/libmultipath/defaults.h
+Index: multipath-tools/libmultipath/defaults.h
 ===================================================================
---- multipath-tools-090724.orig/libmultipath/defaults.h
-+++ multipath-tools-090724/libmultipath/defaults.h
+--- multipath-tools.orig/libmultipath/defaults.h
++++ multipath-tools/libmultipath/defaults.h
 @@ -1,6 +1,6 @@
  #define DEFAULT_GETUID		"/lib/udev/scsi_id --whitelisted --device=/dev/%n"
  #define DEFAULT_UDEVDIR		"/dev"
@@ -10,20 +10,26 @@ Index: multipath-tools-090724/libmultipath/defaults.h
  #define DEFAULT_SELECTOR	"round-robin 0"
  #define DEFAULT_FEATURES	"0"
  #define DEFAULT_HWHANDLER	"0"
-Index: multipath-tools-090724/Makefile.inc
+Index: multipath-tools/Makefile.inc
 ===================================================================
---- multipath-tools-090724.orig/Makefile.inc
-+++ multipath-tools-090724/Makefile.inc
-@@ -13,6 +13,8 @@ ifeq ($(TOPDIR),)
+--- multipath-tools.orig/Makefile.inc
++++ multipath-tools/Makefile.inc
+@@ -13,6 +13,14 @@ ifeq ($(TOPDIR),)
  	TOPDIR	= ..
  endif
  
-+	LIB=lib64
++ifndef LIB
++	ifeq ($(shell test -d /lib64 && echo 1),1)
++		LIB=lib64
++	else
++		LIB=lib
++	endif
++endif
 +
  prefix      = 
  exec_prefix = $(prefix)
  bindir      = $(exec_prefix)/sbin
-@@ -21,14 +23,14 @@ multipathdir = $(TOPDIR)/libmultipath
+@@ -21,14 +29,14 @@ multipathdir = $(TOPDIR)/libmultipath
  mandir      = $(prefix)/usr/share/man/man8
  man5dir     = $(prefix)/usr/share/man/man5
  rcdir	    = $(prefix)/etc/init.d

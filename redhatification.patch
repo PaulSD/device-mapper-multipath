@@ -1,7 +1,7 @@
-Index: multipath-tools-090724/libmultipath/hwtable.c
+Index: multipath-tools/libmultipath/hwtable.c
 ===================================================================
---- multipath-tools-090724.orig/libmultipath/hwtable.c
-+++ multipath-tools-090724/libmultipath/hwtable.c
+--- multipath-tools.orig/libmultipath/hwtable.c
++++ multipath-tools/libmultipath/hwtable.c
 @@ -589,7 +589,7 @@ static struct hwentry default_hw[] = {
  		.vendor        = "IBM",
  		.product       = "S/390 DASD ECKD",
@@ -11,11 +11,11 @@ Index: multipath-tools-090724/libmultipath/hwtable.c
  		.features      = "1 queue_if_no_path",
  		.hwhandler     = DEFAULT_HWHANDLER,
  		.selector      = DEFAULT_SELECTOR,
-Index: multipath-tools-090724/Makefile.inc
+Index: multipath-tools/Makefile.inc
 ===================================================================
---- multipath-tools-090724.orig/Makefile.inc
-+++ multipath-tools-090724/Makefile.inc
-@@ -26,7 +26,7 @@ libudevdir  = ${prefix}/lib/udev
+--- multipath-tools.orig/Makefile.inc
++++ multipath-tools/Makefile.inc
+@@ -28,7 +28,7 @@ libudevdir  = ${prefix}/lib/udev
  multipathdir = $(TOPDIR)/libmultipath
  mandir      = $(prefix)/usr/share/man/man8
  man5dir     = $(prefix)/usr/share/man/man5
@@ -24,10 +24,10 @@ Index: multipath-tools-090724/Makefile.inc
  syslibdir   = $(prefix)/$(LIB)
  libdir	    = $(prefix)/$(LIB)/multipath
  
-Index: multipath-tools-090724/multipathd/Makefile
+Index: multipath-tools/multipathd/Makefile
 ===================================================================
---- multipath-tools-090724.orig/multipathd/Makefile
-+++ multipath-tools-090724/multipathd/Makefile
+--- multipath-tools.orig/multipathd/Makefile
++++ multipath-tools/multipathd/Makefile
 @@ -35,6 +35,7 @@ install:
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
  	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)
@@ -36,10 +36,10 @@ Index: multipath-tools-090724/multipathd/Makefile
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).8.gz $(DESTDIR)$(mandir)
  
-Index: multipath-tools-090724/multipath/Makefile
+Index: multipath-tools/multipath/Makefile
 ===================================================================
---- multipath-tools-090724.orig/multipath/Makefile
-+++ multipath-tools-090724/multipath/Makefile
+--- multipath-tools.orig/multipath/Makefile
++++ multipath-tools/multipath/Makefile
 @@ -27,6 +27,9 @@ install:
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).8.gz $(DESTDIR)$(mandir)
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man5dir)
@@ -50,10 +50,10 @@ Index: multipath-tools-090724/multipath/Makefile
  
  uninstall:
  	rm $(DESTDIR)/etc/udev/rules.d/multipath.rules
-Index: multipath-tools-090724/multipath/multipath.conf.redhat
+Index: multipath-tools/multipath/multipath.conf.redhat
 ===================================================================
 --- /dev/null
-+++ multipath-tools-090724/multipath/multipath.conf.redhat
++++ multipath-tools/multipath/multipath.conf.redhat
 @@ -0,0 +1,97 @@
 +# This is a basic configuration file with some examples, for device mapper
 +# multipath.
@@ -152,10 +152,10 @@ Index: multipath-tools-090724/multipath/multipath.conf.redhat
 +#		path_grouping_policy	multibus
 +#	}
 +#}
-Index: multipath-tools-090724/kpartx/Makefile
+Index: multipath-tools/kpartx/Makefile
 ===================================================================
---- multipath-tools-090724.orig/kpartx/Makefile
-+++ multipath-tools-090724/kpartx/Makefile
+--- multipath-tools.orig/kpartx/Makefile
++++ multipath-tools/kpartx/Makefile
 @@ -20,10 +20,10 @@ $(EXEC): $(OBJS)
  install: $(EXEC) $(EXEC).8
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
