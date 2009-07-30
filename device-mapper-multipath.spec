@@ -98,6 +98,12 @@ rm -rf $RPM_BUILD_ROOT
 %post
 /sbin/ldconfig
 /sbin/chkconfig --add multipathd
+if [ "$1" -gt "1" -a ! -e /etc/multipath/bindings -a \
+    -f /var/lib/multipath/bindings ]; then
+	mv /var/lib/multipath/bindings /etc/multipath/bindings
+	ln -s /etc/multipath/bindings /var/lib/multipath/bindings
+fi
+
 
 %preun
 if [ "$1" = 0 ]; then
