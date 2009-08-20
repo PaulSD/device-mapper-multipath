@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -22,6 +22,8 @@ Patch11: multipath_rules.patch
 Patch12: cciss_id.patch
 Patch13: stop_warnings.patch
 Patch14: move_bindings.patch
+Patch15: dont_remove.patch
+Patch16: udev_change.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: %{name}-libs = %{version}-%{release}
@@ -76,6 +78,8 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch12 -p1 -b .cciss_id
 %patch13 -p1 -b .stop_warnings
 %patch14 -p1 -b .move_bindings
+%patch15 -p1 -b .dont_remove
+%patch16 -p1 -b .udev_change
 
 %build
 %define _sbindir /sbin
@@ -142,6 +146,10 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Aug 20 2009 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.8-5
+- Fixed problem where maps were being added and then removed.
+- Changed the udev rules to fix some issues.
+
 * Thu Jul 30 2009 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.9-4
 - Fixed build issue on i686 machines.
 
