@@ -1,0 +1,29 @@
+From c104e104645fcf271956e174eca9ccbf0e443014 Mon Sep 17 00:00:00 2001
+From: Fabio M. Di Nitto <fdinitto@redhat.com>
+Date: Tue, 20 Oct 2009 15:17:13 +0200
+Subject: [PATCH 12/12] RH: explicitly disable dm udev sync support in kpartx
+
+Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
+---
+:100644 100644 103ed0a... 9619edb... M	kpartx/kpartx.c
+ kpartx/kpartx.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/kpartx/kpartx.c b/kpartx/kpartx.c
+index 103ed0a..9619edb 100644
+--- a/kpartx/kpartx.c
++++ b/kpartx/kpartx.c
+@@ -256,6 +256,10 @@ main(int argc, char **argv){
+ 			exit(1);
+ 	}
+ 
++#ifdef DM_COOKIE_MAGIC
++	dm_udev_set_sync_support(0);
++#endif
++
+ 	if (dm_prereq(DM_TARGET, 0, 0, 0) && (what == ADD || what == DELETE)) {
+ 		fprintf(stderr, "device mapper prerequisites not met\n");
+ 		exit(1);
+-- 
+1.6.5.1
+

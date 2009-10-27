@@ -1,16 +1,28 @@
+From 8191fb07d8212e29ad44370abb60e174e1c34bb5 Mon Sep 17 00:00:00 2001
+From: Fabio M. Di Nitto <fdinitto@redhat.com>
+Date: Tue, 13 Oct 2009 08:15:15 +0200
+Subject: [PATCH 01/12] RH: queue without daemon
+
+Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
 ---
+:100644 100644 50a728c... 86b1320... M	libmultipath/config.h
+:100644 100644 ee4de68... 7888e8e... M	libmultipath/dict.c
+:100644 100644 afd1246... 2e7a0d1... M	libmultipath/structs.h
+:100644 100644 c222da4... 9afa615... M	multipath.conf.annotated
+:100644 100644 3e0fd6e... 44d1329... M	multipath.conf.synthetic
+:100644 100644 41a9bd0... 90de6df... M	multipathd/main.c
  libmultipath/config.h    |    1 +
  libmultipath/dict.c      |   35 +++++++++++++++++++++++++++++++++++
  libmultipath/structs.h   |    6 ++++++
  multipath.conf.annotated |    9 +++++++++
  multipath.conf.synthetic |    1 +
  multipathd/main.c        |    5 +++++
- 6 files changed, 57 insertions(+)
+ 6 files changed, 57 insertions(+), 0 deletions(-)
 
-Index: multipath-tools-090724/libmultipath/config.h
-===================================================================
---- multipath-tools-090724.orig/libmultipath/config.h
-+++ multipath-tools-090724/libmultipath/config.h
+diff --git a/libmultipath/config.h b/libmultipath/config.h
+index 50a728c..86b1320 100644
+--- a/libmultipath/config.h
++++ b/libmultipath/config.h
 @@ -72,6 +72,7 @@ struct config {
  	int pg_timeout;
  	int max_fds;
@@ -19,10 +31,10 @@ Index: multipath-tools-090724/libmultipath/config.h
  	int daemon;
  	int flush_on_last_del;
  	int attribute_flags;
-Index: multipath-tools-090724/libmultipath/dict.c
-===================================================================
---- multipath-tools-090724.orig/libmultipath/dict.c
-+++ multipath-tools-090724/libmultipath/dict.c
+diff --git a/libmultipath/dict.c b/libmultipath/dict.c
+index ee4de68..7888e8e 100644
+--- a/libmultipath/dict.c
++++ b/libmultipath/dict.c
 @@ -333,6 +333,28 @@ def_no_path_retry_handler(vector strvec)
  }
  
@@ -52,7 +64,7 @@ Index: multipath-tools-090724/libmultipath/dict.c
  def_pg_timeout_handler(vector strvec)
  {
  	int pg_timeout;
-@@ -1846,6 +1868,18 @@ snprint_def_no_path_retry (char * buff, 
+@@ -1846,6 +1868,18 @@ snprint_def_no_path_retry (char * buff, int len, void * data)
  }
  
  static int
@@ -79,10 +91,10 @@ Index: multipath-tools-090724/libmultipath/dict.c
  	install_keyword("pg_timeout", &def_pg_timeout_handler, &snprint_def_pg_timeout);
  	install_keyword("flush_on_last_del", &def_flush_on_last_del_handler, &snprint_def_flush_on_last_del);
  	install_keyword("user_friendly_names", &names_handler, &snprint_def_user_friendly_names);
-Index: multipath-tools-090724/libmultipath/structs.h
-===================================================================
---- multipath-tools-090724.orig/libmultipath/structs.h
-+++ multipath-tools-090724/libmultipath/structs.h
+diff --git a/libmultipath/structs.h b/libmultipath/structs.h
+index afd1246..2e7a0d1 100644
+--- a/libmultipath/structs.h
++++ b/libmultipath/structs.h
 @@ -63,6 +63,12 @@ enum pgstates {
  	PGSTATE_ACTIVE
  };
@@ -96,11 +108,11 @@ Index: multipath-tools-090724/libmultipath/structs.h
  enum pgtimeouts {
  	PGTIMEOUT_UNDEF,
  	PGTIMEOUT_NONE
-Index: multipath-tools-090724/multipath.conf.annotated
-===================================================================
---- multipath-tools-090724.orig/multipath.conf.annotated
-+++ multipath-tools-090724/multipath.conf.annotated
-@@ -151,6 +151,15 @@
+diff --git a/multipath.conf.annotated b/multipath.conf.annotated
+index c222da4..9afa615 100644
+--- a/multipath.conf.annotated
++++ b/multipath.conf.annotated
+@@ -153,6 +153,15 @@
  #	no_path_retry  queue
  #
  #	#
@@ -116,10 +128,10 @@ Index: multipath-tools-090724/multipath.conf.annotated
  #	# name    : user_friendly_names
  #	# scope   : multipath
  #	# desc    : If set to "yes", using the bindings file
-Index: multipath-tools-090724/multipath.conf.synthetic
-===================================================================
---- multipath-tools-090724.orig/multipath.conf.synthetic
-+++ multipath-tools-090724/multipath.conf.synthetic
+diff --git a/multipath.conf.synthetic b/multipath.conf.synthetic
+index 3e0fd6e..44d1329 100644
+--- a/multipath.conf.synthetic
++++ b/multipath.conf.synthetic
 @@ -16,6 +16,7 @@
  #	rr_weight		priorities
  #	failback		immediate
@@ -128,10 +140,10 @@ Index: multipath-tools-090724/multipath.conf.synthetic
  #	user_friendly_names	no
  #	mode			644
  #	uid			0
-Index: multipath-tools-090724/multipathd/main.c
-===================================================================
---- multipath-tools-090724.orig/multipathd/main.c
-+++ multipath-tools-090724/multipathd/main.c
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 41a9bd0..90de6df 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
 @@ -1334,6 +1334,8 @@ child (void * param)
  	pthread_t check_thr, uevent_thr, uxlsnr_thr;
  	pthread_attr_t log_attr, misc_attr;
@@ -151,3 +163,6 @@ Index: multipath-tools-090724/multipathd/main.c
  	remove_maps_and_stop_waiters(vecs);
  	free_pathvec(vecs->pathvec, FREE_PATHS);
  
+-- 
+1.6.5.1
+

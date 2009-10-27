@@ -1,7 +1,18 @@
-Index: multipath-tools-090724/multipathd/multipathd.init.redhat
-===================================================================
---- multipath-tools-090724.orig/multipathd/multipathd.init.redhat
-+++ multipath-tools-090724/multipathd/multipathd.init.redhat
+From e6a23cc9de85a66d774567515592bdbdba7b2ca4 Mon Sep 17 00:00:00 2001
+From: Fabio M. Di Nitto <fdinitto@redhat.com>
+Date: Tue, 13 Oct 2009 08:19:01 +0200
+Subject: [PATCH 03/12] RH: root init script
+
+Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
+---
+:100644 100644 ee776f0... e46b1b8... M	multipathd/multipathd.init.redhat
+ multipathd/multipathd.init.redhat |   38 ++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 37 insertions(+), 1 deletions(-)
+
+diff --git a/multipathd/multipathd.init.redhat b/multipathd/multipathd.init.redhat
+index ee776f0..e46b1b8 100644
+--- a/multipathd/multipathd.init.redhat
++++ b/multipathd/multipathd.init.redhat
 @@ -2,7 +2,7 @@
  #
  # multipathd	Starts the multipath daemon
@@ -19,7 +30,7 @@ Index: multipath-tools-090724/multipathd/multipathd.init.redhat
  
   
  . $initdir/functions
-@@ -25,6 +26,36 @@ test -r $sysconfig/$prog && . $sysconfig
+@@ -25,6 +26,36 @@ test -r $sysconfig/$prog && . $sysconfig/$prog
  
  RETVAL=0
  
@@ -68,3 +79,6 @@ Index: multipath-tools-090724/multipathd/multipathd.init.redhat
  	echo -n $"Stopping $prog daemon: "
  	killproc $DAEMON
  	RETVAL=$?
+-- 
+1.6.5.1
+

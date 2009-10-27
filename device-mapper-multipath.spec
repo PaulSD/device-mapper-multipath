@@ -1,85 +1,85 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 5%{?dist}
+Release: 10%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
-Source0: multipath-tools-090729.tgz
-Patch0: fix_missed_uevs.patch
-Patch1: log_all_messages.patch
-Patch2: queue_without_daemon.patch
-Patch3: path_checker.patch
-Patch4: root_init_script.patch
-Patch5: uninstall.patch
-Patch6: select_lib.patch
-Patch7: directio_message_cleanup.patch
-Patch8: fix_kpartx.patch
-Patch9: redhatification.patch
-Patch10: mpath_wait.patch
-Patch11: multipath_rules.patch
-Patch12: cciss_id.patch
-Patch13: stop_warnings.patch
-Patch14: move_bindings.patch
-Patch15: dont_remove.patch
-Patch16: udev_change.patch
+Source0: multipath-tools-091027.tar.gz
+Source1: multipath.conf.redhat
+# patch that should go upstream
+Patch1: 0001-for-upstream-add-tpg_pref-prioritizer.patch
+# local patches
+Patch1001: 0001-RH-queue-without-daemon.patch
+Patch1002: 0002-RH-path-checker.patch
+Patch1003: 0003-RH-root-init-script.patch
+Patch1004: 0004-RH-fix-kpartx.patch
+Patch1005: 0005-RH-cciss_id.patch
+Patch1006: 0006-RH-move-bindings.patch
+Patch1007: 0007-RH-do-not-remove.patch
+Patch1008: 0008-RH-Make-build-system-RH-Fedora-friendly.patch
+Patch1009: 0009-RH-multipathd-blacklist-all-by-default.patch
+Patch1010: 0010-RH-multipath-rules-udev-changes.patch
+Patch1011: 0011-RH-fix-init-script-LSB-headers.patch
+Patch1012: 0012-RH-explicitly-disable-dm-udev-sync-support-in-kpartx.patch
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+# runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
-Requires: device-mapper >= 1.02.02-2
+Requires: device-mapper >= 1.02.39-1
 Requires(post): chkconfig
 Requires(preun): chkconfig
 Requires(preun): initscripts
 Requires(postun): initscripts
-BuildRequires: libaio-devel, device-mapper-devel
+
+# build/setup
+BuildRequires: libaio-devel, device-mapper-devel >= 1.02.39-1
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
+
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description
 %{name} provides tools to manage multipath devices by
 instructing the device-mapper multipath kernel module what to do. 
 The tools are :
-* multipath :   Scan the system for multipath devices and assemble them.
-* multipathd :  Detects when paths fail and execs multipath to update things.
+* multipath - Scan the system for multipath devices and assemble them.
+* multipathd - Detects when paths fail and execs multipath to update things.
 
 %package libs
-Summary: %{name} modules and shared library
+Summary: The %{name} modules and shared library
 License: GPL+
 Group: System Environment/Libraries
 
 %description libs
-%{name}-libs provides the path checker and prioritizer modules. It also
-contains the multipath shared library, libmultipath.
+The %{name}-libs provides the path checker
+and prioritizer modules. It also contains the multipath shared library,
+libmultipath.
 
 %package -n kpartx
 Summary: Partition device manager for device-mapper devices
 Group: System Environment/Base
-Provides: kpartx = %{version}-%{release}
 
 %description -n kpartx
 kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
 %setup -q -n multipath-tools
-%patch0 -p1 -b .fix_missed_uevs
-%patch1 -p1 -b .log_all_messages
-%patch2 -p1 -b .queue_without_daemon
-%patch3 -p1 -b .path_checker
-%patch4 -p1 -b .root_init_script
-%patch5 -p1 -b .uninstall.patch
-%patch6 -p1 -b .select_lib
-%patch7 -p1 -b .directio_message_cleanup
-%patch8 -p1 -b .fix_kpartx
-%patch9 -p1 -b .redhatification
-%patch10 -p1 -b .mpath_wait
-%patch11 -p1 -b .multipath_rules
-%patch12 -p1 -b .cciss_id
-%patch13 -p1 -b .stop_warnings
-%patch14 -p1 -b .move_bindings
-%patch15 -p1 -b .dont_remove
-%patch16 -p1 -b .udev_change
+%patch1 -p1
+%patch1001 -p1
+%patch1002 -p1
+%patch1003 -p1
+%patch1004 -p1
+%patch1005 -p1
+%patch1006 -p1
+%patch1007 -p1
+%patch1008 -p1
+%patch1009 -p1
+%patch1010 -p1
+%patch1011 -p1
+%patch1012 -p1
+cp %{SOURCE1} .
 
 %build
 %define _sbindir /sbin
@@ -88,17 +88,25 @@ kpartx manages partition creation and removal for device-mapper devices.
 make %{?_smp_mflags} LIB=%{_lib}
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT bindir=%{_sbindir} syslibdir=%{_libdir} libdir=%{_libmpathdir} rcdir=%{_initrddir}
-install -m 0644 multipath/multipath.conf.redhat $RPM_BUILD_ROOT/etc/multipath.conf
-install -m 0755 multipathd/multipathd.init.redhat $RPM_BUILD_ROOT/%{_initrddir}/multipathd
-install -d $RPM_BUILD_ROOT/etc/multipath
+rm -rf %{buildroot}
+
+make install \
+	DESTDIR=%{buildroot} \
+	bindir=%{_sbindir} \
+	syslibdir=%{_libdir} \
+	libdir=%{_libmpathdir} \
+	rcdir=%{_initrddir}
+
+# tree fix up
+# install -m 0644 %{SOURCE1} %{buildroot}/etc/multipath.conf
+install -d %{buildroot}/etc/multipath
+mv %{buildroot}/etc/udev/rules.d/multipath.rules \
+	%{buildroot}/etc/udev/rules.d/40-multipath.rules
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post
-/sbin/ldconfig
 /sbin/chkconfig --add multipathd
 if [ "$1" -gt "1" -a ! -e /etc/multipath/bindings -a \
     -f /var/lib/multipath/bindings ]; then
@@ -106,17 +114,15 @@ if [ "$1" -gt "1" -a ! -e /etc/multipath/bindings -a \
 	ln -s /etc/multipath/bindings /var/lib/multipath/bindings
 fi
 
-
 %preun
 if [ "$1" = 0 ]; then
-        /sbin/service multipathd stop /dev/null 2>&1
-        /sbin/chkconfig --del multipathd
+	/sbin/service multipathd stop /dev/null 2>&1
+	/sbin/chkconfig --del multipathd
 fi
 
 %postun
-/sbin/ldconfig
 if [ "$1" -ge "1" ]; then
-        /sbin/service multipathd condrestart >/dev/null 2>&1 || :
+	/sbin/service multipathd condrestart >/dev/null 2>&1 || :
 fi
 
 %files
@@ -124,21 +130,26 @@ fi
 %{_sbindir}/multipath
 %{_sbindir}/multipathd
 %{_sbindir}/cciss_id
-%{_sbindir}/mpath_wait
 %{_initrddir}/multipathd
 %{_mandir}/man5/multipath.conf.5.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
 %config /etc/udev/rules.d/40-multipath.rules
-%config(noreplace) /etc/multipath.conf
-%doc AUTHOR COPYING README* FAQ multipath.conf.annotated multipath.conf.defaults multipath.conf.synthetic
+%doc AUTHOR COPYING FAQ
+%doc multipath.conf.redhat multipath.conf.annotated
+%doc multipath.conf.defaults multipath.conf.synthetic
 %dir /etc/multipath
 
 %files libs
 %defattr(-,root,root,-)
+%doc AUTHOR COPYING
 %{_libdir}/libmultipath.so
-%{_libmpathdir}
 %dir %{_libmpathdir}
+%{_libmpathdir}/*
+
+%post libs -p /sbin/ldconfig
+
+%postun libs -p /sbin/ldconfig
 
 %files -n kpartx
 %defattr(-,root,root,-)
@@ -146,7 +157,64 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
-* Thu Aug 20 2009 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.8-5
+* Tue Oct 27 2009 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.4.9-10
+- Updated to latest upstream 0.4.9 code : multipath-tools-091027.tar.gz
+  (git commit id: a946bd4e2a529e5fba9c9547d03d3f91806618a3)
+- Drop unrequired for-upstream patches.
+- BuildRequires and Requires new device-mapper version for udev sync support.
+
+* Tue Oct 20 2009 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.4.9-9
+- 0012-RH-explicitly-disable-dm-udev-sync-support-in-kpartx.patch
+
+* Mon Oct 19 2009 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.4.9-8
+- Split patches in "for-upstream" and "RH" series.
+- Replace 0011-RH-multipathd-blacklist-all-by-default.patch with
+  version from Benjamin Marzinski.
+- Update udev rules 0010-RH-multipath-rules-udev-changes.patch.
+- rpmlint cleanup:
+  * Drop useless-provides kpartx.
+  * Cleanup tab vs spaces usage.
+  * Summary not capitalized.
+  * Missing docs in libs package.
+  * Fix init script LSB headers.
+- Drop README* files from doc sections (they are empty).
+
+* Thu Oct 15 2009 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.4.9-7
+- Add patch 0010-RH-Set-friendly-defaults.patch:
+  * set rcdir to fedora default.
+  * do not install kpartx udev bits.
+  * install redhat init script.
+  * Cleanup spec file install target.
+- Add patch 0011-RH-multipathd-blacklist-all-by-default.patch:
+  * Fix BZ#528059
+  * Stop installing default config in /etc and move it to the doc dir.
+
+* Tue Oct 13 2009 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.4.9-6
+- Updated to latest upstream 0.4.9 code : multipath-tools-091013.tar.gz
+  (git commit id: aa0a885e1f19359c41b63151bfcface38ccca176)
+- Drop, now upstream, patches:
+  * fix_missed_uevs.patch.
+  * log_all_messages.patch.
+  * uninstall.patch.
+  * select_lib.patch.
+  * directio_message_cleanup.patch.
+  * stop_warnings.patch.
+- Drop redhatification.patch in favour of spec file hacks.
+- Drop mpath_wait.patch: no longer required.
+- Merge multipath_rules.patch and udev_change.patch.
+- Rename all patches based on source.
+- Add patch 0009-RH-fix-hp-sw-hardware-table-entries.patch to fix
+  default entry for hp_sw and match current kernel.
+- Add multipath.conf.redhat as source instead of patch.
+- spec file:
+  * divide runtime and build/setup bits.
+  * update BuildRoot.
+  * update install section to apply all the little hacks here and there,
+    in favour of patches against upstream.
+  * move ldconfig invokation to libs package where it belong.
+  * fix libs package directory ownership and files.
+
+* Thu Aug 20 2009 Benjamin Marzinski <bmarzins@redhat.com> - 0.4.9-5
 - Fixed problem where maps were being added and then removed.
 - Changed the udev rules to fix some issues.
 

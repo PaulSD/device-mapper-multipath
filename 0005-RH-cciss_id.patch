@@ -1,13 +1,90 @@
----
- Makefile            |    3 -
- cciss_id/Makefile   |   47 +++++++++++++++++++
- cciss_id/cciss_id.c |  128 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 177 insertions(+), 1 deletion(-)
+From a3db7def912c2fd3756cfd99c1165db075281caa Mon Sep 17 00:00:00 2001
+From: Fabio M. Di Nitto <fdinitto@redhat.com>
+Date: Tue, 13 Oct 2009 09:26:02 +0200
+Subject: [PATCH 05/12] RH: cciss_id
 
-Index: multipath-tools-090724/cciss_id/cciss_id.c
-===================================================================
+Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
+---
+:100644 100644 54be0a5... 7e4b7b1... M	Makefile
+:000000 100644 0000000... 6db12a4... A	cciss_id/Makefile
+:000000 100644 0000000... 091b5fe... A	cciss_id/cciss_id.c
+ Makefile            |    3 +-
+ cciss_id/Makefile   |   47 +++++++++++++++++++
+ cciss_id/cciss_id.c |  128 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 177 insertions(+), 1 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 54be0a5..7e4b7b1 100644
+--- a/Makefile
++++ b/Makefile
+@@ -25,7 +25,8 @@ BUILDDIRS = \
+ 	libmultipath/checkers \
+ 	multipath \
+ 	multipathd \
+-	kpartx
++	kpartx \
++	cciss_id
+ 
+ ifeq   ($(MULTIPATH_VERSION),)
+ VERSION = $(shell basename ${PWD} | cut -d'-' -f3)
+diff --git a/cciss_id/Makefile b/cciss_id/Makefile
+new file mode 100644
+index 0000000..6db12a4
 --- /dev/null
-+++ multipath-tools-090724/cciss_id/cciss_id.c
++++ b/cciss_id/Makefile
+@@ -0,0 +1,47 @@
++
++# *****************************************************************************
++# *                                                                           *
++# *     (C)  Copyright 2007 Hewlett-Packard Development Company, L.P          *
++# *                                                                           *
++# * This program is free software; you can redistribute it and/or modify it   *
++# * under the terms of the GNU General Public License as published by the Free*
++# * Software  Foundation; either version 2 of the License, or (at your option)*
++# * any later version.                                                        *
++# *                                                                           *
++# * This program is distributed in the hope that it will be useful, but       *
++# * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY*
++# * or FITNESS FOR  A PARTICULAR PURPOSE. See the GNU General Public License  *
++# * for more details.                                                         *
++# *                                                                           *
++# * You should have received a copy of the GNU General Public License along   *
++# * with this program; if not, write to the Free Software Foundation, Inc.,   *
++# * 675 Mass Ave, Cambridge, MA 02139, USA.                                   *
++# *                                                                           *
++# *                                                                           *
++# *                                                                           *
++# *                                                                           *
++# *****************************************************************************
++
++include ../Makefile.inc
++
++OBJS = cciss_id.o
++CFLAGS = -pipe -g -Wall -Wunused -Wstrict-prototypes
++
++LDFLAGS = -ldevmapper
++
++EXEC = cciss_id
++
++all: $(EXEC)
++
++$(EXEC): $(OBJS)
++	$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS)
++
++install:
++	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
++	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
++
++uninstall:
++	rm $(DESTDIR)$(bindir)/$(EXEC)
++
++clean:
++	rm -f core.* *.o $(EXEC) *.gz
+diff --git a/cciss_id/cciss_id.c b/cciss_id/cciss_id.c
+new file mode 100644
+index 0000000..091b5fe
+--- /dev/null
++++ b/cciss_id/cciss_id.c
 @@ -0,0 +1,128 @@
 +/*
 + *****************************************************************************
@@ -137,69 +214,6 @@ Index: multipath-tools-090724/cciss_id/cciss_id.c
 +	close(fd);
 +	return 0;
 +}
-Index: multipath-tools-090724/cciss_id/Makefile
-===================================================================
---- /dev/null
-+++ multipath-tools-090724/cciss_id/Makefile
-@@ -0,0 +1,47 @@
-+
-+# *****************************************************************************
-+# *                                                                           *
-+# *     (C)  Copyright 2007 Hewlett-Packard Development Company, L.P          *
-+# *                                                                           *
-+# * This program is free software; you can redistribute it and/or modify it   *
-+# * under the terms of the GNU General Public License as published by the Free*
-+# * Software  Foundation; either version 2 of the License, or (at your option)*
-+# * any later version.                                                        *
-+# *                                                                           *
-+# * This program is distributed in the hope that it will be useful, but       *
-+# * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY*
-+# * or FITNESS FOR  A PARTICULAR PURPOSE. See the GNU General Public License  *
-+# * for more details.                                                         *
-+# *                                                                           *
-+# * You should have received a copy of the GNU General Public License along   *
-+# * with this program; if not, write to the Free Software Foundation, Inc.,   *
-+# * 675 Mass Ave, Cambridge, MA 02139, USA.                                   *
-+# *                                                                           *
-+# *                                                                           *
-+# *                                                                           *
-+# *                                                                           *
-+# *****************************************************************************
-+
-+include ../Makefile.inc
-+
-+OBJS = cciss_id.o
-+CFLAGS = -pipe -g -Wall -Wunused -Wstrict-prototypes
-+
-+LDFLAGS = -ldevmapper
-+
-+EXEC = cciss_id
-+
-+all: $(EXEC)
-+
-+$(EXEC): $(OBJS)
-+	$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS)
-+
-+install:
-+	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
-+	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
-+
-+uninstall:
-+	rm $(DESTDIR)$(bindir)/$(EXEC)
-+
-+clean:
-+	rm -f core.* *.o $(EXEC) *.gz
-Index: multipath-tools-090724/Makefile
-===================================================================
---- multipath-tools-090724.orig/Makefile
-+++ multipath-tools-090724/Makefile
-@@ -25,7 +25,8 @@ BUILDDIRS = \
- 	libmultipath/checkers \
- 	multipath \
- 	multipathd \
--	kpartx
-+	kpartx \
-+	cciss_id
- 
- ifeq   ($(MULTIPATH_VERSION),)
- VERSION = $(shell basename ${PWD} | cut -d'-' -f3)
+-- 
+1.6.5.1
+
