@@ -1,15 +1,16 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
 Source0: multipath-tools-091027.tar.gz
-Source1: multipath.conf.redhat
+Source1: multipath.conf
 # patch that should go upstream
 Patch1: 0001-for-upstream-add-tpg_pref-prioritizer.patch
+Patch2: 0002-for-upstream-add-tmo-config-options.patch
 # local patches
 Patch1001: 0001-RH-queue-without-daemon.patch
 Patch1002: 0002-RH-path-checker.patch
@@ -23,6 +24,9 @@ Patch1009: 0009-RH-multipathd-blacklist-all-by-default.patch
 Patch1010: 0010-RH-multipath-rules-udev-changes.patch
 Patch1011: 0011-RH-fix-init-script-LSB-headers.patch
 Patch1012: 0012-RH-explicitly-disable-dm-udev-sync-support-in-kpartx.patch
+Patch1013: 0013-RH-add-weighted_prio-prioritizer.patch
+Patch1014: 0014-RH-add-hp_tur-checker.patch
+Patch1015: 0015-RH-add-multipathd-count-paths-cmd.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -67,6 +71,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %prep
 %setup -q -n multipath-tools
 %patch1 -p1
+%patch2 -p1
 %patch1001 -p1
 %patch1002 -p1
 %patch1003 -p1
@@ -79,6 +84,9 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch1010 -p1
 %patch1011 -p1
 %patch1012 -p1
+%patch1013 -p1
+%patch1014 -p1
+%patch1015 -p1
 cp %{SOURCE1} .
 
 %build
@@ -136,7 +144,7 @@ fi
 %{_mandir}/man8/multipathd.8.gz
 %config /etc/udev/rules.d/40-multipath.rules
 %doc AUTHOR COPYING FAQ
-%doc multipath.conf.redhat multipath.conf.annotated
+%doc multipath.conf multipath.conf.annotated
 %doc multipath.conf.defaults multipath.conf.synthetic
 %dir /etc/multipath
 
@@ -157,6 +165,15 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Nov 16 2009 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-11
+- Add 0002-for-upstream-add-tmo-config-options.patch
+  * Add fail_io_fail_tmo and dev_loss_tmo multipath.conf options
+- Add 0013-RH-add-weighted_prio-prioritizer.patch
+- Add 0014-RH-add-hp_tur-checker.patch
+- Add 0015-RH-add-multipathd-count-paths-cmd.patch
+- rename multipath.conf.redhat to multipath.conf, and remove the default
+  blacklist.
+
 * Tue Oct 27 2009 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.4.9-10
 - Updated to latest upstream 0.4.9 code : multipath-tools-091027.tar.gz
   (git commit id: a946bd4e2a529e5fba9c9547d03d3f91806618a3)
