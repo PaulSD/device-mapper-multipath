@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -11,6 +11,7 @@ Source1: multipath.conf
 # patch that should go upstream
 Patch1: 0001-for-upstream-add-tpg_pref-prioritizer.patch
 Patch2: 0002-for-upstream-add-tmo-config-options.patch
+Patch3: 0003-for-upstream-default-configs.patch
 # local patches
 Patch1001: 0001-RH-queue-without-daemon.patch
 Patch1002: 0002-RH-path-checker.patch
@@ -27,6 +28,13 @@ Patch1012: 0012-RH-explicitly-disable-dm-udev-sync-support-in-kpartx.patch
 Patch1013: 0013-RH-add-weighted_prio-prioritizer.patch
 Patch1014: 0014-RH-add-hp_tur-checker.patch
 Patch1015: 0015-RH-add-multipathd-count-paths-cmd.patch
+Patch1016: 0016-RHBZ-554561-fix-init-error-msg.patch
+Patch1017: 0017-RHBZ-554592-man-page-note.patch
+Patch1018: 0018-RHBZ-554596-SUN-6540-config.patch
+Patch1019: 0019-RHBZ-554598-fix-multipath-locking.patch
+Patch1020: 0020-RHBZ-554605-fix-manual-failover.patch
+Patch1021: 0021-RHBZ-548874-add-find-multipaths.patch
+Patch1022: 0022-RHBZ-557845-RHEL5-style-partitions.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -72,6 +80,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %setup -q -n multipath-tools
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 %patch1001 -p1
 %patch1002 -p1
 %patch1003 -p1
@@ -87,6 +96,13 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch1013 -p1
 %patch1014 -p1
 %patch1015 -p1
+%patch1016 -p1
+%patch1017 -p1
+%patch1018 -p1
+%patch1019 -p1
+%patch1020 -p1
+%patch1021 -p1
+%patch1022 -p1
 cp %{SOURCE1} .
 
 %build
@@ -108,8 +124,6 @@ make install \
 # tree fix up
 # install -m 0644 %{SOURCE1} %{buildroot}/etc/multipath.conf
 install -d %{buildroot}/etc/multipath
-mv %{buildroot}/etc/udev/rules.d/multipath.rules \
-	%{buildroot}/etc/udev/rules.d/40-multipath.rules
 
 %clean
 rm -rf %{buildroot}
@@ -138,11 +152,12 @@ fi
 %{_sbindir}/multipath
 %{_sbindir}/multipathd
 %{_sbindir}/cciss_id
+%{_sbindir}/mpathconf
 %{_initrddir}/multipathd
 %{_mandir}/man5/multipath.conf.5.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
-%config /etc/udev/rules.d/40-multipath.rules
+%config /lib/udev/rules.d/40-multipath.rules
 %doc AUTHOR COPYING FAQ
 %doc multipath.conf multipath.conf.annotated
 %doc multipath.conf.defaults multipath.conf.synthetic
@@ -165,6 +180,27 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Jan 22 2010 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-12
+- Refresh 0001-RH-queue-without-daemon.patch
+- Refresh 0002-RH-path-checker.patch
+- Modify 0010-RH-multipath-rules-udev-changes.patch
+  * Fix udev rules to use DM_SBIN_PATH when calling kpartx
+  * install udev rules to /lib/udev/rules.d instead of /etc/udev/rules.d
+- Modify 0014-RH-add-hp_tur-checker.patch
+- Add 0003-for-upstream-default-configs.patch
+- Add 0016-RHBZ-554561-fix-init-error-msg.patch
+- Add 0017-RHBZ-554592-man-page-note.patch
+- Add 0018-RHBZ-554596-SUN-6540-config.patch
+- Add 0019-RHBZ-554598-fix-multipath-locking.patch
+- Add 0020-RHBZ-554605-fix-manual-failover.patch
+- Add 0021-RHBZ-548874-add-find-multipaths.patch
+  * Added find_multipaths multipath.conf option
+  * Added /sbin/mpathconf for simple editting of multipath.conf
+- Add 0022-RHBZ-557845-RHEL5-style-partitions.patch
+  * Make kpartx deal with logical partitions like it did in RHEL5.
+    Don't create a dm-device for the extended partition itself.
+    Create the logical partitions on top of the dm-device for the whole disk.
+
 * Mon Nov 16 2009 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-11
 - Add 0002-for-upstream-add-tmo-config-options.patch
   * Add fail_io_fail_tmo and dev_loss_tmo multipath.conf options

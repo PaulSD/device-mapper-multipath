@@ -6,13 +6,14 @@ Subject: [PATCH 10/12] RH: multipath rules + udev changes
 Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
 ---
 :100644 100644 ac97749... 064196d... M	multipath/multipath.rules
+ multipath/Makefile        |    6 +++---
  multipath/multipath.rules |   18 +++++++++++-------
- 1 files changed, 11 insertions(+), 7 deletions(-)
+ 2 files changed, 14 insertions(+), 10 deletions(-)
 
-diff --git a/multipath/multipath.rules b/multipath/multipath.rules
-index ac97749..064196d 100644
---- a/multipath/multipath.rules
-+++ b/multipath/multipath.rules
+Index: multipath-tools/multipath/multipath.rules
+===================================================================
+--- multipath-tools.orig/multipath/multipath.rules
++++ multipath-tools/multipath/multipath.rules
 @@ -1,7 +1,11 @@
 -#
 -# udev rules for multipathing.
@@ -30,8 +31,28 @@ index ac97749..064196d 100644
 +ENV{DM_SUSPENDED}=="1", GOTO="end_mpath"
 +ENV{DM_UUID}!="mpath-?*", GOTO="end_mpath"
 +ENV{DM_ACTION}=="PATH_FAILED", GOTO="end_mpath"
-+RUN+="/sbin/kpartx -a -p p $tempnode"
++RUN+="$env{DM_SBIN_PATH}/kpartx -a -p p $tempnode"
 +LABEL="end_mpath"
--- 
-1.6.5.1
-
+Index: multipath-tools/multipath/Makefile
+===================================================================
+--- multipath-tools.orig/multipath/Makefile
++++ multipath-tools/multipath/Makefile
+@@ -21,15 +21,15 @@ $(EXEC): $(OBJS)
+ install:
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
+ 	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)/etc/udev/rules.d
+-	$(INSTALL_PROGRAM) -m 644 multipath.rules $(DESTDIR)/etc/udev/rules.d/
++	$(INSTALL_PROGRAM) -d $(DESTDIR)/lib/udev/rules.d
++	$(INSTALL_PROGRAM) -m 644 multipath.rules $(DESTDIR)/lib/udev/rules.d/40-multipath.rules
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)
+ 	$(INSTALL_PROGRAM) -m 644 $(EXEC).8.gz $(DESTDIR)$(mandir)
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man5dir)
+ 	$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5.gz $(DESTDIR)$(man5dir)
+ 
+ uninstall:
+-	rm $(DESTDIR)/etc/udev/rules.d/multipath.rules
++	rm $(DESTDIR)/lib/udev/rules.d/multipath.rules
+ 	rm $(DESTDIR)$(bindir)/$(EXEC)
+ 	rm $(DESTDIR)$(mandir)/$(EXEC).8.gz
+ 	rm $(DESTDIR)$(man5dir)/$(EXEC).conf.5.gz

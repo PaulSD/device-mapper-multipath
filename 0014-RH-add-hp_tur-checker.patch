@@ -1,8 +1,9 @@
 ---
  libmultipath/checkers.h        |    3 +
  libmultipath/checkers/Makefile |    4 +
- libmultipath/checkers/tur.c    |  110 +++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 117 insertions(+)
+ libmultipath/checkers/tur.c    |  111 +++++++++++++++++++++++++++++++++++++++++
+ multipath.conf.annotated       |    5 +
+ 4 files changed, 121 insertions(+), 2 deletions(-)
 
 Index: multipath-tools/libmultipath/checkers.h
 ===================================================================
@@ -205,3 +206,26 @@ Index: multipath-tools/libmultipath/checkers/tur.c
  	MSG(c, MSG_TUR_UP);
  	return PATH_UP;
  }
+Index: multipath-tools/multipath.conf.annotated
+===================================================================
+--- multipath-tools.orig/multipath.conf.annotated
++++ multipath-tools/multipath.conf.annotated
+@@ -86,7 +86,8 @@
+ #	# name    : path_checker, checker
+ #	# scope   : multipath & multipathd
+ #	# desc    : the default method used to determine the paths' state
+-#	# values  : readsector0|tur|emc_clariion|hp_sw|directio|rdac|cciss_tur
++#	# values  : readsector0|tur|emc_clariion|hp_sw|directio|rdac|
++#	            cciss_tur|hp_tur
+ #	# default : directio
+ #	#
+ #	path_checker	directio
+@@ -456,7 +457,7 @@
+ #		# scope   : multipathd
+ #		# desc    : path checking alorithm to use to check path state
+ #		# values  : readsector0|tur|emc_clariion|hp_sw|directio|rdac|
+-#		#           cciss_tur
++#		#           cciss_tur|hp_tur
+ #		#
+ #		path_checker		directio
+ #

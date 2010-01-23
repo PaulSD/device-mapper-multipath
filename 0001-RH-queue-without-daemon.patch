@@ -19,11 +19,11 @@ Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
  multipathd/main.c        |    5 +++++
  6 files changed, 57 insertions(+), 0 deletions(-)
 
-diff --git a/libmultipath/config.h b/libmultipath/config.h
-index 50a728c..86b1320 100644
---- a/libmultipath/config.h
-+++ b/libmultipath/config.h
-@@ -72,6 +72,7 @@ struct config {
+Index: multipath-tools/libmultipath/config.h
+===================================================================
+--- multipath-tools.orig/libmultipath/config.h
++++ multipath-tools/libmultipath/config.h
+@@ -74,6 +74,7 @@ struct config {
  	int pg_timeout;
  	int max_fds;
  	int force_reload;
@@ -31,11 +31,11 @@ index 50a728c..86b1320 100644
  	int daemon;
  	int flush_on_last_del;
  	int attribute_flags;
-diff --git a/libmultipath/dict.c b/libmultipath/dict.c
-index ee4de68..7888e8e 100644
---- a/libmultipath/dict.c
-+++ b/libmultipath/dict.c
-@@ -333,6 +333,28 @@ def_no_path_retry_handler(vector strvec)
+Index: multipath-tools/libmultipath/dict.c
+===================================================================
+--- multipath-tools.orig/libmultipath/dict.c
++++ multipath-tools/libmultipath/dict.c
+@@ -362,6 +362,28 @@ def_no_path_retry_handler(vector strvec)
  }
  
  static int
@@ -64,7 +64,7 @@ index ee4de68..7888e8e 100644
  def_pg_timeout_handler(vector strvec)
  {
  	int pg_timeout;
-@@ -1846,6 +1868,18 @@ snprint_def_no_path_retry (char * buff, int len, void * data)
+@@ -1944,6 +1966,18 @@ snprint_def_no_path_retry (char * buff, 
  }
  
  static int
@@ -83,7 +83,7 @@ index ee4de68..7888e8e 100644
  snprint_def_pg_timeout (char * buff, int len, void * data)
  {
  	if (conf->pg_timeout == DEFAULT_PGTIMEOUT)
-@@ -1931,6 +1965,7 @@ init_keywords(void)
+@@ -2029,6 +2063,7 @@ init_keywords(void)
  	install_keyword("max_fds", &max_fds_handler, &snprint_max_fds);
  	install_keyword("rr_weight", &def_weight_handler, &snprint_def_rr_weight);
  	install_keyword("no_path_retry", &def_no_path_retry_handler, &snprint_def_no_path_retry);
@@ -91,10 +91,10 @@ index ee4de68..7888e8e 100644
  	install_keyword("pg_timeout", &def_pg_timeout_handler, &snprint_def_pg_timeout);
  	install_keyword("flush_on_last_del", &def_flush_on_last_del_handler, &snprint_def_flush_on_last_del);
  	install_keyword("user_friendly_names", &names_handler, &snprint_def_user_friendly_names);
-diff --git a/libmultipath/structs.h b/libmultipath/structs.h
-index afd1246..2e7a0d1 100644
---- a/libmultipath/structs.h
-+++ b/libmultipath/structs.h
+Index: multipath-tools/libmultipath/structs.h
+===================================================================
+--- multipath-tools.orig/libmultipath/structs.h
++++ multipath-tools/libmultipath/structs.h
 @@ -63,6 +63,12 @@ enum pgstates {
  	PGSTATE_ACTIVE
  };
@@ -108,10 +108,10 @@ index afd1246..2e7a0d1 100644
  enum pgtimeouts {
  	PGTIMEOUT_UNDEF,
  	PGTIMEOUT_NONE
-diff --git a/multipath.conf.annotated b/multipath.conf.annotated
-index c222da4..9afa615 100644
---- a/multipath.conf.annotated
-+++ b/multipath.conf.annotated
+Index: multipath-tools/multipath.conf.annotated
+===================================================================
+--- multipath-tools.orig/multipath.conf.annotated
++++ multipath-tools/multipath.conf.annotated
 @@ -153,6 +153,15 @@
  #	no_path_retry  queue
  #
@@ -128,10 +128,10 @@ index c222da4..9afa615 100644
  #	# name    : user_friendly_names
  #	# scope   : multipath
  #	# desc    : If set to "yes", using the bindings file
-diff --git a/multipath.conf.synthetic b/multipath.conf.synthetic
-index 3e0fd6e..44d1329 100644
---- a/multipath.conf.synthetic
-+++ b/multipath.conf.synthetic
+Index: multipath-tools/multipath.conf.synthetic
+===================================================================
+--- multipath-tools.orig/multipath.conf.synthetic
++++ multipath-tools/multipath.conf.synthetic
 @@ -16,6 +16,7 @@
  #	rr_weight		priorities
  #	failback		immediate
@@ -140,10 +140,10 @@ index 3e0fd6e..44d1329 100644
  #	user_friendly_names	no
  #	mode			644
  #	uid			0
-diff --git a/multipathd/main.c b/multipathd/main.c
-index 41a9bd0..90de6df 100644
---- a/multipathd/main.c
-+++ b/multipathd/main.c
+Index: multipath-tools/multipathd/main.c
+===================================================================
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
 @@ -1334,6 +1334,8 @@ child (void * param)
  	pthread_t check_thr, uevent_thr, uxlsnr_thr;
  	pthread_attr_t log_attr, misc_attr;
@@ -163,6 +163,3 @@ index 41a9bd0..90de6df 100644
  	remove_maps_and_stop_waiters(vecs);
  	free_pathvec(vecs->pathvec, FREE_PATHS);
  
--- 
-1.6.5.1
-

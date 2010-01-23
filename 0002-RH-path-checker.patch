@@ -15,10 +15,10 @@ Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
  multipathd/main.c           |   21 +-------------
  4 files changed, 52 insertions(+), 34 deletions(-)
 
-diff --git a/libmultipath/checkers/tur.c b/libmultipath/checkers/tur.c
-index e06dc52..47107a2 100644
---- a/libmultipath/checkers/tur.c
-+++ b/libmultipath/checkers/tur.c
+Index: multipath-tools/libmultipath/checkers/tur.c
+===================================================================
+--- multipath-tools.orig/libmultipath/checkers/tur.c
++++ multipath-tools/libmultipath/checkers/tur.c
 @@ -69,7 +69,6 @@ libcheck_check (struct checker * c)
  		case DID_NO_CONNECT:
  		case DID_BAD_TARGET:
@@ -27,11 +27,11 @@ index e06dc52..47107a2 100644
  		case DID_TRANSPORT_FAILFAST:
  			break;
  		default:
-diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
-index 98d1618..00aa5ea 100644
---- a/libmultipath/discovery.c
-+++ b/libmultipath/discovery.c
-@@ -579,10 +579,9 @@ struct sysfs_device *sysfs_device_from_path(struct path *pp)
+Index: multipath-tools/libmultipath/discovery.c
+===================================================================
+--- multipath-tools.orig/libmultipath/discovery.c
++++ multipath-tools/libmultipath/discovery.c
+@@ -616,10 +616,9 @@ struct sysfs_device *sysfs_device_from_p
  }
  
  int
@@ -43,7 +43,7 @@ index 98d1618..00aa5ea 100644
  
  	pp->sysdev = sysfs_device_from_path(pp);
  	if (!pp->sysdev) {
-@@ -604,6 +603,16 @@ path_offline (struct path * pp)
+@@ -641,6 +640,16 @@ path_offline (struct path * pp)
  		return 1;
  
  	condlog(3, "%s: state = %s", pp->dev, buff);
@@ -60,7 +60,7 @@ index 98d1618..00aa5ea 100644
  
  	if (!strncmp(buff, "offline", 7)) {
  		pp->offline = 1;
-@@ -613,6 +622,21 @@ path_offline (struct path * pp)
+@@ -650,6 +659,21 @@ path_offline (struct path * pp)
  	return 0;
  }
  
@@ -82,7 +82,7 @@ index 98d1618..00aa5ea 100644
  extern int
  sysfs_pathinfo(struct path * pp)
  {
-@@ -699,36 +723,43 @@ cciss_ioctl_pathinfo (struct path * pp, int mask)
+@@ -736,36 +760,43 @@ cciss_ioctl_pathinfo (struct path * pp, 
  	return 0;
  }
  
@@ -117,15 +117,15 @@ index 98d1618..00aa5ea 100644
 -		pp->state = PATH_DOWN;
 -		return 0;
 +		return PATH_DOWN;
-+	}
-+	if (daemon) {
-+		if (path_blocked(pp))
-+			return PATH_PENDING;
-+		checker_set_async(c);
  	}
 -	pp->state = checker_check(c);
 -	condlog(3, "%s: state = %i", pp->dev, pp->state);
 -	if (pp->state == PATH_DOWN && strlen(checker_message(c)))
++	if (daemon) {
++		if (path_blocked(pp))
++			return PATH_PENDING;
++		checker_set_async(c);
++	}
 +	state = checker_check(c);
 +	condlog(3, "%s: state = %i", pp->dev, state);
 +	if (state == PATH_DOWN && strlen(checker_message(c)))
@@ -136,7 +136,7 @@ index 98d1618..00aa5ea 100644
  }
  
  static int
-@@ -813,8 +844,11 @@ pathinfo (struct path *pp, vector hwtable, int mask)
+@@ -850,8 +881,11 @@ pathinfo (struct path *pp, vector hwtabl
  	    cciss_ioctl_pathinfo(pp, mask))
  		goto blank;
  
@@ -150,11 +150,11 @@ index 98d1618..00aa5ea 100644
  
  	 /*
  	  * Retrieve path priority, even for PATH_DOWN paths if it has never
-diff --git a/libmultipath/discovery.h b/libmultipath/discovery.h
-index 7283f36..17cd4af 100644
---- a/libmultipath/discovery.h
-+++ b/libmultipath/discovery.h
-@@ -30,6 +30,8 @@ int path_discovery (vector pathvec, struct config * conf, int flag);
+Index: multipath-tools/libmultipath/discovery.h
+===================================================================
+--- multipath-tools.orig/libmultipath/discovery.h
++++ multipath-tools/libmultipath/discovery.h
+@@ -30,6 +30,8 @@ int path_discovery (vector pathvec, stru
  int do_tur (char *);
  int devt2devname (char *, char *);
  int path_offline (struct path *);
@@ -163,11 +163,11 @@ index 7283f36..17cd4af 100644
  int pathinfo (struct path *, vector hwtable, int mask);
  struct path * store_pathinfo (vector pathvec, vector hwtable,
  			      char * devname, int flag);
-diff --git a/multipathd/main.c b/multipathd/main.c
-index 90de6df..5d3625a 100644
---- a/multipathd/main.c
-+++ b/multipathd/main.c
-@@ -908,26 +908,9 @@ check_path (struct vectors * vecs, struct path * pp)
+Index: multipath-tools/multipathd/main.c
+===================================================================
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
+@@ -908,26 +908,9 @@ check_path (struct vectors * vecs, struc
  	 */
  	pp->tick = conf->checkint;
  
@@ -196,6 +196,3 @@ index 90de6df..5d3625a 100644
  		condlog(2, "%s: unusable path", pp->dev);
  		pathinfo(pp, conf->hwtable, 0);
  		return;
--- 
-1.6.5.1
-
