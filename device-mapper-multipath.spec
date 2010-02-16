@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -184,6 +184,11 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Feb 16 2010 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-14
+- Modify 0021-RHBZ-548874-add-find-multipaths.patch
+  * fix bug where mpathconf wouldn't create a multpath.conf file unless one
+    already existed.
+
 * Tue Feb 16 2010 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-13
 - Replace 0012-RH-explicitly-disable-dm-udev-sync-support-in-kpartx.patch
   with 0012-RH-udev-sync-support.patch
