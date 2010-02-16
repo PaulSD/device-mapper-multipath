@@ -235,7 +235,7 @@ Index: multipath-tools/libmultipath/config.h
 ===================================================================
 --- multipath-tools.orig/libmultipath/config.h
 +++ multipath-tools/libmultipath/config.h
-@@ -84,6 +84,7 @@ struct config {
+@@ -85,6 +85,7 @@ struct config {
  	int attribute_flags;
  	int fast_io_fail;
  	unsigned int dev_loss;

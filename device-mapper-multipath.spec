@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -24,7 +24,7 @@ Patch1008: 0008-RH-Make-build-system-RH-Fedora-friendly.patch
 Patch1009: 0009-RH-multipathd-blacklist-all-by-default.patch
 Patch1010: 0010-RH-multipath-rules-udev-changes.patch
 Patch1011: 0011-RH-fix-init-script-LSB-headers.patch
-Patch1012: 0012-RH-explicitly-disable-dm-udev-sync-support-in-kpartx.patch
+Patch1012: 0012-RH-udev-sync-support.patch
 Patch1013: 0013-RH-add-weighted_prio-prioritizer.patch
 Patch1014: 0014-RH-add-hp_tur-checker.patch
 Patch1015: 0015-RH-add-multipathd-count-paths-cmd.patch
@@ -35,6 +35,8 @@ Patch1019: 0019-RHBZ-554598-fix-multipath-locking.patch
 Patch1020: 0020-RHBZ-554605-fix-manual-failover.patch
 Patch1021: 0021-RHBZ-548874-add-find-multipaths.patch
 Patch1022: 0022-RHBZ-557845-RHEL5-style-partitions.patch
+Patch1023: 0023-RHBZ-557810-emc-invista-config.patch
+Patch1024: 0024-RHBZ-565933-checker-timeout.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -103,6 +105,8 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch1020 -p1
 %patch1021 -p1
 %patch1022 -p1
+%patch1023 -p1
+%patch1024 -p1
 cp %{SOURCE1} .
 
 %build
@@ -180,6 +184,22 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Feb 16 2010 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-13
+- Replace 0012-RH-explicitly-disable-dm-udev-sync-support-in-kpartx.patch
+  with 0012-RH-udev-sync-support.patch
+  * Add udev sync support to kpartx and multipath. In kpartx it is disabled
+    unless you use the -s option.
+- Refresh 0013-RH-add-weighted_prio-prioritizer.patch
+- Refresh 0021-RHBZ-548874-add-find-multipaths.patch
+- Modify 0022-RHBZ-557845-RHEL5-style-partitions.patch
+  * kpartx now creates a 2 sector large device for dos extended
+    partitions, just like the kernel does on the regular block devices.
+- Add 0023-RHBZ-557810-emc-invista-config.patch
+- Add 0024-RHBZ-565933-checker-timeout.patch
+  * Multipath has a new option checker_timeout. If this is not set, 
+    all path checker functions with explicit timeouts use
+    /sys/block/sd<x>/device/timeout. If this is set, they use it instead.
+
 * Fri Jan 22 2010 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-12
 - Refresh 0001-RH-queue-without-daemon.patch
 - Refresh 0002-RH-path-checker.patch

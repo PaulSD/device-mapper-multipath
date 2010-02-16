@@ -88,7 +88,7 @@ Index: multipath-tools/kpartx/dos.c
 -			n += read_extended_partition(fd, &p, i, sp+n, ns-n);
 +			n += read_extended_partition(fd, &p, sp+n, ns-n);
 +			/* hide the extended partition itself */
-+			sp[i].size = 0;
++			sp[i].size = 2;
  		}
  	}
  	return n;
@@ -96,7 +96,7 @@ Index: multipath-tools/kpartx/kpartx.c
 ===================================================================
 --- multipath-tools.orig/kpartx/kpartx.c
 +++ multipath-tools/kpartx/kpartx.c
-@@ -184,7 +184,7 @@ get_hotplug_device(void)
+@@ -185,7 +185,7 @@ get_hotplug_device(void)
  
  int
  main(int argc, char **argv){
@@ -105,7 +105,7 @@ Index: multipath-tools/kpartx/kpartx.c
  	struct slice all;
  	struct pt *ptp;
  	enum action what = LIST;
-@@ -350,49 +350,30 @@ main(int argc, char **argv){
+@@ -355,49 +355,30 @@ main(int argc, char **argv){
  		else
  			continue;
  
@@ -169,7 +169,7 @@ Index: multipath-tools/kpartx/kpartx.c
  
  			if (loopcreated && S_ISREG (buf.st_mode)) {
  				if (del_loop(device)) {
-@@ -438,16 +419,10 @@ main(int argc, char **argv){
+@@ -443,16 +424,10 @@ main(int argc, char **argv){
  			break;
  
  		case ADD:
@@ -187,7 +187,7 @@ Index: multipath-tools/kpartx/kpartx.c
  				if (safe_sprintf(partname, "%s%s%d",
  					     mapname, delim, j+1)) {
  					fprintf(stderr, "partname too small\n");
-@@ -488,70 +463,6 @@ main(int argc, char **argv){
+@@ -493,70 +468,6 @@ main(int argc, char **argv){
  					       slices[j].minor, slices[j].size,
  					       DM_TARGET, params);
  			}

@@ -1,7 +1,20 @@
-Index: multipath-tools-091020/libmultipath/config.c
+---
+ libmultipath/config.c                |   10 ++
+ libmultipath/config.h                |    4 +
+ libmultipath/dict.c                  |   92 ++++++++++++++++++++---
+ libmultipath/discovery.c             |   56 +++++++-------
+ libmultipath/prio.h                  |    1 
+ libmultipath/prioritizers/Makefile   |    3 
+ libmultipath/prioritizers/weighted.c |  139 +++++++++++++++++++++++++++++++++++
+ libmultipath/prioritizers/weighted.h |    8 ++
+ libmultipath/propsel.c               |   11 ++
+ libmultipath/structs.h               |    1 
+ 10 files changed, 286 insertions(+), 39 deletions(-)
+
+Index: multipath-tools/libmultipath/config.c
 ===================================================================
---- multipath-tools-091020.orig/libmultipath/config.c
-+++ multipath-tools-091020/libmultipath/config.c
+--- multipath-tools.orig/libmultipath/config.c
++++ multipath-tools/libmultipath/config.c
 @@ -156,6 +156,9 @@ free_hwe (struct hwentry * hwe)
  	if (hwe->prio_name)
  		FREE(hwe->prio_name);
@@ -33,11 +46,11 @@ Index: multipath-tools-091020/libmultipath/config.c
  	merge_str(bl_product);
  	merge_num(pgpolicy);
  	merge_num(pgfailback);
-Index: multipath-tools-091020/libmultipath/config.h
+Index: multipath-tools/libmultipath/config.h
 ===================================================================
---- multipath-tools-091020.orig/libmultipath/config.h
-+++ multipath-tools-091020/libmultipath/config.h
-@@ -24,6 +24,7 @@ struct hwentry {
+--- multipath-tools.orig/libmultipath/config.h
++++ multipath-tools/libmultipath/config.h
+@@ -25,6 +25,7 @@ struct hwentry {
  	char * selector;
  	char * checker_name;
  	char * prio_name;
@@ -45,7 +58,7 @@ Index: multipath-tools-091020/libmultipath/config.h
  
  	int pgpolicy;
  	int pgfailback;
-@@ -42,6 +43,8 @@ struct mpentry {
+@@ -43,6 +44,8 @@ struct mpentry {
  	char * alias;
  	char * getuid;
  	char * selector;
@@ -54,7 +67,7 @@ Index: multipath-tools-091020/libmultipath/config.h
  
  	int pgpolicy;
  	int pgfailback;
-@@ -95,6 +98,7 @@ struct config {
+@@ -97,6 +100,7 @@ struct config {
  	char * hwhandler;
  	char * bindings_file;
  	char * prio_name;
@@ -62,10 +75,10 @@ Index: multipath-tools-091020/libmultipath/config.h
  	char * checker_name;
  
  	vector keywords;
-Index: multipath-tools-091020/libmultipath/dict.c
+Index: multipath-tools/libmultipath/dict.c
 ===================================================================
---- multipath-tools-091020.orig/libmultipath/dict.c
-+++ multipath-tools-091020/libmultipath/dict.c
+--- multipath-tools.orig/libmultipath/dict.c
++++ multipath-tools/libmultipath/dict.c
 @@ -139,11 +139,23 @@ def_getuid_callout_handler(vector strvec
  static int
  def_prio_handler(vector strvec)
@@ -218,10 +231,10 @@ Index: multipath-tools-091020/libmultipath/dict.c
 +	install_keyword("prio", &mp_prio_handler, &snprint_mp_prio);
  	install_sublevel_end();
  }
-Index: multipath-tools-091020/libmultipath/discovery.c
+Index: multipath-tools/libmultipath/discovery.c
 ===================================================================
---- multipath-tools-091020.orig/libmultipath/discovery.c
-+++ multipath-tools-091020/libmultipath/discovery.c
+--- multipath-tools.orig/libmultipath/discovery.c
++++ multipath-tools/libmultipath/discovery.c
 @@ -800,30 +800,6 @@ get_state (struct path * pp, int daemon)
  }
  
@@ -306,10 +319,10 @@ Index: multipath-tools-091020/libmultipath/discovery.c
  	return 0;
  
  blank:
-Index: multipath-tools-091020/libmultipath/prio.h
+Index: multipath-tools/libmultipath/prio.h
 ===================================================================
---- multipath-tools-091020.orig/libmultipath/prio.h
-+++ multipath-tools-091020/libmultipath/prio.h
+--- multipath-tools.orig/libmultipath/prio.h
++++ multipath-tools/libmultipath/prio.h
 @@ -24,6 +24,7 @@
  #define PRIO_NETAPP "netapp"
  #define PRIO_RANDOM "random"
@@ -318,10 +331,10 @@ Index: multipath-tools-091020/libmultipath/prio.h
  
  /*
   * Value used to mark the fact prio was not defined
-Index: multipath-tools-091020/libmultipath/prioritizers/Makefile
+Index: multipath-tools/libmultipath/prioritizers/Makefile
 ===================================================================
---- multipath-tools-091020.orig/libmultipath/prioritizers/Makefile
-+++ multipath-tools-091020/libmultipath/prioritizers/Makefile
+--- multipath-tools.orig/libmultipath/prioritizers/Makefile
++++ multipath-tools/libmultipath/prioritizers/Makefile
 @@ -13,7 +13,8 @@ LIBS = \
  	libprioalua.so \
  	libpriotpg_pref.so \
@@ -332,10 +345,10 @@ Index: multipath-tools-091020/libmultipath/prioritizers/Makefile
  
  CFLAGS += -I..
  
-Index: multipath-tools-091020/libmultipath/prioritizers/weighted.c
+Index: multipath-tools/libmultipath/prioritizers/weighted.c
 ===================================================================
 --- /dev/null
-+++ multipath-tools-091020/libmultipath/prioritizers/weighted.c
++++ multipath-tools/libmultipath/prioritizers/weighted.c
 @@ -0,0 +1,139 @@
 +/******************************************************************************
 +*******************************************************************************
@@ -476,10 +489,10 @@ Index: multipath-tools-091020/libmultipath/prioritizers/weighted.c
 +{
 +	return prio_weighted(pp);
 +}
-Index: multipath-tools-091020/libmultipath/propsel.c
+Index: multipath-tools/libmultipath/propsel.c
 ===================================================================
---- multipath-tools-091020.orig/libmultipath/propsel.c
-+++ multipath-tools-091020/libmultipath/propsel.c
+--- multipath-tools.orig/libmultipath/propsel.c
++++ multipath-tools/libmultipath/propsel.c
 @@ -312,14 +312,25 @@ select_getuid (struct path * pp)
  extern int
  select_prio (struct path * pp)
@@ -506,10 +519,10 @@ Index: multipath-tools-091020/libmultipath/propsel.c
  		condlog(3, "%s: prio = %s (config file default)",
  			pp->dev, conf->prio_name);
  		return 0;
-Index: multipath-tools-091020/libmultipath/structs.h
+Index: multipath-tools/libmultipath/structs.h
 ===================================================================
---- multipath-tools-091020.orig/libmultipath/structs.h
-+++ multipath-tools-091020/libmultipath/structs.h
+--- multipath-tools.orig/libmultipath/structs.h
++++ multipath-tools/libmultipath/structs.h
 @@ -142,6 +142,7 @@ struct path {
  	int priority;
  	int pgindex;
@@ -518,10 +531,10 @@ Index: multipath-tools-091020/libmultipath/structs.h
  	struct prio * prio;
  	struct checker checker;
  	struct multipath * mpp;
-Index: multipath-tools-091020/libmultipath/prioritizers/weighted.h
+Index: multipath-tools/libmultipath/prioritizers/weighted.h
 ===================================================================
 --- /dev/null
-+++ multipath-tools-091020/libmultipath/prioritizers/weighted.h
++++ multipath-tools/libmultipath/prioritizers/weighted.h
 @@ -0,0 +1,8 @@
 +#ifndef _WEIGHTED_H
 +#define _WEIGHTED_H
