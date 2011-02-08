@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -184,6 +184,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.9-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Tue Feb 16 2010 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-14
 - Modify 0021-RHBZ-548874-add-find-multipaths.patch
   * fix bug where mpathconf wouldn't create a multpath.conf file unless one
