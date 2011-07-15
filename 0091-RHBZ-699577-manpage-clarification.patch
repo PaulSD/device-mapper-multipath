@@ -1,0 +1,51 @@
+---
+ multipath/multipath.conf.5 |   26 +++++++++++++++++++-------
+ 1 file changed, 19 insertions(+), 7 deletions(-)
+
+Index: multipath-tools/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools.orig/multipath/multipath.conf.5
++++ multipath-tools/multipath/multipath.conf.5
+@@ -39,9 +39,8 @@ section in which they occor.
+ The following \fIsection\fP keywords are recognized:
+ .TP 17
+ .B defaults
+-This section defines default values for attributes which are used
+-whenever no specific setting is given in the appropriate device or
+-multipath sections.
++This section defines default settings for devices-mapper-multipath. These
++values can be overwritten by the devices and multipaths sections.
+ .TP
+ .B blacklist
+ This section defines which devices should be excluded from the
+@@ -54,13 +53,26 @@ multipath topology discovery, despite be
+ section.
+ .TP
+ .B multipaths
+-This section defines the multipath topologies. They are indexed by a
+-\fIWorld Wide Identifier\fR(wwid), which is the result of the
+-\fIgetuid_callout\fR program.
++This section defines the settings for individual multipath devices.
++These values overwrite what is specified in the defaults and devices
++section of the configuration file.
++The devices are identified by the \fIwwid\fR keyword, which is a regular
++expression that must match the result of the \fIgetuid_callout\fR program.
+ .TP
+ .B devices
+-This section defines the device-specific settings.
++This section defines the settings for individual storage controller types.
++These value overwrite what is specified in the defaults section of the
++configuration file.
++These controller types are identified by the \fIvendor\fR, \fIproduct\fR, and
++\fIrevision\fR keywords, which are regular expressions that must match the
++sysfs information about this device.
++If you are using a storage array that is not supported by default, you may need
++to create a devices subsection for your array.
+ .RE
++.P
++The priority of configuration in multipath.conf is:
++.br
++\fImultipaths\fR is greater than \fIdevices\fR is greater that \fIdefaults\fR
+ .LP
+ .SH "defaults section"
+ The

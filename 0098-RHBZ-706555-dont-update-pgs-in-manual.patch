@@ -1,0 +1,18 @@
+---
+ multipathd/main.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+Index: multipath-tools/multipathd/main.c
+===================================================================
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
+@@ -1118,7 +1118,8 @@ check_path (struct vectors * vecs, struc
+ 	condlog(4, "path prio refresh");
+ 	if (update_prio(pp, new_path_up) &&
+ 	    pp->mpp->pgpolicyfn == (pgpolicyfn *)group_by_prio &&
+-	    pp->mpp->pgfailback != -FAILBACK_FOLLOWOVER)
++	    (pp->mpp->pgfailback == -FAILBACK_IMMEDIATE ||
++	     pp->mpp->pgfailback > 0))
+ 		update_path_groups(pp->mpp, vecs, !new_path_up);
+ 	else if (need_switch_pathgroup(pp->mpp, 0)) {
+ 		if (pp->mpp->pgfailback > 0 &&

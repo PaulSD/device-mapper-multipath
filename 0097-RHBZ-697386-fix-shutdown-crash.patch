@@ -1,0 +1,17 @@
+---
+ multipathd/main.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+Index: multipath-tools/multipathd/main.c
+===================================================================
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
+@@ -1155,6 +1155,8 @@ checkerloop (void *ap)
+ 		block_signal(SIGHUP, &old);
+ 		pthread_cleanup_push(cleanup_lock, &vecs->lock);
+ 		lock(vecs->lock);
++		/* check to see if we are exiting */
++		pthread_testcancel();
+ 		condlog(4, "tick");
+ 
+ 		if (vecs->pathvec) {

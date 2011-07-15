@@ -1,0 +1,34 @@
+---
+ libmultipath/discovery.c |   12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+Index: multipath-tools/libmultipath/discovery.c
+===================================================================
+--- multipath-tools.orig/libmultipath/discovery.c
++++ multipath-tools/libmultipath/discovery.c
+@@ -289,12 +289,6 @@ sysfs_set_scsi_tmo (struct multipath *mp
+ 			condlog(0, "attr_path '/class/fc_remote_ports/rport-%d:%d-%d' too large", pp->sg_id.host_no, pp->sg_id.channel, rport_id);
+ 			return 1;
+ 		}
+-		if (mpp->dev_loss){
+-			snprintf(value, 11, "%u", mpp->dev_loss);
+- 			if (sysfs_attr_set_value(attr_path, "dev_loss_tmo",
+-						 value))
+-				return 1;
+-		}
+ 		if (mpp->fast_io_fail){
+ 			if (mpp->fast_io_fail == -1)
+ 				sprintf(value, "off");
+@@ -304,6 +298,12 @@ sysfs_set_scsi_tmo (struct multipath *mp
+ 						 value))
+ 				return 1;
+ 		}
++		if (mpp->dev_loss){
++			snprintf(value, 11, "%u", mpp->dev_loss);
++ 			if (sysfs_attr_set_value(attr_path, "dev_loss_tmo",
++						 value))
++				return 1;
++		}
+ 	}
+ 	return 0;
+ }

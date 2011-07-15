@@ -1,0 +1,19 @@
+---
+ libmultipath/discovery.c |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+Index: multipath-tools/libmultipath/discovery.c
+===================================================================
+--- multipath-tools.orig/libmultipath/discovery.c
++++ multipath-tools/libmultipath/discovery.c
+@@ -859,6 +859,10 @@ get_state (struct path * pp, int daemon)
+ 			return PATH_PENDING;
+ 		checker_set_async(c);
+ 	}
++	if (!pp->sysdev) {
++		condlog(2, "%s: no sysfs information", pp->dev);
++		return PATH_DOWN;
++	}
+ 	if (!conf->checker_timeout)
+ 		sysfs_get_timeout(pp->sysdev, &(c->timeout));
+ 	state = checker_check(c);

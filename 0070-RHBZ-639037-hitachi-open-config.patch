@@ -1,0 +1,30 @@
+---
+ libmultipath/hwtable.c  |    2 +-
+ multipath.conf.defaults |    1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+Index: multipath-tools/libmultipath/hwtable.c
+===================================================================
+--- multipath-tools.orig/libmultipath/hwtable.c
++++ multipath-tools/libmultipath/hwtable.c
+@@ -349,7 +349,7 @@ static struct hwentry default_hw[] = {
+ 		.pgpolicy      = MULTIBUS,
+ 		.pgfailback    = FAILBACK_UNDEF,
+ 		.rr_weight     = RR_WEIGHT_NONE,
+-		.no_path_retry = NO_PATH_RETRY_UNDEF,
++		.no_path_retry = 6,
+ 		.minio         = DEFAULT_MINIO,
+ 		.checker_name  = TUR,
+ 		.prio_name     = DEFAULT_PRIO,
+Index: multipath-tools/multipath.conf.defaults
+===================================================================
+--- multipath-tools.orig/multipath.conf.defaults
++++ multipath-tools/multipath.conf.defaults
+@@ -260,6 +260,7 @@
+ #		path_selector		"round-robin 0"
+ #		path_grouping_policy	multibus
+ #		rr_weight		uniform
++#		no_path_retry		6
+ #		rr_min_io		100
+ #		path_checker		tur
+ #		prio			const

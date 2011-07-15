@@ -1,0 +1,17 @@
+---
+ libmultipath/discovery.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+Index: multipath-tools/libmultipath/discovery.c
+===================================================================
+--- multipath-tools.orig/libmultipath/discovery.c
++++ multipath-tools/libmultipath/discovery.c
+@@ -297,6 +297,8 @@ sysfs_set_scsi_tmo (struct multipath *mp
+ 				return 1;
+ 		}
+ 		if (mpp->dev_loss){
++			if (mpp->dev_loss > 600 && mpp->fast_io_fail <= 0)
++				condlog(2, "you must enable fast_io_fail_tmo in order to set dev_loss_tmo greater than 600");
+ 			snprintf(value, 11, "%u", mpp->dev_loss);
+  			if (sysfs_attr_set_value(attr_path, "dev_loss_tmo",
+ 						 value))

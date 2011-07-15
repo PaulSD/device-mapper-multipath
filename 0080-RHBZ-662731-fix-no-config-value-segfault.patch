@@ -1,0 +1,31 @@
+---
+ libmultipath/parser.c |   11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+Index: multipath-tools/libmultipath/parser.c
+===================================================================
+--- multipath-tools.orig/libmultipath/parser.c
++++ multipath-tools/libmultipath/parser.c
+@@ -386,13 +386,20 @@ alloc_value_block(vector strvec, void (*
+ void *
+ set_value(vector strvec)
+ {
+-	char *str = VECTOR_SLOT(strvec, 1);
+-	int size = strlen(str);
++	char *str;
++	int size;
+ 	int i = 0;
+ 	int len = 0;
+ 	char *alloc = NULL;
+ 	char *tmp;
+ 
++	str = VECTOR_SLOT(strvec, 1);
++	if (!str) {
++		str = VECTOR_SLOT(strvec, 0);
++		condlog(0, "option '%s' missing value\n", str);
++		return NULL;
++	}
++	size = strlen(str);
+ 	if (*str == '"') {
+ 		for (i = 2; i < VECTOR_SIZE(strvec); i++) {
+ 			str = VECTOR_SLOT(strvec, i);

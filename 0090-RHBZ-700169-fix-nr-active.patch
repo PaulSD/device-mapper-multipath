@@ -1,0 +1,17 @@
+---
+ libmultipath/configure.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: multipath-tools/libmultipath/configure.c
+===================================================================
+--- multipath-tools.orig/libmultipath/configure.c
++++ multipath-tools/libmultipath/configure.c
+@@ -90,7 +90,7 @@ setup_map (struct multipath * mpp)
+ 	if (mpp->pgpolicyfn && mpp->pgpolicyfn(mpp))
+ 		return 1;
+ 
+-	mpp->nr_active = pathcount(mpp, PATH_UP);
++	mpp->nr_active = pathcount(mpp, PATH_UP) + pathcount(mpp, PATH_GHOST);
+ 
+ 	/*
+ 	 * ponders each path group and determine highest prio pg

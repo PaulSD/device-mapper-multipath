@@ -1,0 +1,18 @@
+---
+ multipathd/main.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+Index: multipath-tools/multipathd/main.c
+===================================================================
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
+@@ -999,7 +999,8 @@ int update_path_groups(struct multipath 
+ 		return 1;
+ 	}
+ 	dm_lib_release();
+-	setup_multipath(vecs, mpp);
++	if (setup_multipath(vecs, mpp) != 0)
++		return 1;
+ 	sync_map_state(mpp);
+ 
+ 	return 0;

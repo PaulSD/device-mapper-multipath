@@ -1,0 +1,162 @@
+---
+ libmultipath/dict.c        |   12 +++++-----
+ multipath.conf.annotated   |   53 ---------------------------------------------
+ multipath.conf.synthetic   |    3 --
+ multipath/multipath.conf.5 |   18 ---------------
+ 4 files changed, 6 insertions(+), 80 deletions(-)
+
+Index: multipath-tools/libmultipath/dict.c
+===================================================================
+--- multipath-tools.orig/libmultipath/dict.c
++++ multipath-tools/libmultipath/dict.c
+@@ -2204,13 +2204,13 @@ init_keywords(void)
+ 	install_keyword("pg_timeout", &def_pg_timeout_handler, &snprint_def_pg_timeout);
+ 	install_keyword("flush_on_last_del", &def_flush_on_last_del_handler, &snprint_def_flush_on_last_del);
+ 	install_keyword("user_friendly_names", &names_handler, &snprint_def_user_friendly_names);
+-	install_keyword("mode", &def_mode_handler, &snprint_def_mode);
+-	install_keyword("uid", &def_uid_handler, &snprint_def_uid);
+-	install_keyword("gid", &def_gid_handler, &snprint_def_gid);
+ 	install_keyword("fast_io_fail_tmo", &def_fast_io_fail_handler, &snprint_def_fast_io_fail);
+ 	install_keyword("dev_loss_tmo", &def_dev_loss_handler, &snprint_def_dev_loss);
+ 	install_keyword("find_multipaths", &def_find_multipaths_handler, &snprint_def_find_multipaths);
+ 	install_keyword("log_checker_err", &def_log_checker_err_handler, &snprint_def_log_checker_err);
++	__deprecated install_keyword("mode", &def_mode_handler, &snprint_def_mode);
++	__deprecated install_keyword("uid", &def_uid_handler, &snprint_def_uid);
++	__deprecated install_keyword("gid", &def_gid_handler, &snprint_def_gid);
+ 	__deprecated install_keyword("default_selector", &def_selector_handler, NULL);
+ 	__deprecated install_keyword("default_path_grouping_policy", &def_pgpolicy_handler, NULL);
+ 	__deprecated install_keyword("default_getuid_callout", &def_getuid_callout_handler, NULL);
+@@ -2283,9 +2283,9 @@ init_keywords(void)
+ 	install_keyword("rr_min_io", &mp_minio_handler, &snprint_mp_rr_min_io);
+ 	install_keyword("pg_timeout", &mp_pg_timeout_handler, &snprint_mp_pg_timeout);
+ 	install_keyword("flush_on_last_del", &mp_flush_on_last_del_handler, &snprint_mp_flush_on_last_del);
+-	install_keyword("mode", &mp_mode_handler, &snprint_mp_mode);
+-	install_keyword("uid", &mp_uid_handler, &snprint_mp_uid);
+-	install_keyword("gid", &mp_gid_handler, &snprint_mp_gid);
++	__deprecated install_keyword("mode", &mp_mode_handler, &snprint_mp_mode);
++	__deprecated install_keyword("uid", &mp_uid_handler, &snprint_mp_uid);
++	__deprecated install_keyword("gid", &mp_gid_handler, &snprint_mp_gid);
+ 	install_keyword("prio", &mp_prio_handler, &snprint_mp_prio);
+ 	install_sublevel_end();
+ }
+Index: multipath-tools/multipath.conf.annotated
+===================================================================
+--- multipath-tools.orig/multipath.conf.annotated
++++ multipath-tools/multipath.conf.annotated
+@@ -176,32 +176,6 @@
+ #	user_friendly_names no
+ #
+ #	#
+-#	# name    : mode
+-#	# scope   : multipath
+-#	# desc    : The mode to use for the multipath device nodes, in octal.
+-#	# values  : 0000 - 0777
+-#	# default : determined by the process
+-#	mode 0644
+-#
+-#	#
+-#	# name    : uid
+-#	# scope   : multipath
+-#	# desc    : The user id to use for the multipath device nodes. You
+-#	#           may use either the numeric or symbolic uid
+-#	# values  : <user_id>
+-#	# default : determined by the process
+-#	uid 0
+-#
+-#	#
+-#	# name    : gid
+-#	# scope   : multipath
+-#	# desc    : The group id to user for the multipath device nodes. You
+-#	#           may use either the numeric or symbolic gid
+-#	# values  : <group_id>
+-#	# default : determined by the process
+-#	gid disk
+-#
+-#	#
+ #	# name    : checker_timeout
+ #	# scope   : multipath & multipathd
+ #	# desc    : The timeout to use for path checkers that issue scsi
+@@ -369,33 +343,6 @@
+ #		#
+ #		flush_on_last_del       yes
+ #
+-#		#
+-#		# name    : mode
+-#		# scope   : multipath
+-#		# desc    : The mode to use for the multipath device nodes, in
+-#		#           octal.
+-#		# values  : 0000 - 0777
+-#		# default : determined by the process
+-#		mode 0644
+-#
+-#		#
+-#		# name    : uid
+-#		# scope   : multipath
+-#		# desc    : The user id to use for the multipath device nodes.
+-#		#           You may use either the numeric or symbolic uid
+-#		# values  : <user_id>
+-#		# default : determined by the process
+-#		uid 0
+-#
+-#		#
+-#		# name    : gid
+-#		# scope   : multipath
+-#		# desc    : The group id to user for the multipath device nodes.
+-#		#           You may use either the numeric or symbolic gid
+-#		# values  : <group_id>
+-#		# default : determined by the process
+-#		gid 0
+-#
+ #	}
+ #	multipath {
+ #		wwid	1DEC_____321816758474
+Index: multipath-tools/multipath.conf.synthetic
+===================================================================
+--- multipath-tools.orig/multipath.conf.synthetic
++++ multipath-tools/multipath.conf.synthetic
+@@ -18,9 +18,6 @@
+ #	no_path_retry		fail
+ #	queue_without_daemon    no
+ #	user_friendly_names	no
+-#	mode			644
+-#	uid			0
+-#	gid			disk
+ #}
+ #blacklist {
+ #       wwid 26353900f02796769
+Index: multipath-tools/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools.orig/multipath/multipath.conf.5
++++ multipath-tools/multipath/multipath.conf.5
+@@ -335,18 +335,6 @@ will disable the timeout.
+ Specify the number of seconds the scsi layer will wait after a problem has
+ been detected on a FC remote port before removing it from the system.
+ .TP
+-.B mode
+-The mode to use for the multipath device nodes, in octal; default determined
+-by the process
+-.TP
+-.B uid
+-The user id to use for the multipath device nodes. You may use either the
+-numeric or symbolic uid; default determined by the process.
+-.TP
+-.B gid
+-The group id to use for the mutipath device nodes. You may use either the
+-numeric or symbolic gid; default determined by the process.
+-.TP
+ .B log_checker_err
+ If set to
+ .I once
+@@ -446,12 +434,6 @@ section:
+ .B rr_weight
+ .TP
+ .B flush_on_last_del
+-.TP
+-.B mode
+-.TP
+-.B uid
+-.TP
+-.B gid
+ .RE
+ .PD
+ .LP

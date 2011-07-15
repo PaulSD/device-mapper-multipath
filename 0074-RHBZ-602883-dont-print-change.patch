@@ -1,0 +1,31 @@
+---
+ multipathd/main.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+Index: multipath-tools/multipathd/main.c
+===================================================================
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
+@@ -217,7 +217,7 @@ flush_map(struct multipath * mpp, struct
+ static int
+ uev_add_map (struct sysfs_device * dev, struct vectors * vecs)
+ {
+-	condlog(2, "%s: add map (uevent)", dev->kernel);
++	condlog(3, "%s: add map (uevent)", dev->kernel);
+ 	return ev_add_map(dev, vecs);
+ }
+ 
+@@ -258,11 +258,12 @@ ev_add_map (struct sysfs_device * dev, s
+ 		 * if we create a multipath mapped device as a result
+ 		 * of uev_add_path
+ 		 */
+-		condlog(0, "%s: devmap already registered",
++		condlog(3, "%s: devmap already registered",
+ 			dev->kernel);
+ 		FREE(alias);
+ 		return 0;
+ 	}
++	condlog(0, "%s: adding map", dev->kernel);
+ 
+ 	/*
+ 	 * now we can register the map

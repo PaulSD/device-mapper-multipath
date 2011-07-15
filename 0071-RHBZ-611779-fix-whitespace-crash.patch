@@ -1,0 +1,20 @@
+---
+ multipathd/cli.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+Index: multipath-tools/multipathd/cli.c
+===================================================================
+--- multipath-tools.orig/multipathd/cli.c
++++ multipath-tools/multipathd/cli.c
+@@ -228,8 +228,10 @@ get_cmdvec (char * cmd, vector *v)
+ 	vector cmdvec, strvec;
+ 
+ 	strvec = alloc_strvec(cmd);
+-	if (!strvec)
++	if (!strvec) {
++		*v = NULL;
+ 		return 0;
++	}
+ 
+ 	cmdvec = vector_alloc();
+ 	*v = cmdvec;

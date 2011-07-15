@@ -1,0 +1,17 @@
+---
+ libmultipath/discovery.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: multipath-tools/libmultipath/discovery.c
+===================================================================
+--- multipath-tools.orig/libmultipath/discovery.c
++++ multipath-tools/libmultipath/discovery.c
+@@ -711,7 +711,7 @@ path_offline (struct path * pp)
+ 	char buff[SCSI_STATE_SIZE];
+ 
+ 	if (path_state(pp, buff))
+-		return 1;
++		return 0;
+ 
+ 	if (!strncmp(buff, "offline", 7)) {
+ 		pp->offline = 1;

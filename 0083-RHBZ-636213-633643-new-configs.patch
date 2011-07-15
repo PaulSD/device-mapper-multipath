@@ -1,0 +1,99 @@
+---
+ libmultipath/hwtable.c  |   32 ++++++++++++++++++++++++++++++++
+ multipath.conf.defaults |   28 ++++++++++++++++++++++++++++
+ 2 files changed, 60 insertions(+)
+
+Index: multipath-tools/libmultipath/hwtable.c
+===================================================================
+--- multipath-tools.orig/libmultipath/hwtable.c
++++ multipath-tools/libmultipath/hwtable.c
+@@ -239,6 +239,22 @@ static struct hwentry default_hw[] = {
+ 		.checker_name  = TUR,
+ 		.prio_name     = DEFAULT_PRIO,
+ 	},
++	{
++		/* HP P2000 family arrays */
++		.vendor        = "HP",
++		.product       = "P2000 G3 FC|P2000G3 FC/iSCSI|P2000 G3 SAS|P2000 G3 iSCSI",
++		.getuid        = DEFAULT_GETUID,
++		.features      = DEFAULT_FEATURES,
++		.hwhandler     = DEFAULT_HWHANDLER,
++		.selector      = DEFAULT_SELECTOR,
++		.pgpolicy      = GROUP_BY_PRIO,
++		.pgfailback    = -FAILBACK_IMMEDIATE,
++		.rr_weight     = RR_WEIGHT_NONE,
++		.no_path_retry = 18,
++		.minio         = 100,
++		.checker_name  = TUR,
++		.prio_name     = PRIO_ALUA,
++	},
+ 	/*
+ 	 * DDN controller family
+ 	 *
+@@ -1118,6 +1134,22 @@ static struct hwentry default_hw[] = {
+ 		.checker_name  = DEFAULT_CHECKER,
+ 		.prio_name     = DEFAULT_PRIO,
+ 	},
++	/* NEC Storage M Series */
++	{
++		.vendor        = "NEC",
++		.product       = "DISK ARRAY",
++		.getuid        = DEFAULT_GETUID,
++		.features      = DEFAULT_FEATURES,
++		.hwhandler     = "1 alua",
++		.selector      = DEFAULT_SELECTOR,
++		.pgpolicy      = GROUP_BY_PRIO,
++		.pgfailback    = -FAILBACK_IMMEDIATE,
++		.rr_weight     = RR_WEIGHT_NONE,
++		.no_path_retry = NO_PATH_RETRY_UNDEF,
++		.minio         = DEFAULT_MINIO,
++		.checker_name  = TUR,
++		.prio_name     = PRIO_ALUA,
++	},
+ 	/*
+ 	 * EOL
+ 	 */
+Index: multipath-tools/multipath.conf.defaults
+===================================================================
+--- multipath-tools.orig/multipath.conf.defaults
++++ multipath-tools/multipath.conf.defaults
+@@ -180,6 +180,20 @@
+ #		prio			const
+ #	}
+ #	device {
++#		vendor			"HP"
++#		product			"P2000 G3 FC|P2000G3 FC/iSCSI|P2000 G3 SAS|P2000 G3 iSCS"
++#		getuid_callout		"/lib/udev/scsi_id --whitelisted --device=/dev/%n"
++#		features		"0"
++#		hardware_handler	"0"
++#		path_selector		"round-robin 0"
++#		path_grouping_policy	group_by_prio
++#		rr_weight		uniform
++#		no_path_retry		18
++#		rr_min_io		100
++#		path_checker		tur
++#		prio			alua
++#	}
++#	device {
+ #		vendor			"DDN"
+ #		product			"SAN DataDirector"
+ #		getuid_callout		"/lib/udev/scsi_id --whitelisted --device=/dev/%n"
+@@ -659,4 +673,18 @@
+ #		path_checker		directio
+ #		prio			const
+ #	}
++#	device {
++#		vendor                  "NEC"
++#		product                 "DISK ARRAY"
++#		getuid_callout          "/lib/udev/scsi_id --whitelisted --device=/dev/%n"
++#		features                "0"
++#		hardware_handler        "1 alua"
++#		path_selector           "round-robin 0"
++#		path_grouping_policy    group_by_prio
++#		failback                immediate
++#		rr_weight               uniform
++#		rr_min_io               1000
++#		path_checker            tur
++#		prio                    alua
++#	}
+ #}

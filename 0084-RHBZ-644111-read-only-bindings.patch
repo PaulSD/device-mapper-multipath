@@ -1,0 +1,160 @@
+From c2f3abecdb76c4e7b3ec3aa418625b4f1b942496 Mon Sep 17 00:00:00 2001
+From: Malahal Naineni <malahal@us.ibm.com>
+Date: Mon, 16 Aug 2010 15:57:02 -0700
+Subject: [PATCH] option to multipath to not modify the bindinfs file
+
+initramfs is mounted read-write causing multipath to update the
+initramfs bindings file and name all multipath devices it finds using
+friendly names. The actual changes to the file are thrown away as they
+are only written to the memory image rather than to the disk image. This
+may cause the in memory updated initramfs bindings file inconsistent
+with the actual bindings file in the active root file system image when
+devices are added or removed.
+
+In other words, the boot time updated initramfs bindings file may have
+'uuid1 map to mpatha' and 'uuid2 map to mpathb', but the active root fs
+bindings file may have 'uuid1 map to mpathb' and 'uuid2 map to mpatha'
+
+The option, -B, will not modify the bindings file. It will only use the
+bindings file if needed.  This option to multipath should be used when
+invoked in the initramfs context to avoid the inconsistency.
+
+Signed-off-by: Malahal Naineni (malahal@us.ibm.com)
+---
+ libmultipath/alias.c   |    4 ++--
+ libmultipath/alias.h   |    2 +-
+ libmultipath/config.h  |    1 +
+ libmultipath/propsel.c |    3 ++-
+ multipath/main.c       |    5 ++++-
+ multipath/multipath.8  |    5 ++++-
+ multipathd/main.c      |    5 ++++-
+ 7 files changed, 18 insertions(+), 7 deletions(-)
+
+Index: multipath-tools/libmultipath/alias.c
+===================================================================
+--- multipath-tools.orig/libmultipath/alias.c
++++ multipath-tools/libmultipath/alias.c
+@@ -206,7 +206,7 @@ allocate_binding(int fd, char *wwid, int
+ }
+ 
+ char *
+-get_user_friendly_alias(char *wwid, char *file)
++get_user_friendly_alias(char *wwid, char *file, int bindings_read_only)
+ {
+ 	char *alias;
+ 	int fd, scan_fd, id;
+@@ -250,7 +250,7 @@ get_user_friendly_alias(char *wwid, char
+ 		return NULL;
+ 	}
+ 
+-	if (!alias && can_write)
++	if (!alias && can_write && !bindings_read_only)
+ 		alias = allocate_binding(fd, wwid, id);
+ 
+ 	fclose(f);
+Index: multipath-tools/libmultipath/alias.h
+===================================================================
+--- multipath-tools.orig/libmultipath/alias.h
++++ multipath-tools/libmultipath/alias.h
+@@ -7,5 +7,5 @@
+ "# alias wwid\n" \
+ "#\n"
+ 
+-char *get_user_friendly_alias(char *wwid, char *file);
++char *get_user_friendly_alias(char *wwid, char *file, int bindings_readonly);
+ char *get_user_friendly_wwid(char *alias, char *file);
+Index: multipath-tools/libmultipath/config.h
+===================================================================
+--- multipath-tools.orig/libmultipath/config.h
++++ multipath-tools/libmultipath/config.h
+@@ -76,6 +76,7 @@ struct config {
+ 	int rr_weight;
+ 	int no_path_retry;
+ 	int user_friendly_names;
++	int bindings_read_only;
+ 	int pg_timeout;
+ 	int max_fds;
+ 	int force_reload;
+Index: multipath-tools/libmultipath/propsel.c
+===================================================================
+--- multipath-tools.orig/libmultipath/propsel.c
++++ multipath-tools/libmultipath/propsel.c
+@@ -219,7 +219,8 @@ select_alias (struct multipath * mp)
+ 		mp->alias = NULL;
+ 		if (conf->user_friendly_names)
+ 			mp->alias = get_user_friendly_alias(mp->wwid,
+-					conf->bindings_file);
++					conf->bindings_file,
++					conf->bindings_read_only);
+ 		if (mp->alias == NULL){
+ 			char *alias;
+ 			if ((alias = MALLOC(WWID_SIZE)) != NULL){
+Index: multipath-tools/multipath/main.c
+===================================================================
+--- multipath-tools.orig/multipath/main.c
++++ multipath-tools/multipath/main.c
+@@ -383,7 +383,7 @@ main (int argc, char *argv[])
+ 		condlog(0, "multipath tools need sysfs mounted");
+ 		exit(1);
+ 	}
+-	while ((arg = getopt(argc, argv, ":dchl::FfM:v:p:b:rq")) != EOF ) {
++	while ((arg = getopt(argc, argv, ":dchl::FfM:v:p:b:Brq")) != EOF ) {
+ 		switch(arg) {
+ 		case 1: printf("optarg : %s\n",optarg);
+ 			break;
+@@ -403,6 +403,9 @@ main (int argc, char *argv[])
+ 		case 'q':
+ 			conf->allow_queueing = 1;
+ 			break;
++		case 'B':
++			conf->bindings_read_only = 1;
++			break;
+ 		case 'd':
+ 			if (!conf->dry_run)
+ 				conf->dry_run = 1;
+Index: multipath-tools/multipath/multipath.8
+===================================================================
+--- multipath-tools.orig/multipath/multipath.8
++++ multipath-tools/multipath/multipath.8
+@@ -6,7 +6,7 @@ multipath \- Device mapper target autoco
+ .RB [\| \-v\ \c
+ .IR verbosity \|]
+ .RB [\| \-d \|]
+-.RB [\| \-h | \-l | \-ll | \-f | \-F \|]
++.RB [\| \-h | \-l | \-ll | \-f | \-F | \-B \|]
+ .RB [\| \-p\ \c
+ .BR failover | multibus | group_by_serial | group_by_prio | group_by_node_name \|]
+ .RB [\| device \|]
+@@ -47,6 +47,9 @@ flush a multipath device map specified a
+ .B \-F
+ flush all unused multipath device maps
+ .TP
++.B \-B
++treat the bindings file as read only
++.TP
+ .BI \-p " policy"
+ force maps to specified policy:
+ .RS 1.2i
+Index: multipath-tools/multipathd/main.c
+===================================================================
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
+@@ -1640,7 +1640,7 @@ main (int argc, char *argv[])
+ 	if (!conf)
+ 		exit(1);
+ 
+-	while ((arg = getopt(argc, argv, ":dv:k::")) != EOF ) {
++	while ((arg = getopt(argc, argv, ":dv:k::B")) != EOF ) {
+ 	switch(arg) {
+ 		case 'd':
+ 			logsink = 0;
+@@ -1653,6 +1653,9 @@ main (int argc, char *argv[])
+ 
+ 			conf->verbosity = atoi(optarg);
+ 			break;
++		case 'B':
++			conf->bindings_read_only = 1;
++			break;
+ 		case 'k':
+ 			uxclnt(optarg);
+ 			exit(0);

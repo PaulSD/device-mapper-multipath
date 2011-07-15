@@ -1,0 +1,18 @@
+---
+ multipath/multipath.conf.5 |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+Index: multipath-tools/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools.orig/multipath/multipath.conf.5
++++ multipath-tools/multipath/multipath.conf.5
+@@ -40,7 +40,8 @@ The following \fIsection\fP keywords are
+ .TP 17
+ .B defaults
+ This section defines default values for attributes which are used
+-whenever no specific setting is given.
++whenever no specific setting is given in the appropriate device or
++multipath sections.
+ .TP
+ .B blacklist
+ This section defines which devices should be excluded from the

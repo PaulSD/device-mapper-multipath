@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -37,20 +37,98 @@ Patch1021: 0021-RHBZ-548874-add-find-multipaths.patch
 Patch1022: 0022-RHBZ-557845-RHEL5-style-partitions.patch
 Patch1023: 0023-RHBZ-557810-emc-invista-config.patch
 Patch1024: 0024-RHBZ-565933-checker-timeout.patch
+Patch1025: 0025-RHBZ-508827-update-multipathd-manpage.patch
+Patch1026: 0026-RHBZ-549636-default-path-selector.patch
+Patch1027: 0027-RHBZ-509443-enhance-show-config.patch
+Patch1028: 0028-RHBZ-452617-add-revision-parameter.patch
+Patch1029: 0029-RHBZ-567219-recalculate-pgs-in-checkerloop.patch
+Patch1030: 0030-RHBZ-558636-check-if-multipath-owns-path.patch
+Patch1031: 0031-RHBZ-570546-display-avg-pg-prio.patch
+Patch1032: 0032-RHBZ-575767-ontap_prio.patch
+Patch1033: 0033-RHBZ-573715-eurologic-config.patch
+Patch1034: 0034-RHBZ-579575-add-q-multipath-option.patch
+Patch1035: 0035-RHBZ-467709-add-followover.patch
+Patch1036: 0036-RH-clear-messages.patch
+Patch1037: 0037-RH-adopt-paths.patch
+Patch1038: 0038-RHBZ-587201-IBM-SGI.patch
+Patch1039: 0039-RHBZ-589153-manpage-update.patch
+Patch1040: 0040-RHBZ-587695-add-checker-msg-alias.patch
+Patch1041: 0041-RHBZ-587695-add-rdac-message.patch
+Patch1042: 0042-RHBZ-590038-fix-fast-io-fail-tmo.patch
+Patch1043: 0043-RHBZ-590028-close-sysfs_attr_fd.patch
+Patch1044: 0044-RHBZ-591940-dont-clear-daemon.patch
+Patch1045: 0045-RHBZ-593379-dont-add-unknown-paths.patch
+Patch1046: 0046-RHBZ-593426-move-adopt-path.patch
+Patch1047: 0047-RHBZ-591608-only-switch-pgs-once.patch
+Patch1048: 0048-RHBZ-592494-fix-user-configs.patch
+Patch1049: 0049-RHBZ-591644-enhance-mpathconf.patch
+Patch1050: 0050-RHBZ-595400-fix-checker-tmo.patch
+Patch1051: 0051-RHBZ-596156-mpathconf-man-page.patch
+Patch1052: 0052-RHBZ-601247-fix-path-adoption.patch
+Patch1053: 0053-RHBZ-596323-remember_more_wwids.patch
+Patch1054: 0054-RHBZ-596319-rules-cleanup.patch
+Patch1055: 0055-RHBZ-602257-update-on-show-topology.patch
+Patch1056: 0056-RHBZ-603812-better-type-check.patch
+Patch1057: 0057-RHBZ-607869-fix-resize.patch
+Patch1058: 0058-RHBZ-601665-assemble-features.patch
+Patch1059: 0059-RHBZ-607874-handle-offlined-paths.patch
+Patch1060: 0060-RHBZ-606420-fix-remove-map.patch
+Patch1061: 0061-RHBZ-620479-find-rport.patch
+Patch1062: 0062-RHBZ-592998-hpsc-config.patch
+Patch1063: 0063-RHBZ-595719-udev_link_priority.patch
+Patch1064: 0064-RHBZ-612173-fix-reverse-lookup.patch
+Patch1065: 0065-RHBZ-635088-update-priority.patch
+Patch1066: 0066-RHBZ-636071-mpathconf-variable_names.patch
+Patch1067: 0067-RHBZ-622569-symmetrix-config.patch
+Patch1068: 0068-RHBZ-632734-nvdisk-config.patch
+Patch1069: 0069-RHBZ-636246-hp-open-config.patch
+Patch1070: 0070-RHBZ-639037-hitachi-open-config.patch
+Patch1071: 0071-RHBZ-611779-fix-whitespace-crash.patch
+Patch1072: 0072-RHBZ-651389-change-scsi-tmo-order.patch
+Patch1073: 0073-RHBZ-650664-clarify-error-msg.patch
+Patch1074: 0074-RHBZ-602883-dont-print-change.patch
+Patch1075: 0075-RHBZ-576919-log-checker-err.patch
+Patch1076: 0076-RHBZ-599690-update-multipath-conf.patch
+Patch1077: 0077-RHBZ-622608-nvdisk-config.patch
+Patch1078: 0078-RHBZ-628095-config-warnings.patch
+Patch1079: 0079-RHBZ-650797-display-iscsi-tgt-name.patch
+Patch1080: 0080-RHBZ-662731-fix-no-config-value-segfault.patch
+Patch1081: 0081-RHBZ-623644-fix-sysfs-caching.patch
+Patch1083: 0083-RHBZ-636213-633643-new-configs.patch
+Patch1084: 0084-RHBZ-644111-read-only-bindings.patch
+Patch1085: 0085-RHBZ-645605-fix-offline-check.patch
+Patch1086: 0086-RHBZ-681144-sysfs-device-cleanup.patch
+Patch1087: 0087-RHBZ-680480-skip-if-no-sysdev.patch
+Patch1088: 0088-RHBZ-693524-fix-prio-segfault.patch
+Patch1089: 0089-RHBZ-694602-RSSM-config.patch
+Patch1090: 0090-RHBZ-700169-fix-nr-active.patch
+Patch1091: 0091-RHBZ-699577-manpage-clarification.patch
+Patch1092: 0092-RHBZ-689504-rdac-retry.patch
+Patch1093: 0093-RHBZ-677449-dont-remove-map-on-enomem.patch
+Patch1094: 0094-RHBZ-707560-check-return-value.patch
+Patch1095: 0095-RHBZ-678673-no-path-groups.patch
+Patch1096: 0096-RHBZ-683616-ioship-support.patch
+Patch1097: 0097-RHBZ-697386-fix-shutdown-crash.patch
+Patch1098: 0098-RHBZ-706555-dont-update-pgs-in-manual.patch
+Patch1099: 0099-RHBZ-705854-warn-on-bad-dev-loss-tmo.patch
+Patch1100: 0100-RHBZ-710478-deprecate-uid-gid-mode.patch
+Patch1101: 0101-RHBZ-631009-disable-udev-disk-rules-on-reload.patch
+Patch1102: 0102-RHBZ-690828-systemd-unit-file.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
 Requires: device-mapper >= 1.02.39-1
-Requires(post): chkconfig
-Requires(preun): chkconfig
-Requires(preun): initscripts
-Requires(postun): initscripts
+Requires: udev initscripts
+Requires(post): systemd-units systemd-sysv chkconfig
+Requires(preun): systemd-units
+Requires(postun): systemd-units
 
 # build/setup
 BuildRequires: libaio-devel, device-mapper-devel >= 1.02.39-1
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
+BuildRequires: systemd-units
 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -70,6 +148,14 @@ Group: System Environment/Libraries
 The %{name}-libs provides the path checker
 and prioritizer modules. It also contains the multipath shared library,
 libmultipath.
+
+%package sysvinit
+Summary: SysV init script for device-mapper-multipath
+Group: System Environment/Libraries
+
+%description sysvinit
+SysV style init script for device-mapper-multipth. It needs to be
+installed only if systemd is not used as the system init process.
 
 %package -n kpartx
 Summary: Partition device manager for device-mapper devices
@@ -107,6 +193,83 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch1022 -p1
 %patch1023 -p1
 %patch1024 -p1
+%patch1025 -p1
+%patch1026 -p1
+%patch1027 -p1
+%patch1028 -p1
+%patch1029 -p1
+%patch1030 -p1
+%patch1031 -p1
+%patch1032 -p1
+%patch1033 -p1
+%patch1034 -p1
+%patch1035 -p1
+%patch1036 -p1
+%patch1037 -p1
+%patch1038 -p1
+%patch1039 -p1
+%patch1040 -p1
+%patch1041 -p1
+%patch1042 -p1
+%patch1043 -p1
+%patch1044 -p1
+%patch1045 -p1
+%patch1046 -p1
+%patch1047 -p1
+%patch1048 -p1
+%patch1049 -p1
+%patch1050 -p1
+%patch1051 -p1
+%patch1052 -p1
+%patch1053 -p1
+%patch1054 -p1
+%patch1055 -p1
+%patch1056 -p1
+%patch1057 -p1
+%patch1058 -p1
+%patch1059 -p1
+%patch1060 -p1
+%patch1061 -p1
+%patch1062 -p1
+%patch1063 -p1
+%patch1064 -p1
+%patch1065 -p1
+%patch1066 -p1
+%patch1067 -p1
+%patch1068 -p1
+%patch1069 -p1
+%patch1070 -p1
+%patch1071 -p1
+%patch1072 -p1
+%patch1073 -p1
+%patch1074 -p1
+%patch1075 -p1
+%patch1076 -p1
+%patch1077 -p1
+%patch1078 -p1
+%patch1079 -p1
+%patch1080 -p1
+%patch1081 -p1
+%patch1083 -p1
+%patch1084 -p1
+%patch1085 -p1
+%patch1086 -p1
+%patch1087 -p1
+%patch1088 -p1
+%patch1089 -p1
+%patch1090 -p1
+%patch1091 -p1
+%patch1092 -p1
+%patch1093 -p1
+%patch1094 -p1
+%patch1095 -p1
+%patch1096 -p1
+%patch1097 -p1
+%patch1098 -p1
+%patch1099 -p1
+%patch1100 -p1
+%patch1101 -p1
+%patch1102 -p1
 cp %{SOURCE1} .
 
 %build
@@ -123,7 +286,8 @@ make install \
 	bindir=%{_sbindir} \
 	syslibdir=%{_libdir} \
 	libdir=%{_libmpathdir} \
-	rcdir=%{_initrddir}
+	rcdir=%{_initrddir} \
+	unitdir=%{_unitdir}
 
 # tree fix up
 # install -m 0644 %{SOURCE1} %{buildroot}/etc/multipath.conf
@@ -133,23 +297,30 @@ install -d %{buildroot}/etc/multipath
 rm -rf %{buildroot}
 
 %post
-/sbin/chkconfig --add multipathd
-if [ "$1" -gt "1" -a ! -e /etc/multipath/bindings -a \
-    -f /var/lib/multipath/bindings ]; then
-	mv /var/lib/multipath/bindings /etc/multipath/bindings
-	ln -s /etc/multipath/bindings /var/lib/multipath/bindings
+if [ $1 -eq 1 ] ; then
+	/bin/systemctl enable multipathd.service >/dev/null 2>&1 || :
 fi
 
 %preun
-if [ "$1" = 0 ]; then
-	/sbin/service multipathd stop /dev/null 2>&1
-	/sbin/chkconfig --del multipathd
+if [ $1 -eq 0 ] ; then
+	/bin/systemctl --no-reload disable multipathd.service > /dev/null 2>&1 || :
+	bin/systemctl stop multipathd.service > /dev/null 2>&1 || :
 fi
 
 %postun
-if [ "$1" -ge "1" ]; then
-	/sbin/service multipathd condrestart >/dev/null 2>&1 || :
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+	/bin/systemctl try-restart multipathd.service >/dev/null 2>&1 || :
 fi
+
+%triggerun --  %{name} < 0.4.9-16
+%{_bindir}/systemd-sysv-convert --save multipathd >/dev/null 2>&1 ||: 
+bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
+/sbin/chkconfig --del multipathd >/dev/null 2>&1 || :
+/bin/systemctl try-restart multipathd.service >/dev/null 2>&1 || :
+
+%triggerpostun -n %{name}-sysvinit -- %{name} < 0.4.9-16
+/sbin/chkconfig --add mdmonitor >/dev/null 2>&1 || :
 
 %files
 %defattr(-,root,root,-)
@@ -157,10 +328,11 @@ fi
 %{_sbindir}/multipathd
 %{_sbindir}/cciss_id
 %{_sbindir}/mpathconf
-%{_initrddir}/multipathd
+%{_unitdir}/multipathd.service
 %{_mandir}/man5/multipath.conf.5.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
+%{_mandir}/man8/mpathconf.8.gz
 %config /lib/udev/rules.d/40-multipath.rules
 %doc AUTHOR COPYING FAQ
 %doc multipath.conf multipath.conf.annotated
@@ -178,12 +350,28 @@ fi
 
 %postun libs -p /sbin/ldconfig
 
+%files sysvinit
+%{_initrddir}/multipathd
+
 %files -n kpartx
 %defattr(-,root,root,-)
 /sbin/kpartx
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Jul 15 2011 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-16
+- Modify 0012-RH-udev-sync-support.patch
+- Modify 0021-RHBZ-548874-add-find-multipaths.patch
+- Modify 0022-RHBZ-557845-RHEL5-style-partitions.patch
+- Add 0025-RHBZ-508827-update-multipathd-manpage.patch through
+      0101-RHBZ-631009-disable-udev-disk-rules-on-reload.patch
+  * sync with current state of RHEL6. Next release should include a updated
+    source tarball with most of these fixes rolled in.
+- Add 0102-RHBZ-690828-systemd-unit-file.patch
+  * Add Jóhann B. Guðmundsson's unit file for systemd.
+  * Add sub-package sysvinit for SysV init script.
+- Resolves: bz #690828
+
 * Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.9-15
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 

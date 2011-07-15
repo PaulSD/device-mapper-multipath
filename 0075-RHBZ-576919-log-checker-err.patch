@@ -1,0 +1,139 @@
+---
+ libmultipath/config.h      |    1 +
+ libmultipath/dict.c        |   27 +++++++++++++++++++++++++++
+ libmultipath/structs.h     |    5 +++++
+ multipath/multipath.conf.5 |    9 +++++++++
+ multipathd/main.c          |   13 ++++++++++---
+ 5 files changed, 52 insertions(+), 3 deletions(-)
+
+Index: multipath-tools/libmultipath/config.h
+===================================================================
+--- multipath-tools.orig/libmultipath/config.h
++++ multipath-tools/libmultipath/config.h
+@@ -88,6 +88,7 @@ struct config {
+ 	unsigned int dev_loss;
+ 	int find_multipaths;
+ 	int allow_queueing;
++	int log_checker_err;
+ 	uid_t uid;
+ 	gid_t gid;
+ 	mode_t mode;
+Index: multipath-tools/libmultipath/dict.c
+===================================================================
+--- multipath-tools.orig/libmultipath/dict.c
++++ multipath-tools/libmultipath/dict.c
+@@ -490,6 +490,25 @@ def_find_multipaths_handler(vector strve
+ }
+ 
+ static int
++def_log_checker_err_handler(vector strvec)
++{
++	char * buff;
++
++	buff = set_value(strvec);
++
++	if (!buff)
++		return 1;
++
++	if (strlen(buff) == 4 && !strcmp(buff, "once"))
++		conf->log_checker_err = LOG_CHKR_ERR_ONCE;
++	else if (strlen(buff) == 6 && !strcmp(buff, "always"))
++		conf->log_checker_err = LOG_CHKR_ERR_ALWAYS;
++
++	free(buff);
++	return 0;
++}
++
++static int
+ names_handler(vector strvec)
+ {
+ 	char * buff;
+@@ -2117,6 +2136,13 @@ snprint_def_find_multipaths (char * buff
+ 	return snprintf(buff, len, "yes");
+ }
+ 
++static int
++snprint_def_log_checker_err (char * buff, int len, void * data)
++{
++	if (conf->log_checker_err == LOG_CHKR_ERR_ONCE)
++		return snprintf(buff, len, "once");
++	return snprintf(buff, len, "always");
++}
+ 
+ static int
+ snprint_def_user_friendly_names (char * buff, int len, void * data)
+@@ -2184,6 +2210,7 @@ init_keywords(void)
+ 	install_keyword("fast_io_fail_tmo", &def_fast_io_fail_handler, &snprint_def_fast_io_fail);
+ 	install_keyword("dev_loss_tmo", &def_dev_loss_handler, &snprint_def_dev_loss);
+ 	install_keyword("find_multipaths", &def_find_multipaths_handler, &snprint_def_find_multipaths);
++	install_keyword("log_checker_err", &def_log_checker_err_handler, &snprint_def_log_checker_err);
+ 	__deprecated install_keyword("default_selector", &def_selector_handler, NULL);
+ 	__deprecated install_keyword("default_path_grouping_policy", &def_pgpolicy_handler, NULL);
+ 	__deprecated install_keyword("default_getuid_callout", &def_getuid_callout_handler, NULL);
+Index: multipath-tools/libmultipath/structs.h
+===================================================================
+--- multipath-tools.orig/libmultipath/structs.h
++++ multipath-tools/libmultipath/structs.h
+@@ -88,6 +88,11 @@ enum flush_states {
+ 	FLUSH_IN_PROGRESS,
+ };
+ 
++enum log_checker_err_states {
++	LOG_CHKR_ERR_ALWAYS,
++	LOG_CHKR_ERR_ONCE,
++};
++
+ struct scsi_idlun {
+ 	int dev_id;
+ 	int host_unique_id;
+Index: multipath-tools/multipathd/main.c
+===================================================================
+--- multipath-tools.orig/multipathd/main.c
++++ multipath-tools/multipathd/main.c
+@@ -63,7 +63,10 @@
+ #define CMDSIZE 160
+ 
+ #define LOG_MSG(a,b) \
+-	if (strlen(b)) condlog(a, "%s: %s - %s", pp->mpp->alias, pp->dev, b);
++do { \
++	if (strlen(b)) \
++	condlog(a, "%s: %s - %s", pp->mpp->alias, pp->dev, b); \
++} while(0)
+ 
+ pthread_cond_t exit_cond = PTHREAD_COND_INITIALIZER;
+ pthread_mutex_t exit_mutex = PTHREAD_MUTEX_INITIALIZER;
+@@ -1090,8 +1093,12 @@ check_path (struct vectors * vecs, struc
+ 		condlog(4, "%s: delay next check %is",
+ 				pp->dev_t, pp->tick);
+ 	}
+-	else if (newstate == PATH_DOWN)
+-		LOG_MSG(2, checker_message(&pp->checker));
++	else if (newstate == PATH_DOWN) {
++		if (conf->log_checker_err == LOG_CHKR_ERR_ONCE)
++			LOG_MSG(3, checker_message(&pp->checker));
++		else
++			LOG_MSG(2, checker_message(&pp->checker));
++	}
+ 
+ 	pp->state = newstate;
+ 
+Index: multipath-tools/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools.orig/multipath/multipath.conf.5
++++ multipath-tools/multipath/multipath.conf.5
+@@ -333,6 +333,15 @@ numeric or symbolic uid; default determi
+ .B gid
+ The group id to use for the mutipath device nodes. You may use either the
+ numeric or symbolic gid; default determined by the process.
++.TP
++.B log_checker_err
++If set to
++.I once
++, multipathd logs the first path checker error at logging level 2. Any later
++errors are logged at level 3 until the device is restored. If set to
++.I always
++, multipathd always logs the path checker error at logging level 2. Default is
++.I always
+ .
+ .SH "blacklist section"
+ The

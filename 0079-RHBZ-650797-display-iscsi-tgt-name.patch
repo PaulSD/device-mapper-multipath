@@ -1,0 +1,55 @@
+---
+ libmultipath/discovery.c |   19 ++++++++++++++++++-
+ libmultipath/structs.h   |    2 +-
+ 2 files changed, 19 insertions(+), 2 deletions(-)
+
+Index: multipath-tools/libmultipath/discovery.c
+===================================================================
+--- multipath-tools.orig/libmultipath/discovery.c
++++ multipath-tools/libmultipath/discovery.c
+@@ -212,6 +212,7 @@ sysfs_get_fc_nodename (struct sysfs_devi
+ 		       unsigned int host, unsigned int channel,
+ 		       unsigned int target)
+ {
++	unsigned int checkhost, session;
+ 	char attr_path[SYSFS_PATH_SIZE], *attr;
+ 
+ 	if (safe_sprintf(attr_path,
+@@ -223,7 +224,23 @@ sysfs_get_fc_nodename (struct sysfs_devi
+ 
+ 	attr = sysfs_attr_get_value(attr_path, "node_name");
+ 	if (attr) {
+-		strlcpy(node, attr, strlen(attr));
++		strncpy(node, attr, strlen(attr));
++		return 0;
++	}
++
++	if (sscanf(dev->devpath, "/devices/platform/host%u/session%u/",
++	    &checkhost, &session) != 2)
++		return 1;
++	if (checkhost != host)
++		return 1;
++	if (safe_sprintf(attr_path, "/devices/platform/host%u/session%u/iscsi_session/session%u", host, session, session)) {
++		condlog(0, "attr_path too small");
++		return 1;
++	}
++
++	attr = sysfs_attr_get_value(attr_path, "targetname");
++	if (attr) {
++		strncpy(node, attr, strlen(attr));
+ 		return 0;
+ 	}
+ 
+Index: multipath-tools/libmultipath/structs.h
+===================================================================
+--- multipath-tools.orig/libmultipath/structs.h
++++ multipath-tools/libmultipath/structs.h
+@@ -5,7 +5,7 @@
+ 
+ #define WWID_SIZE		128
+ #define SERIAL_SIZE		64
+-#define NODE_NAME_SIZE		19
++#define NODE_NAME_SIZE		224
+ #define PATH_STR_SIZE  		16
+ #define PARAMS_SIZE		1024
+ #define FILE_NAME_SIZE		256

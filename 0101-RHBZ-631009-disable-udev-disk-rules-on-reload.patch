@@ -1,0 +1,173 @@
+---
+ kpartx/devmapper.c       |   14 +++++++++++---
+ kpartx/devmapper.h       |    2 +-
+ kpartx/kpartx.c          |   15 +++++++++++----
+ libmultipath/config.h    |    1 +
+ libmultipath/devmapper.c |   12 ++++++++++--
+ multipath/main.c         |    5 ++++-
+ 6 files changed, 38 insertions(+), 11 deletions(-)
+
+Index: multipath-tools/kpartx/devmapper.c
+===================================================================
+--- multipath-tools.orig/kpartx/devmapper.c
++++ multipath-tools/kpartx/devmapper.c
+@@ -52,7 +52,8 @@ dm_prereq (char * str, int x, int y, int
+ }
+ 
+ extern int
+-dm_simplecmd (int task, const char *name, int no_flush, uint32_t *cookie) {
++dm_simplecmd (int task, const char *name, int no_flush, uint32_t *cookie,
++	      int force_udev_rules) {
+ 	int r = 0;
+ 	int udev_wait_flag = (task == DM_DEVICE_RESUME ||
+ 			      task == DM_DEVICE_REMOVE);
+@@ -70,8 +71,15 @@ dm_simplecmd (int task, const char *name
+ 	if (no_flush)
+ 		dm_task_no_flush(dmt);
+ 
+-	if (udev_wait_flag && !dm_task_set_cookie(dmt, cookie, 0))
+-		goto out;
++	if (udev_wait_flag) {
++		if (!dm_task_set_cookie(dmt, cookie, (force_udev_rules)? 0 :
++					DM_UDEV_DISABLE_DISK_RULES_FLAG))
++			goto out;
++	}
++	else if (task == DM_DEVICE_RESUME && dm_cookie_supported() &&
++		 !force_udev_rules)
++		dm_task_set_event_nr(dmt, DM_UDEV_DISABLE_DISK_RULES_FLAG <<
++					  DM_UDEV_FLAGS_SHIFT);
+ 	r = dm_task_run(dmt);
+ 
+ 	out:
+Index: multipath-tools/kpartx/devmapper.h
+===================================================================
+--- multipath-tools.orig/kpartx/devmapper.h
++++ multipath-tools/kpartx/devmapper.h
+@@ -3,7 +3,7 @@
+ #define MKDEV(ma,mi)    ((mi & 0xff) | (ma << 8) | ((mi & ~0xff) << 12))
+ 
+ int dm_prereq (char *, int, int, int);
+-int dm_simplecmd (int, const char *, int, uint32_t *);
++int dm_simplecmd (int, const char *, int, uint32_t *, int);
+ int dm_addmap (int, const char *, const char *, const char *, uint64_t,
+ 	       const char *, int, mode_t, uid_t, gid_t, uint32_t *);
+ int dm_map_present (char *);
+Index: multipath-tools/kpartx/kpartx.c
+===================================================================
+--- multipath-tools.orig/kpartx/kpartx.c
++++ multipath-tools/kpartx/kpartx.c
+@@ -82,7 +82,7 @@ initpts(void)
+ 	addpts("sun", read_sun_pt);
+ }
+ 
+-static char short_opts[] = "ladgvp:t:s";
++static char short_opts[] = "ladgvp:t:su";
+ 
+ /* Used in gpt.c */
+ int force_gpt=0;
+@@ -184,7 +184,8 @@ get_hotplug_device(void)
+ }
+ 
+ int
+-main(int argc, char **argv){
++main(int argc, char **argv)
++{
+ 	int fd, i, j, k, n, op, off, arg;
+ 	struct slice all;
+ 	struct pt *ptp;
+@@ -202,6 +203,7 @@ main(int argc, char **argv){
+ 	int sync = 0;
+ 	struct stat buf;
+ 	uint32_t cookie = 0;
++	int force_udev_rules = 0;
+ 
+ 	initpts();
+ 	init_crc32();
+@@ -257,6 +259,9 @@ main(int argc, char **argv){
+ 		case 's':
+ 			sync = 1;
+ 			break;
++		case 'u':
++			force_udev_rules = 1;
++			break;
+ 		default:
+ 			usage();
+ 			exit(1);
+@@ -404,7 +409,8 @@ main(int argc, char **argv){
+ 					continue;
+ 
+ 				if (!dm_simplecmd(DM_DEVICE_REMOVE, partname,
+-						  0, &cookie)) {
++						  0, &cookie,
++						  force_udev_rules)) {
+ 					r++;
+ 					continue;
+ 				}
+@@ -454,7 +460,8 @@ main(int argc, char **argv){
+ 				}
+ 				if (op == DM_DEVICE_RELOAD &&
+ 				    !dm_simplecmd(DM_DEVICE_RESUME, partname,
+-						  1, &cookie)) {
++						  1, &cookie,
++						  force_udev_rules)) {
+ 					fprintf(stderr, "resume failed on %s\n",
+ 						partname);
+ 					r++;
+Index: multipath-tools/libmultipath/config.h
+===================================================================
+--- multipath-tools.orig/libmultipath/config.h
++++ multipath-tools/libmultipath/config.h
+@@ -90,6 +90,7 @@ struct config {
+ 	int find_multipaths;
+ 	int allow_queueing;
+ 	int log_checker_err;
++	int force_udev_rules;
+ 	uid_t uid;
+ 	gid_t gid;
+ 	mode_t mode;
+Index: multipath-tools/libmultipath/devmapper.c
+===================================================================
+--- multipath-tools.orig/libmultipath/devmapper.c
++++ multipath-tools/libmultipath/devmapper.c
+@@ -168,8 +168,16 @@ dm_simplecmd (int task, const char *name
+ 		dm_task_no_flush(dmt);		/* for DM_DEVICE_SUSPEND/RESUME */
+ #endif
+ 
+-	if (udev_wait_flag && !dm_task_set_cookie(dmt, &conf->cookie, 0))
+-		goto out;
++	if (udev_wait_flag) {
++		if (!dm_task_set_cookie(dmt, &conf->cookie,
++					(conf->force_udev_rules)? 0 :
++					DM_UDEV_DISABLE_DISK_RULES_FLAG))
++			goto out;
++	}
++	else if (task == DM_DEVICE_RESUME && dm_cookie_supported() &&
++		 !conf->force_udev_rules)
++		dm_task_set_event_nr(dmt, DM_UDEV_DISABLE_DISK_RULES_FLAG <<
++					  DM_UDEV_FLAGS_SHIFT);
+ 	r = dm_task_run (dmt);
+ 
+ 	out:
+Index: multipath-tools/multipath/main.c
+===================================================================
+--- multipath-tools.orig/multipath/main.c
++++ multipath-tools/multipath/main.c
+@@ -383,7 +383,7 @@ main (int argc, char *argv[])
+ 		condlog(0, "multipath tools need sysfs mounted");
+ 		exit(1);
+ 	}
+-	while ((arg = getopt(argc, argv, ":dchl::FfM:v:p:b:Brq")) != EOF ) {
++	while ((arg = getopt(argc, argv, ":dchl::FfM:v:p:b:Brqu")) != EOF ) {
+ 		switch(arg) {
+ 		case 1: printf("optarg : %s\n",optarg);
+ 			break;
+@@ -439,6 +439,9 @@ main (int argc, char *argv[])
+ 		case 'r':
+ 			conf->force_reload = 1;
+ 			break;
++		case 'u':
++			conf->force_udev_rules = 1;
++			break;
+ 		case 'h':
+ 			usage(argv[0]);
+ 		case ':':

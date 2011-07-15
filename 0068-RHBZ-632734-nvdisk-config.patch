@@ -1,0 +1,89 @@
+---
+ libmultipath/hwtable.c  |   34 ++++++++++++++++++++++++++++++++++
+ multipath.conf.defaults |   28 ++++++++++++++++++++++++++++
+ 2 files changed, 62 insertions(+)
+
+Index: multipath-tools/libmultipath/hwtable.c
+===================================================================
+--- multipath-tools.orig/libmultipath/hwtable.c
++++ multipath-tools/libmultipath/hwtable.c
+@@ -717,6 +717,40 @@ static struct hwentry default_hw[] = {
+ 		.prio_name     = DEFAULT_PRIO,
+ 	},
+ 	{
++		/* IBM 3303      NVDISK */
++		.vendor        = "IBM",
++		.product       = "3303      NVDISK",
++		.getuid        = DEFAULT_GETUID,
++		.features      = DEFAULT_FEATURES,
++		.hwhandler     = DEFAULT_HWHANDLER,
++		.selector      = DEFAULT_SELECTOR,
++		.pgpolicy      = FAILOVER,
++		.pgfailback    = -FAILBACK_IMMEDIATE,
++		.rr_weight     = RR_WEIGHT_NONE,
++		.no_path_retry = (300 / DEFAULT_CHECKINT),
++		.minio         = DEFAULT_MINIO,
++		.checker_name  = TUR,
++		.prio_name     = DEFAULT_PRIO,
++		.prio_args     = NULL,
++	},
++	{
++		/* AIX NVDISK */
++		.vendor        = "AIX",
++		.product       = "NVDISK",
++		.getuid        = DEFAULT_GETUID,
++		.features      = DEFAULT_FEATURES,
++		.hwhandler     = "1 alua",
++		.selector      = DEFAULT_SELECTOR,
++		.pgpolicy      = GROUP_BY_PRIO,
++		.pgfailback    = -FAILBACK_IMMEDIATE,
++		.rr_weight     = RR_WEIGHT_NONE,
++		.no_path_retry = (300 / DEFAULT_CHECKINT),
++		.minio         = DEFAULT_MINIO,
++		.checker_name  = TUR,
++		.prio_name     = PRIO_ALUA,
++		.prio_args     = NULL,
++	},
++	{
+ 		/* DELL MD3000 */
+ 		.vendor        = "DELL",
+ 		.product       = "MD3000",
+Index: multipath-tools/multipath.conf.defaults
+===================================================================
+--- multipath-tools.orig/multipath.conf.defaults
++++ multipath-tools/multipath.conf.defaults
+@@ -474,6 +474,34 @@
+ #		path_checker		tur
+ #		prio			alua
+ #	}
++#       device {
++#               vendor                  "IBM"
++#               product                 "3303      NVDISK"
++#               getuid_callout          "/lib/udev/scsi_id --whitelisted --device=/dev/%n"
++#               features                "0"
++#               hardware_handler        "0"
++#               path_grouping_policy    failover
++#               failback                immediate
++#               no_path_retry           60
++#               rr_weight               uniform
++#               rr_min_io               1000
++#               path_checker            tur
++#       }
++#       device {
++#               vendor                  "AIX"
++#               product                 "NVDISK"
++#               getuid_callout          "/lib/udev/scsi_id --whitelisted --device=/dev/%n"
++#               features                "0"
++#               hardware_handler        "1 alua"
++#               path_grouping_policy    group_by_prio
++#               failback                immediate
++#               no_path_retry           60
++#               rr_weight               uniform
++#               rr_min_io               1000
++#               path_checker            tur
++#               prio                    alua
++#               prio_args               ""
++#       }
+ #	device {
+ #		vendor			"SGI"
+ #		product			"TP9[13]00"

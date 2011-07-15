@@ -4,18 +4,18 @@
  libmultipath/alias.h     |    1 
  libmultipath/config.c    |    5 -
  libmultipath/config.h    |    1 
- libmultipath/configure.c |   23 ++++
+ libmultipath/configure.c |   22 ++++
  libmultipath/defaults.h  |    2 
  libmultipath/dict.c      |   34 ++++++
  libmultipath/file.c      |  178 +++++++++++++++++++++++++++++++++++
  libmultipath/file.h      |   11 ++
- libmultipath/finder.c    |  150 ++++++++++++++++++++++++++++++
+ libmultipath/finder.c    |  165 +++++++++++++++++++++++++++++++++
  libmultipath/finder.h    |   18 +++
  multipath/Makefile       |    2 
  multipath/main.c         |    2 
  multipath/mpathconf      |  234 +++++++++++++++++++++++++++++++++++++++++++++++
- multipathd/main.c        |   27 +++--
- 16 files changed, 679 insertions(+), 163 deletions(-)
+ multipathd/main.c        |   24 +++-
+ 16 files changed, 690 insertions(+), 163 deletions(-)
 
 Index: multipath-tools/libmultipath/alias.c
 ===================================================================
@@ -240,7 +240,7 @@ Index: multipath-tools/libmultipath/config.c
  		condlog(0,
  "/usr/share/doc/device-mapper-multipath-%d.%d.%d/multipath.conf",
  			MULTIPATH_VERSION(VERSION_CODE));
-+		condlog(0, 
++		condlog(0,
 +"You can run /sbin/mpathconf to create or modify /etc/multipath.conf");
  		conf->blist_devnode = vector_alloc();
  		if (!conf->blist_devnode) {
@@ -269,7 +269,16 @@ Index: multipath-tools/libmultipath/configure.c
  
  extern int
  setup_map (struct multipath * mpp)
-@@ -462,6 +463,10 @@ coalesce_paths (struct vectors * vecs, v
+@@ -403,6 +404,8 @@ domap (struct multipath * mpp)
+ 		 * DM_DEVICE_CREATE, DM_DEVICE_RENAME, or DM_DEVICE_RELOAD
+ 		 * succeeded
+ 		 */
++		if (mpp->action == ACT_CREATE)
++			remember_wwid(mpp->wwid);
+ 		if (!conf->daemon) {
+ 			/* multipath client mode */
+ 			dm_switchgroup(mpp->alias, mpp->bestpg);
+@@ -462,6 +465,10 @@ coalesce_paths (struct vectors * vecs, v
  
  	memset(empty_buff, 0, WWID_SIZE);
  
@@ -280,7 +289,7 @@ Index: multipath-tools/libmultipath/configure.c
  	if (force_reload) {
  		vector_foreach_slot (pathvec, pp1, k) {
  			pp1->mpp = NULL;
-@@ -472,21 +477,35 @@ coalesce_paths (struct vectors * vecs, v
+@@ -472,21 +479,32 @@ coalesce_paths (struct vectors * vecs, v
  
  		/* 1. if path has no unique id or wwid blacklisted */
  		if (memcmp(empty_buff, pp1->wwid, WWID_SIZE) == 0 ||
@@ -306,13 +315,10 @@ Index: multipath-tools/libmultipath/configure.c
  			continue;
  
 +		/* If find_multipaths was selected check if the path is valid */
-+		if (conf->find_multipaths){
-+			if (refwwid || should_multipath(pp1, pathvec))
-+				remember_wwid(pp1->wwid);
-+			else {
-+				orphan_path(pp1);
-+				continue;
-+			}
++		if (conf->find_multipaths && !refwwid &&
++		    !should_multipath(pp1, pathvec)){
++			orphan_path(pp1);
++			continue;
 +		}
 +
  		/*
@@ -599,7 +605,7 @@ Index: multipath-tools/libmultipath/finder.c
 ===================================================================
 --- /dev/null
 +++ multipath-tools/libmultipath/finder.c
-@@ -0,0 +1,150 @@
+@@ -0,0 +1,165 @@
 +#include <stdlib.h>
 +#include <errno.h>
 +#include <unistd.h>
@@ -622,18 +628,33 @@ Index: multipath-tools/libmultipath/finder.c
 +
 +static int
 +lookup_wwid(FILE *f, char *wwid) {
++	int c;
 +	char buf[LINE_MAX];
++	int count;
 +
-+	while (fgets(buf, LINE_MAX, f)) {
-+		char *c;
-+
-+		c = strpbrk(buf, "#\n\r");
-+		if (c)
-+			*c = '\0';
-+		if (*buf == '\0')
-+			continue;
-+		if (strncmp(wwid, buf, WWID_SIZE) == 0)
++	while ((c = fgetc(f)) != EOF){
++		if (c != '/') {
++			if (fgets(buf, LINE_MAX, f) == NULL)
++				return 0;
++			else
++				continue;
++		}
++		count = 0;
++		while ((c = fgetc(f)) != '/') {
++			if (c == EOF)
++				return 0;
++			if (count >= WWID_SIZE - 1)
++				goto next;
++			if (wwid[count] == '\0')
++				goto next;
++			if (c != wwid[count++])
++				goto next;
++		}
++		if (wwid[count] == '\0')
 +			return 1;
++next:
++		if (fgets(buf, LINE_MAX, f) == NULL)
++			return 0;
 +	}
 +	return 0;
 +}
@@ -642,10 +663,10 @@ Index: multipath-tools/libmultipath/finder.c
 +write_out_wwid(int fd, char *wwid) {
 +	int ret;
 +	off_t offset;
-+	char buf[WWID_SIZE + 1];
++	char buf[WWID_SIZE + 3];
 +
-+	ret = snprintf(buf, WWID_SIZE + 1, "%s\n", wwid);
-+	if (ret > WWID_SIZE || ret < 0){
++	ret = snprintf(buf, WWID_SIZE + 3, "/%s/\n", wwid);
++	if (ret >= (WWID_SIZE + 3) || ret < 0){
 +		condlog(0, "can't format wwid for writing (%d) : %s",
 +			ret, strerror(errno));
 +		return -1;
@@ -807,7 +828,7 @@ Index: multipath-tools/multipathd/main.c
  	}
  	if (filter_path(conf, pp) > 0){
  		int i = find_slot(vecs->pathvec, (void *)pp);
-@@ -412,18 +413,26 @@ rescan:
+@@ -412,18 +413,23 @@ rescan:
  		condlog(4,"%s: adopting all paths for path %s",
  			mpp->alias, pp->dev);
  		if (adopt_paths(vecs->pathvec, mpp))
@@ -819,13 +840,10 @@ Index: multipath-tools/multipathd/main.c
  		mpp->action = ACT_RELOAD;
  	}
  	else {
-+		if (conf->find_multipaths) {
-+			if (should_multipath(pp, vecs->pathvec))
-+				remember_wwid(pp->wwid);
-+			else {
-+				orphan_path(pp);
-+				return 0;
-+			}
++		if (conf->find_multipaths &&
++		    !should_multipath(pp, vecs->pathvec)) {
++			orphan_path(pp);
++			return 0;
 +		}
  		condlog(4,"%s: creating new map", pp->dev);
  		if ((mpp = add_map_with_path(vecs, pp, 1)))
@@ -836,7 +854,7 @@ Index: multipath-tools/multipathd/main.c
  	}
  
  	/*
-@@ -432,7 +441,7 @@ rescan:
+@@ -432,7 +438,7 @@ rescan:
  	if (setup_map(mpp)) {
  		condlog(0, "%s: failed to setup map for addition of new "
  			"path %s", mpp->alias, devname);
@@ -845,7 +863,7 @@ Index: multipath-tools/multipathd/main.c
  	}
  	/*
  	 * reload the map for the multipath mapped device
-@@ -450,7 +459,7 @@ rescan:
+@@ -450,7 +456,7 @@ rescan:
  			goto rescan;
  		}
  		else
@@ -854,7 +872,7 @@ Index: multipath-tools/multipathd/main.c
  	}
  	dm_lib_release();
  
-@@ -458,19 +467,21 @@ rescan:
+@@ -458,19 +464,21 @@ rescan:
  	 * update our state from kernel regardless of create or reload
  	 */
  	if (setup_multipath(vecs, mpp))

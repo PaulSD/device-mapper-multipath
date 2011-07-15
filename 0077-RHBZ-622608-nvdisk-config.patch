@@ -1,0 +1,49 @@
+---
+ libmultipath/hwtable.c |   34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+Index: multipath-tools/libmultipath/hwtable.c
+===================================================================
+--- multipath-tools.orig/libmultipath/hwtable.c
++++ multipath-tools/libmultipath/hwtable.c
+@@ -766,6 +766,40 @@ static struct hwentry default_hw[] = {
+ 		.prio_args     = NULL,
+ 	},
+ 	{
++		/* IBM 3303      NVDISK */
++		.vendor        = "IBM",
++		.product       = "3303      NVDISK",
++		.getuid        = DEFAULT_GETUID,
++		.features      = DEFAULT_FEATURES,
++		.hwhandler     = DEFAULT_HWHANDLER,
++		.selector      = DEFAULT_SELECTOR,
++		.pgpolicy      = FAILOVER,
++		.pgfailback    = -FAILBACK_IMMEDIATE,
++		.rr_weight     = RR_WEIGHT_NONE,
++		.no_path_retry = (300 / DEFAULT_CHECKINT),
++		.minio         = DEFAULT_MINIO,
++		.checker_name  = TUR,
++		.prio_name     = DEFAULT_PRIO,
++		.prio_args     = NULL,
++	},
++	{
++		/* AIX NVDISK */
++		.vendor        = "AIX",
++		.product       = "NVDISK",
++		.getuid        = DEFAULT_GETUID,
++		.features      = DEFAULT_FEATURES,
++		.hwhandler     = "1 alua",
++		.selector      = DEFAULT_SELECTOR,
++		.pgpolicy      = GROUP_BY_PRIO,
++		.pgfailback    = -FAILBACK_IMMEDIATE,
++		.rr_weight     = RR_WEIGHT_NONE,
++		.no_path_retry = (300 / DEFAULT_CHECKINT),
++		.minio         = DEFAULT_MINIO,
++		.checker_name  = TUR,
++		.prio_name     = PRIO_ALUA,
++		.prio_args     = NULL,
++	},
++	{
+ 		/* DELL MD3000 */
+ 		.vendor        = "DELL",
+ 		.product       = "MD3000",

@@ -1,0 +1,35 @@
+---
+ multipath/mpathconf |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+Index: multipath-tools/multipath/mpathconf
+===================================================================
+--- multipath-tools.orig/multipath/mpathconf
++++ multipath-tools/multipath/mpathconf
+@@ -17,6 +17,8 @@
+ # This program was largely ripped off from lvmconf
+ #
+ 
++unset ENABLE FIND FRIENDLY MODULE MULTIPATHD CHKCONFIG HAVE_DISABLE HAVE_FIND HAVE_BLACKLIST HAVE_DEFAULTS HAVE_FRIENDLY HAVE_MULTIPATHD HAVE_CHKCONFIG HAVE_MODULE SHOW_STATUS CHANGED_CONFIG
++
+ DEFAULT_CONFIGFILE="/usr/share/doc/device-mapper-multipath-0.4.9/multipath.conf"
+ CONFIGFILE="/etc/multipath.conf"
+ MULTIPATHDIR="/etc/multipath"
+@@ -118,7 +120,7 @@ function validate_args
+ 		exit 1
+ 	fi
+ 	if [ -z "$ENABLE" -a -z "$FIND" -a -z "$FRIENDLY" ]; then
+-		DISPLAY=1
++		SHOW_STATUS=1
+ 	fi
+ 	if [ -n "$MODULE" ] && [ "$MODULE" != "y" -a "$MODULE" != "n" ]; then
+ 		echo "--with_module must be either 'y' or 'n'"
+@@ -211,7 +213,7 @@ if [ "$HAVE_DEFAULTS" = "1" ]; then
+ 	fi
+ fi
+ 
+-if [ -n "$DISPLAY" ]; then
++if [ -n "$SHOW_STATUS" ]; then
+ 	if [ -z "$HAVE_DISABLE" -o "$HAVE_DISABLE" = 0 ]; then
+ 		echo "multipath is enabled"
+ 	else

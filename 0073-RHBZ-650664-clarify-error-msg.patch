@@ -1,0 +1,157 @@
+---
+ libmultipath/alias.c     |   14 ++++++++++----
+ libmultipath/callout.c   |    5 ++++-
+ libmultipath/discovery.c |    7 +++++--
+ libmultipath/file.c      |   14 ++++++++++----
+ libmultipath/finder.c    |    7 +++++--
+ libmultipath/sysfs.c     |   14 ++++++++++----
+ 6 files changed, 44 insertions(+), 17 deletions(-)
+
+Index: multipath-tools/libmultipath/callout.c
+===================================================================
+--- multipath-tools.orig/libmultipath/callout.c
++++ multipath-tools/libmultipath/callout.c
+@@ -65,7 +65,10 @@ int execute_program(char *path, char *va
+ 	retval = pipe(fds);
+ 
+ 	if (retval != 0) {
+-		condlog(0, "error creating pipe for callout: %s", strerror(errno));
++		if (errno == EMFILE)
++			condlog(0, "out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++		else
++			condlog(0, "error creating pipe for callout: %s", strerror(errno));
+ 		return -1;
+ 	}
+ 
+Index: multipath-tools/libmultipath/discovery.c
+===================================================================
+--- multipath-tools.orig/libmultipath/discovery.c
++++ multipath-tools/libmultipath/discovery.c
+@@ -945,8 +945,11 @@ pathinfo (struct path *pp, vector hwtabl
+ 		pp->fd = opennode(pp->dev, O_RDONLY);
+ 
+ 	if (pp->fd < 0) {
+-		condlog(4, "Couldn't open node for %s: %s",
+-			pp->dev, strerror(errno));
++		if (errno == EMFILE)
++			condlog(0, "out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++		else
++			condlog(4, "Couldn't open node for %s: %s",
++				pp->dev, strerror(errno));
+ 		goto blank;
+ 	}
+ 
+Index: multipath-tools/libmultipath/file.c
+===================================================================
+--- multipath-tools.orig/libmultipath/file.c
++++ multipath-tools/libmultipath/file.c
+@@ -140,8 +140,11 @@ open_file(char *file, int *can_write, ch
+ 			}
+ 		}
+ 		else {
+-			condlog(0, "Cannot open file [%s] : %s", file,
+-				strerror(errno));
++			if (errno == EMFILE)
++				condlog(0, "out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++			else
++				condlog(0, "Cannot open file [%s] : %s", file,
++					strerror(errno));
+ 			return -1;
+ 		}
+ 	}
+@@ -186,8 +189,11 @@ int pidfile_check(const char *file)
+ 	if (fd < 0) {
+ 		if (errno == ENOENT)
+ 			return 0;
+-		condlog(0, "Cannot open pidfile, %s : %s", file,
+-			strerror(errno));
++		if (errno == EMFILE)
++			condlog(0, "out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++		else
++			condlog(0, "Cannot open pidfile, %s : %s", file,
++				strerror(errno));
+ 		return -1;
+ 	}
+ 	lock.l_type = F_WRLCK;
+Index: multipath-tools/libmultipath/sysfs.c
+===================================================================
+--- multipath-tools.orig/libmultipath/sysfs.c
++++ multipath-tools/libmultipath/sysfs.c
+@@ -392,8 +392,11 @@ sysfs_attr_set_value(const char *devpath
+ 
+ 	fd = open(path_full, O_WRONLY);
+ 	if (fd < 0) {
+-		dbg("attribute '%s' can not be opened: %s",
+-		    path_full, strerror(errno));
++		if (errno == EMFILE)
++			dbg("out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++		else
++			dbg("attribute '%s' can not be opened: %s",
++			    path_full, strerror(errno));
+ 		goto out;
+ 	}
+ 	value_len = strlen(value) + 1;
+@@ -494,8 +497,11 @@ char *sysfs_attr_get_value(const char *d
+ 	/* read attribute value */
+ 	fd = open(path_full, O_RDONLY);
+ 	if (fd < 0) {
+-		dbg("attribute '%s' can not be opened: %s",
+-		    path_full, strerror(errno));
++		if (errno == EMFILE)
++			dbg("out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++		else
++			dbg("attribute '%s' can not be opened: %s",
++			    path_full, strerror(errno));
+ 		goto out;
+ 	}
+ 	size = read(fd, value, sizeof(value));
+Index: multipath-tools/libmultipath/alias.c
+===================================================================
+--- multipath-tools.orig/libmultipath/alias.c
++++ multipath-tools/libmultipath/alias.c
+@@ -224,8 +224,11 @@ get_user_friendly_alias(char *wwid, char
+ 
+ 	scan_fd = dup(fd);
+ 	if (scan_fd < 0) {
+-		condlog(0, "Cannot dup bindings file descriptor : %s",
+-			strerror(errno));
++		if (errno == EMFILE)
++			condlog(0, "out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++		else
++			condlog(0, "Cannot dup bindings file descriptor : %s",
++				strerror(errno));
+ 		close(fd);
+ 		return NULL;
+ 	}
+@@ -274,8 +277,11 @@ get_user_friendly_wwid(char *alias, char
+ 
+ 	scan_fd = dup(fd);
+ 	if (scan_fd < 0) {
+-		condlog(0, "Cannot dup bindings file descriptor : %s",
+-			strerror(errno));
++		if (errno == EMFILE)
++			condlog(0, "out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++		else
++			condlog(0, "Cannot dup bindings file descriptor : %s",
++				strerror(errno));
+ 		close(fd);
+ 		return NULL;
+ 	}
+Index: multipath-tools/libmultipath/finder.c
+===================================================================
+--- multipath-tools.orig/libmultipath/finder.c
++++ multipath-tools/libmultipath/finder.c
+@@ -89,8 +89,11 @@ check_wwids_file(char *wwid, int write_w
+ 
+ 	scan_fd = dup(fd);
+ 	if (scan_fd < 0) {
+-		condlog(0, "can't dup wwids file descriptor : %s",
+-			strerror(errno));
++		if (errno == EMFILE)
++			condlog(0, "out of file descriptors. set or increase max_fds in /etc/multipath.conf");
++		else
++			condlog(0, "can't dup wwids file descriptor : %s",
++				strerror(errno));
+ 		close(fd);
+ 		return -1;
+ 	}
