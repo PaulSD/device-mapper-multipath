@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -114,6 +114,7 @@ Patch1099: 0099-RHBZ-705854-warn-on-bad-dev-loss-tmo.patch
 Patch1100: 0100-RHBZ-710478-deprecate-uid-gid-mode.patch
 Patch1101: 0101-RHBZ-631009-disable-udev-disk-rules-on-reload.patch
 Patch1102: 0102-RHBZ-690828-systemd-unit-file.patch
+Patch1103: 0103-add-disable-sync-option.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -270,6 +271,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch1100 -p1
 %patch1101 -p1
 %patch1102 -p1
+%patch1103 -p1
 cp %{SOURCE1} .
 
 %build
@@ -359,6 +361,11 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Jul 19 2011 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-17
+- Add 0103-add-disable-sync-option.patch
+  * add a -n (nosync) option to multipath. This disables synchronous
+    file creation with udev. 
+
 * Fri Jul 15 2011 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-16
 - Modify 0012-RH-udev-sync-support.patch
 - Modify 0021-RHBZ-548874-add-find-multipaths.patch

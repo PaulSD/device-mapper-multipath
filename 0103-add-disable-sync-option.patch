@@ -1,0 +1,26 @@
+---
+ multipath/main.c |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+Index: multipath-tools/multipath/main.c
+===================================================================
+--- multipath-tools.orig/multipath/main.c
++++ multipath-tools/multipath/main.c
+@@ -100,6 +100,7 @@ usage (char * progname)
+ 		"  -d      dry run, do not create or update devmaps\n" \
+ 		"  -r      force devmap reload\n" \
+ 		"  -p      policy failover|multibus|group_by_serial|group_by_prio\n" \
++		"  -n      nosync. disable synchronous device creation with udev\n" \
+ 		"  -b fil  bindings file location\n" \
+ 		"  -p pol  force all maps to specified path grouping policy :\n" \
+ 		"          . failover            one path per priority group\n" \
+@@ -442,6 +443,9 @@ main (int argc, char *argv[])
+ 		case 'u':
+ 			conf->force_udev_rules = 1;
+ 			break;
++		case 'n':
++			dm_udev_set_sync_support(0);
++			break;
+ 		case 'h':
+ 			usage(argv[0]);
+ 		case ':':
