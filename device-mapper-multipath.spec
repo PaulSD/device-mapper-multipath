@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 17%{?dist}
+Release: 18%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -361,6 +361,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Aug 15 2011 Kalev Lember <kalevlember@gmail.com> - 0.4.9-18
+- Rebuilt for rpm bug #728707
+
 * Tue Jul 19 2011 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-17
 - Add 0103-add-disable-sync-option.patch
   * add a -n (nosync) option to multipath. This disables synchronous
