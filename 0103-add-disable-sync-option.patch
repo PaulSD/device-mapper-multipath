@@ -1,6 +1,6 @@
 ---
- multipath/main.c |    4 ++++
- 1 file changed, 4 insertions(+)
+ multipath/main.c |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 Index: multipath-tools/multipath/main.c
 ===================================================================
@@ -14,6 +14,15 @@ Index: multipath-tools/multipath/main.c
  		"  -b fil  bindings file location\n" \
  		"  -p pol  force all maps to specified path grouping policy :\n" \
  		"          . failover            one path per priority group\n" \
+@@ -383,7 +384,7 @@ main (int argc, char *argv[])
+ 		condlog(0, "multipath tools need sysfs mounted");
+ 		exit(1);
+ 	}
+-	while ((arg = getopt(argc, argv, ":dchl::FfM:v:p:b:Brqu")) != EOF ) {
++	while ((arg = getopt(argc, argv, ":dchl::FfM:v:p:b:Brqun")) != EOF ) {
+ 		switch(arg) {
+ 		case 1: printf("optarg : %s\n",optarg);
+ 			break;
 @@ -442,6 +443,9 @@ main (int argc, char *argv[])
  		case 'u':
  			conf->force_udev_rules = 1;

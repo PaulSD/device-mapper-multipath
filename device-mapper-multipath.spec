@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -115,6 +115,8 @@ Patch1100: 0100-RHBZ-710478-deprecate-uid-gid-mode.patch
 Patch1101: 0101-RHBZ-631009-disable-udev-disk-rules-on-reload.patch
 Patch1102: 0102-RHBZ-690828-systemd-unit-file.patch
 Patch1103: 0103-add-disable-sync-option.patch
+Patch1104: 0104-RHBZ-737989-systemd-unit-fix.patch
+Patch1105: 0105-fix-oom-adj.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -272,6 +274,8 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch1101 -p1
 %patch1102 -p1
 %patch1103 -p1
+%patch1104 -p1
+%patch1105 -p1
 cp %{SOURCE1} .
 
 %build
@@ -361,6 +365,13 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Sep 20 2011 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-19
+  - Modify 0103-add-disable-sync-option.patch
+  - Add 0104-RHBZ-737989-systemd-unit-fix.patch
+    * systemd will only start multipathd if /etc/multipath.conf exists
+  - Add 0105-fix-oom-adj.patch
+    * first try setting oom_score_adj
+
 * Mon Aug 15 2011 Kalev Lember <kalevlember@gmail.com> - 0.4.9-18
 - Rebuilt for rpm bug #728707
 
