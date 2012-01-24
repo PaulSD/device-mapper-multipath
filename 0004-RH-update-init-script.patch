@@ -1,0 +1,76 @@
+---
+ multipathd/multipathd.init.redhat |   27 ++++++---------------------
+ 1 file changed, 6 insertions(+), 21 deletions(-)
+
+Index: multipath-tools-111219/multipathd/multipathd.init.redhat
+===================================================================
+--- multipath-tools-111219.orig/multipathd/multipathd.init.redhat
++++ multipath-tools-111219/multipathd/multipathd.init.redhat
+@@ -73,14 +73,6 @@ start() {
+ 	echo
+ }
+ 
+-force_stop() {
+-	echo -n $"Stopping $prog daemon: "
+-	killproc $DAEMON
+-	RETVAL=$?
+-	[ $RETVAL -eq 0 ] && rm -f $lockdir/$prog
+-	echo
+-}
+-
+ stop() {
+         root_dev=$(awk '{ if ($1 !~ /^[ \t]*#/ && $2 == "/") { print $1; }}' /etc/mtab)
+ 	dm_num=`dmsetup info -c --noheadings -o minor $root_dev 2> /dev/null`
+@@ -89,7 +81,11 @@ stop() {
+ 		[ -d $syspath/$root_dm_device ] && teardown_slaves $syspath/$root_dm_device
+ 	fi
+ 
+-	force_stop
++	echo -n $"Stopping $prog daemon: "
++	killproc $DAEMON
++	RETVAL=$?
++	[ $RETVAL -eq 0 ] && rm -f $lockdir/$prog
++	echo
+ }
+ 
+ restart() {
+@@ -97,11 +93,6 @@ restart() {
+ 	start
+ }
+ 
+-force_restart() {
+-	force_stop
+-	start
+-}
+-
+ reload() {
+ 	echo -n "Reloading $prog: "
+ 	trap "" SIGHUP
+@@ -117,18 +108,12 @@ start)
+ stop)
+ 	stop
+ 	;;
+-force-stop)
+-	force_stop
+-	;;
+ force-reload|reload)
+ 	reload
+ 	;;
+ restart)
+ 	restart
+ 	;;
+-force-restart)
+-	force_restart
+-	;;
+ condrestart|try-restart)
+ 	if [ -f $lockdir/$prog ]; then
+ 	    restart
+@@ -139,7 +124,7 @@ status)
+ 	RETVAL=$?
+ 	;;
+ *)
+-	echo $"Usage: $0 {start|stop|force-stop|status|restart|force-restart|condrestart|reload}"
++	echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
+ 	RETVAL=2
+ esac
+ 
