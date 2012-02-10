@@ -1,0 +1,17 @@
+---
+ multipathd/main.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: multipath-tools-120123/multipathd/main.c
+===================================================================
+--- multipath-tools-120123.orig/multipathd/main.c
++++ multipath-tools-120123/multipathd/main.c
+@@ -524,7 +524,7 @@ rescan:
+ 	 * update our state from kernel regardless of create or reload
+ 	 */
+ 	if (setup_multipath(vecs, mpp))
+-		goto fail_map;
++		goto fail; /* if setup_multipath fails, it removes the map */
+ 
+ 	sync_map_state(mpp);
+ 

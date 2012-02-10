@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 21%{?dist}
+Release: 22%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -19,6 +19,18 @@ Patch0008: 0008-RH-add-mpathconf.patch
 Patch0009: 0009-RH-add-find-multipaths.patch
 Patch0010: 0010-RH-check-if-multipath-owns-path.patch
 Patch0011: 0011-RH-add-hp_tur-checker.patch
+Patch0012: 0012-RH-update-on-show-topology.patch
+Patch0013: 0013-RH-manpage-update.patch
+Patch0014: 0014-RH-RHEL5-style-partitions.patch
+Patch0015: 0015-RH-add-followover.patch
+Patch0016: 0016-RH-dont-remove-map-on-enomem.patch
+Patch0017: 0017-RH-fix-shutdown-crash.patch
+Patch0018: 0018-RH-warn-on-bad-dev-loss-tmo.patch
+Patch0019: 0019-RH-deprecate-uid-gid-mode.patch
+Patch0020: 0020-RH-dont-remove-map-twice.patch
+Patch0021: 0021-RH-validate-guid-partitions.patch
+Patch0022: 0022-RH-adjust-messages.patch
+Patch0023: 0023-RH-manpage-update.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -82,6 +94,18 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0009 -p1
 %patch0010 -p1
 %patch0011 -p1
+%patch0012 -p1
+%patch0013 -p1
+%patch0014 -p1
+%patch0015 -p1
+%patch0016 -p1
+%patch0017 -p1
+%patch0018 -p1
+%patch0019 -p1
+%patch0020 -p1
+%patch0021 -p1
+%patch0022 -p1
+%patch0023 -p1
 cp %{SOURCE1} .
 
 %build
@@ -172,6 +196,20 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Feb 10 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-22
+- Add 0012-RH-update-on-show-topology.patch
+- Add 0013-RH-manpage-update.patch
+- Add 0014-RH-RHEL5-style-partitions.patch
+- Add 0015-RH-add-followover.patch
+- Add 0016-RH-dont-remove-map-on-enomem.patch
+- Add 0017-RH-fix-shutdown-crash.patch
+- Add 0018-RH-warn-on-bad-dev-loss-tmo.patch
+- Add 0019-RH-deprecate-uid-gid-mode.patch
+- Add 0020-RH-dont-remove-map-twice.patch
+- Add 0021-RH-validate-guid-partitions.patch
+- Add 0022-RH-adjust-messages.patch
+- Add 0023-RH-manpage-update.patch
+
 * Tue Jan 24 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-21
 - Updated to latest upstream 0.4.9 code : multipath-tools-120123.tgz
   (git commit id: 63704387009443bdb37d9deaaafa9ab121d45bfb)

@@ -1,0 +1,32 @@
+---
+ libmultipath/configure.c |    3 +++
+ libmultipath/discovery.c |    2 +-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+Index: multipath-tools-120123/libmultipath/configure.c
+===================================================================
+--- multipath-tools-120123.orig/libmultipath/configure.c
++++ multipath-tools-120123/libmultipath/configure.c
+@@ -590,6 +590,9 @@ coalesce_paths (struct vectors * vecs, v
+ 				   "for create/reload map",
+ 				mpp->alias, r);
+ 			if (r == DOMAP_FAIL) {
++				condlog(2, "%s: %s map",
++					mpp->alias, (mpp->action == ACT_CREATE)?
++					"ignoring" : "removing");
+ 				remove_map(mpp, vecs, 0);
+ 				continue;
+ 			} else /* if (r == DOMAP_RETRY) */
+Index: multipath-tools-120123/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-120123.orig/libmultipath/discovery.c
++++ multipath-tools-120123/libmultipath/discovery.c
+@@ -318,7 +318,7 @@ sysfs_set_scsi_tmo (struct multipath *mp
+ 	vector_foreach_slot(mpp->paths, pp, i) {
+ 		rport_id = find_rport_id(pp);
+ 		if (rport_id < 0) {
+-			condlog(0, "failed to find rport_id for target%d:%d:%d", pp->sg_id.host_no, pp->sg_id.channel, pp->sg_id.scsi_id);
++			condlog(3, "failed to find rport_id for target%d:%d:%d", pp->sg_id.host_no, pp->sg_id.channel, pp->sg_id.scsi_id);
+ 			return 1;
+ 		}
+ 

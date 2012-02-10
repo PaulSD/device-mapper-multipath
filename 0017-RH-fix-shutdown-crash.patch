@@ -1,0 +1,69 @@
+---
+ libmultipath/log_pthread.c |    1 +
+ libmultipath/waiter.c      |    1 +
+ multipathd/main.c          |    6 +++++-
+ 3 files changed, 7 insertions(+), 1 deletion(-)
+
+Index: multipath-tools-120123/multipathd/main.c
+===================================================================
+--- multipath-tools-120123.orig/multipathd/main.c
++++ multipath-tools-120123/multipathd/main.c
+@@ -735,6 +735,7 @@ uxsock_trigger (char * str, char ** repl
+ 
+ 	pthread_cleanup_push(cleanup_lock, &vecs->lock);
+ 	lock(vecs->lock);
++	pthread_testcancel();
+ 
+ 	r = parse_cmd(str, reply, len, vecs);
+ 
+@@ -787,7 +788,9 @@ uev_trigger (struct uevent * uev, void *
+ 	if (uev_discard(uev->devpath))
+ 		return 0;
+ 
++	pthread_cleanup_push(cleanup_lock, &vecs->lock);
+ 	lock(vecs->lock);
++	pthread_testcancel();
+ 
+ 	/*
+ 	 * device map event
+@@ -827,7 +830,7 @@ uev_trigger (struct uevent * uev, void *
+ 	}
+ 
+ out:
+-	unlock(vecs->lock);
++	lock_cleanup_pop(vecs->lock);
+ 	return r;
+ }
+ 
+@@ -1295,6 +1298,7 @@ checkerloop (void *ap)
+ 		block_signal(SIGHUP, &old);
+ 		pthread_cleanup_push(cleanup_lock, &vecs->lock);
+ 		lock(vecs->lock);
++		pthread_testcancel();
+ 		condlog(4, "tick");
+ 
+ 		if (vecs->pathvec) {
+Index: multipath-tools-120123/libmultipath/waiter.c
+===================================================================
+--- multipath-tools-120123.orig/libmultipath/waiter.c
++++ multipath-tools-120123/libmultipath/waiter.c
+@@ -157,6 +157,7 @@ int waiteventloop (struct event_thread *
+ 		 */
+ 		pthread_cleanup_push(cleanup_lock, &waiter->vecs->lock);
+ 		lock(waiter->vecs->lock);
++		pthread_testcancel();
+ 		r = update_multipath(waiter->vecs, waiter->mapname, 1);
+ 		lock_cleanup_pop(waiter->vecs->lock);
+ 
+Index: multipath-tools-120123/libmultipath/log_pthread.c
+===================================================================
+--- multipath-tools-120123.orig/libmultipath/log_pthread.c
++++ multipath-tools-120123/libmultipath/log_pthread.c
+@@ -87,6 +87,7 @@ void log_thread_stop (void)
+ 	pthread_mutex_lock(logq_lock);
+ 	pthread_cancel(log_thr);
+ 	pthread_mutex_unlock(logq_lock);
++	pthread_join(log_thr, NULL);
+ 
+ 	flush_logqueue();
+ 
