@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 23%{?dist}
+Release: 24%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -37,7 +37,7 @@ Patch0024: 0024-RH-libudev-monitor.patch
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
 Requires: device-mapper >= 1.02.39-1
-Requires: udev initscripts
+Requires: udev initscripts libudev
 Requires(post): systemd-units systemd-sysv chkconfig
 Requires(preun): systemd-units
 Requires(postun): systemd-units
@@ -46,7 +46,7 @@ Requires(postun): systemd-units
 BuildRequires: libaio-devel, device-mapper-devel >= 1.02.39-1
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
-BuildRequires: systemd-units
+BuildRequires: systemd-units, libudev-devel
 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -198,6 +198,10 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Apr 30 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-24
+- Add requirements on libudev to spec file
+- Resolves: bz #805493
+
 * Mon Apr 30 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-23
 - Add 0024-RH-libudev-monitor.patch
 
