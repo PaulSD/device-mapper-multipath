@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 25%{?dist}
+Release: 26%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -32,6 +32,7 @@ Patch0021: 0021-RH-validate-guid-partitions.patch
 Patch0022: 0022-RH-adjust-messages.patch
 Patch0023: 0023-RH-manpage-update.patch
 Patch0024: 0024-RH-libudev-monitor.patch
+Patch0025: 0025-RHBZ-822714-update-nodes.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -108,6 +109,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0022 -p1
 %patch0023 -p1
 %patch0024 -p1
+%patch0025 -p1
 cp %{SOURCE1} .
 
 %build
@@ -198,6 +200,10 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon May 18 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-26
+- Add 0025-RHBZ-822714-update-nodes.patch
+- Resolves: bz #822714
+
 * Mon Apr 30 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-25
 - Modify 0024-RH-libudev-monitor.patch
 - Resolves: bz #805493
