@@ -5,10 +5,10 @@
  multipath.conf.annotated       |    5 +
  4 files changed, 128 insertions(+), 7 deletions(-)
 
-Index: multipath-tools-111219/libmultipath/checkers.h
+Index: multipath-tools-120613/libmultipath/checkers.h
 ===================================================================
---- multipath-tools-111219.orig/libmultipath/checkers.h
-+++ multipath-tools-111219/libmultipath/checkers.h
+--- multipath-tools-120613.orig/libmultipath/checkers.h
++++ multipath-tools-120613/libmultipath/checkers.h
 @@ -60,6 +60,7 @@ enum path_check_state {
  
  #define DIRECTIO     "directio"
@@ -33,10 +33,10 @@ Index: multipath-tools-111219/libmultipath/checkers.h
  	void * context;                      /* store for persistent data */
  	void ** mpcontext;                   /* store for persistent data shared
  						multipath-wide. Use MALLOC if
-Index: multipath-tools-111219/libmultipath/checkers/Makefile
+Index: multipath-tools-120613/libmultipath/checkers/Makefile
 ===================================================================
---- multipath-tools-111219.orig/libmultipath/checkers/Makefile
-+++ multipath-tools-111219/libmultipath/checkers/Makefile
+--- multipath-tools-120613.orig/libmultipath/checkers/Makefile
++++ multipath-tools-120613/libmultipath/checkers/Makefile
 @@ -8,6 +8,7 @@ LIBS= \
  	libcheckcciss_tur.so \
  	libcheckreadsector0.so \
@@ -55,10 +55,10 @@ Index: multipath-tools-111219/libmultipath/checkers/Makefile
  install:
  	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(libdir)
  
-Index: multipath-tools-111219/libmultipath/checkers/tur.c
+Index: multipath-tools-120613/libmultipath/checkers/tur.c
 ===================================================================
---- multipath-tools-111219.orig/libmultipath/checkers/tur.c
-+++ multipath-tools-111219/libmultipath/checkers/tur.c
+--- multipath-tools-120613.orig/libmultipath/checkers/tur.c
++++ multipath-tools-120613/libmultipath/checkers/tur.c
 @@ -24,12 +24,101 @@
  #define TUR_CMD_LEN 6
  #define HEAVY_CHECK_COUNT       10
@@ -249,10 +249,10 @@ Index: multipath-tools-111219/libmultipath/checkers/tur.c
  		}
  		pthread_attr_destroy(&attr);
  		tur_timeout(&tsp);
-Index: multipath-tools-111219/multipath.conf.annotated
+Index: multipath-tools-120613/multipath.conf.annotated
 ===================================================================
---- multipath-tools-111219.orig/multipath.conf.annotated
-+++ multipath-tools-111219/multipath.conf.annotated
+--- multipath-tools-120613.orig/multipath.conf.annotated
++++ multipath-tools-120613/multipath.conf.annotated
 @@ -96,7 +96,8 @@
  #	# name    : path_checker, checker
  #	# scope   : multipath & multipathd
@@ -265,7 +265,7 @@ Index: multipath-tools-111219/multipath.conf.annotated
  #	path_checker	directio
 @@ -493,7 +494,7 @@
  #		# scope   : multipathd & multipathd
- #		# desc    : path checking alorithm to use to check path state
+ #		# desc    : path checking algorithm to use to check path state
  #		# values  : readsector0|tur|emc_clariion|hp_sw|directio|rdac|
 -#		#           cciss_tur
 +#		#           cciss_tur|hp_tur

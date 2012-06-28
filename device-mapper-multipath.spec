@@ -1,44 +1,35 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 26%{?dist}
+Release: 27%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
-Source0: multipath-tools-120123.tgz
+Source0: multipath-tools-120613.tgz
 Source1: multipath.conf
-Patch0001: 0001-RH-fix-async-tur.patch
-Patch0002: 0002-RH-dont_start_with_no_config.patch
-Patch0003: 0003-RH-multipath.rules.patch
-Patch0004: 0004-RH-update-init-script.patch
-Patch0005: 0005-RH-cciss_id.patch
-Patch0006: 0006-RH-Make-build-system-RH-Fedora-friendly.patch
-Patch0007: 0007-RH-multipathd-blacklist-all-by-default.patch
-Patch0008: 0008-RH-add-mpathconf.patch
-Patch0009: 0009-RH-add-find-multipaths.patch
-Patch0010: 0010-RH-check-if-multipath-owns-path.patch
+Patch0001: 0001-RH-remove_callout.patch
+Patch0002: 0002-RH-add-wwids-file.patch
+Patch0003: 0003-RH-add-followover.patch
+Patch0004: 0004-RH-fix-cciss-names.patch
+Patch0005: 0005-RH-dont_start_with_no_config.patch
+Patch0006: 0006-RH-multipath.rules.patch
+Patch0007: 0007-RH-Make-build-system-RH-Fedora-friendly.patch
+Patch0008: 0008-RH-multipathd-blacklist-all-by-default.patch
+Patch0009: 0009-RH-add-mpathconf.patch
+Patch0010: 0010-RH-add-find-multipaths.patch
 Patch0011: 0011-RH-add-hp_tur-checker.patch
-Patch0012: 0012-RH-update-on-show-topology.patch
-Patch0013: 0013-RH-manpage-update.patch
-Patch0014: 0014-RH-RHEL5-style-partitions.patch
-Patch0015: 0015-RH-add-followover.patch
-Patch0016: 0016-RH-dont-remove-map-on-enomem.patch
-Patch0017: 0017-RH-fix-shutdown-crash.patch
-Patch0018: 0018-RH-warn-on-bad-dev-loss-tmo.patch
-Patch0019: 0019-RH-deprecate-uid-gid-mode.patch
-Patch0020: 0020-RH-dont-remove-map-twice.patch
-Patch0021: 0021-RH-validate-guid-partitions.patch
-Patch0022: 0022-RH-adjust-messages.patch
-Patch0023: 0023-RH-manpage-update.patch
-Patch0024: 0024-RH-libudev-monitor.patch
-Patch0025: 0025-RHBZ-822714-update-nodes.patch
+Patch0012: 0012-RH-RHEL5-style-partitions.patch
+Patch0013: 0013-RH-dont-remove-map-on-enomem.patch
+Patch0014: 0014-RH-deprecate-uid-gid-mode.patch
+Patch0015: 0015-RH-use-sync-support.patch
+Patch0016: 0016-RH-change-configs.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
 Requires: device-mapper >= 1.02.39-1
-Requires: udev initscripts libudev
+Requires: initscripts
 Requires(post): systemd-units systemd-sysv chkconfig
 Requires(preun): systemd-units
 Requires(postun): systemd-units
@@ -47,7 +38,7 @@ Requires(postun): systemd-units
 BuildRequires: libaio-devel, device-mapper-devel >= 1.02.39-1
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
-BuildRequires: systemd-units, libudev-devel
+BuildRequires: systemd-units, systemd-devel
 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -84,7 +75,7 @@ Group: System Environment/Base
 kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
-%setup -q -n multipath-tools-120123
+%setup -q -n multipath-tools-120613
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -101,15 +92,6 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0014 -p1
 %patch0015 -p1
 %patch0016 -p1
-%patch0017 -p1
-%patch0018 -p1
-%patch0019 -p1
-%patch0020 -p1
-%patch0021 -p1
-%patch0022 -p1
-%patch0023 -p1
-%patch0024 -p1
-%patch0025 -p1
 cp %{SOURCE1} .
 
 %build
@@ -166,17 +148,19 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %defattr(-,root,root,-)
 %{_sbindir}/multipath
 %{_sbindir}/multipathd
-%{_sbindir}/cciss_id
 %{_sbindir}/mpathconf
+%{_sbindir}/mpathpersist
 %{_unitdir}/multipathd.service
+%{_mandir}/man3/mpath_persistent_reserve_in.3.gz
+%{_mandir}/man3/mpath_persistent_reserve_out.3.gz
 %{_mandir}/man5/multipath.conf.5.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
 %{_mandir}/man8/mpathconf.8.gz
-%config /lib/udev/rules.d/40-multipath.rules
+%{_mandir}/man8/mpathpersist.8.gz
+%config /lib/udev/rules.d/62-multipath.rules
 %doc AUTHOR COPYING FAQ
-%doc multipath.conf multipath.conf.annotated
-%doc multipath.conf.defaults multipath.conf.synthetic
+%doc multipath.conf
 %dir /etc/multipath
 
 %files libs
@@ -184,6 +168,8 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %doc AUTHOR COPYING
 %{_libdir}/libmultipath.so
 %{_libdir}/libmultipath.so.*
+%{_libdir}/libmpathpersist.so
+%{_libdir}/libmpathpersist.so.*
 %dir %{_libmpathdir}
 %{_libmpathdir}/*
 
@@ -200,6 +186,22 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Jun 28 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-27
+- Updated to latest upstream 0.4.9 code : multipath-tools-120613.tgz
+  (git commit id: cb0f7127ba90ab5e8e71fc534a0a16cdbe96a88f)
+- Add 0001-RH-remove_callout.patch
+  * multipath no longer uses the getuid callout.  It now gets the
+    wwid from the udev database or the environment variables
+- Add 0004-RH-fix-cciss-names.patch
+  * convert cciss device names from cciss/cXdY to sysfs style cciss!cXdY
+- Split 0009-RH-add-find-multipaths.patch into 0002-RH-add-wwids-file.patch
+        and 0010-RH-add-find-multipaths.patch
+- Add 0016-RH-change-configs.patch
+  * default fast_io_fail to 5 and don't set the path selector in the
+    builtin configs.
+Resolves: bz #831978
+
+
 * Mon May 18 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-26
 - Add 0025-RHBZ-822714-update-nodes.patch
 - Resolves: bz #822714

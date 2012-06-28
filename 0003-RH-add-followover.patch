@@ -1,16 +1,18 @@
 ---
  libmultipath/dict.c        |   12 ++++++++++++
+ libmultipath/discovery.c   |    6 +++---
  libmultipath/print.c       |    2 ++
- libmultipath/structs.h     |    3 ++-
+ libmultipath/structs.h     |    4 +++-
+ multipath/main.c           |    2 +-
  multipath/multipath.conf.5 |    5 +++++
- multipathd/main.c          |   29 ++++++++++++++++++++++++++++-
- 5 files changed, 49 insertions(+), 2 deletions(-)
+ multipathd/main.c          |   35 ++++++++++++++++++++++++++++++++++-
+ 7 files changed, 60 insertions(+), 6 deletions(-)
 
-Index: multipath-tools-120123/libmultipath/dict.c
+Index: multipath-tools-120518/libmultipath/dict.c
 ===================================================================
---- multipath-tools-120123.orig/libmultipath/dict.c
-+++ multipath-tools-120123/libmultipath/dict.c
-@@ -406,6 +406,8 @@ default_failback_handler(vector strvec)
+--- multipath-tools-120518.orig/libmultipath/dict.c
++++ multipath-tools-120518/libmultipath/dict.c
+@@ -398,6 +398,8 @@ default_failback_handler(vector strvec)
  		conf->pgfailback = -FAILBACK_MANUAL;
  	else if (strlen(buff) == 9 && !strcmp(buff, "immediate"))
  		conf->pgfailback = -FAILBACK_IMMEDIATE;
@@ -19,7 +21,7 @@ Index: multipath-tools-120123/libmultipath/dict.c
  	else
  		conf->pgfailback = atoi(buff);
  
-@@ -1031,6 +1033,8 @@ hw_failback_handler(vector strvec)
+@@ -1053,6 +1055,8 @@ hw_failback_handler(vector strvec)
  		hwe->pgfailback = -FAILBACK_MANUAL;
  	else if (strlen(buff) == 9 && !strcmp(buff, "immediate"))
  		hwe->pgfailback = -FAILBACK_IMMEDIATE;
@@ -28,7 +30,7 @@ Index: multipath-tools-120123/libmultipath/dict.c
  	else
  		hwe->pgfailback = atoi(buff);
  
-@@ -1303,6 +1307,8 @@ mp_failback_handler(vector strvec)
+@@ -1351,6 +1355,8 @@ mp_failback_handler(vector strvec)
  		mpe->pgfailback = -FAILBACK_MANUAL;
  	else if (strlen(buff) == 9 && !strcmp(buff, "immediate"))
  		mpe->pgfailback = -FAILBACK_IMMEDIATE;
@@ -37,7 +39,7 @@ Index: multipath-tools-120123/libmultipath/dict.c
  	else
  		mpe->pgfailback = atoi(buff);
  
-@@ -1646,6 +1652,8 @@ snprint_mp_failback (char * buff, int le
+@@ -1769,6 +1775,8 @@ snprint_mp_failback (char * buff, int le
  		return snprintf(buff, len, "manual");
  	case -FAILBACK_IMMEDIATE:
  		return snprintf(buff, len, "immediate");
@@ -46,7 +48,7 @@ Index: multipath-tools-120123/libmultipath/dict.c
  	default:
  		return snprintf(buff, len, "%i", mpe->pgfailback);
  	}
-@@ -1985,6 +1993,8 @@ snprint_hw_failback (char * buff, int le
+@@ -2130,6 +2138,8 @@ snprint_hw_failback (char * buff, int le
  		return snprintf(buff, len, "manual");
  	case -FAILBACK_IMMEDIATE:
  		return snprintf(buff, len, "immediate");
@@ -55,7 +57,7 @@ Index: multipath-tools-120123/libmultipath/dict.c
  	default:
  		return snprintf(buff, len, "%i", hwe->pgfailback);
  	}
-@@ -2243,6 +2253,8 @@ snprint_def_failback (char * buff, int l
+@@ -2394,6 +2404,8 @@ snprint_def_failback (char * buff, int l
  		return snprintf(buff, len, "manual");
  	case -FAILBACK_IMMEDIATE:
  		return snprintf(buff, len, "immediate");
@@ -64,10 +66,10 @@ Index: multipath-tools-120123/libmultipath/dict.c
  	default:
  		return snprintf(buff, len, "%i", conf->pgfailback);
  	}
-Index: multipath-tools-120123/libmultipath/print.c
+Index: multipath-tools-120518/libmultipath/print.c
 ===================================================================
---- multipath-tools-120123.orig/libmultipath/print.c
-+++ multipath-tools-120123/libmultipath/print.c
+--- multipath-tools-120518.orig/libmultipath/print.c
++++ multipath-tools-120518/libmultipath/print.c
 @@ -143,6 +143,8 @@ snprint_failback (char * buff, size_t le
  {
  	if (mpp->pgfailback == -FAILBACK_IMMEDIATE)
@@ -77,10 +79,10 @@ Index: multipath-tools-120123/libmultipath/print.c
  
  	if (!mpp->failback_tick)
  		return snprintf(buff, len, "-");
-Index: multipath-tools-120123/libmultipath/structs.h
+Index: multipath-tools-120518/libmultipath/structs.h
 ===================================================================
---- multipath-tools-120123.orig/libmultipath/structs.h
-+++ multipath-tools-120123/libmultipath/structs.h
+--- multipath-tools-120518.orig/libmultipath/structs.h
++++ multipath-tools-120518/libmultipath/structs.h
 @@ -39,7 +39,8 @@ enum rr_weight_mode {
  enum failback_mode {
  	FAILBACK_UNDEF,
@@ -91,11 +93,19 @@ Index: multipath-tools-120123/libmultipath/structs.h
  };
  
  enum sysfs_buses {
-Index: multipath-tools-120123/multipathd/main.c
+@@ -151,6 +152,7 @@ struct path {
+ 	int offline;
+ 	int state;
+ 	int dmstate;
++	int chkrstate;
+ 	int failcount;
+ 	int priority;
+ 	int pgindex;
+Index: multipath-tools-120518/multipathd/main.c
 ===================================================================
---- multipath-tools-120123.orig/multipathd/main.c
-+++ multipath-tools-120123/multipathd/main.c
-@@ -1011,6 +1011,32 @@ mpvec_garbage_collector (struct vectors
+--- multipath-tools-120518.orig/multipathd/main.c
++++ multipath-tools-120518/multipathd/main.c
+@@ -995,6 +995,32 @@ mpvec_garbage_collector (struct vectors
  	}
  }
  
@@ -119,7 +129,7 @@ Index: multipath-tools-120123/multipathd/main.c
 +	vector_foreach_slot(pgp->paths, pp1, i) {
 +		if (pp1 == pp)
 +			continue;
-+		if (pp1->state != PATH_DOWN && pp1->state != PATH_SHAKY)
++		if (pp1->chkrstate != PATH_DOWN && pp1->chkrstate != PATH_SHAKY)
 +			return 0;
 +	}
 +	return 1;
@@ -128,21 +138,48 @@ Index: multipath-tools-120123/multipathd/main.c
  static void
  defered_failback_tick (vector mpvec)
  {
-@@ -1238,7 +1264,8 @@ check_path (struct vectors * vecs, struc
+@@ -1092,6 +1118,8 @@ check_path (struct vectors * vecs, struc
+ {
+ 	int newstate;
+ 	int new_path_up = 0;
++	int chkr_new_path_up = 0;
++	int oldchkrstate = pp->chkrstate;
+ 
+ 	if (!pp->mpp)
+ 		return;
+@@ -1130,6 +1158,7 @@ check_path (struct vectors * vecs, struc
+ 			pp->dev);
+ 		pp->dmstate = PSTATE_UNDEF;
+ 	}
++	pp->chkrstate = newstate;
+ 	if (newstate != pp->state) {
+ 		int oldstate = pp->state;
+ 		pp->state = newstate;
+@@ -1182,6 +1211,9 @@ check_path (struct vectors * vecs, struc
+ 
+ 		new_path_up = 1;
+ 
++		if (oldchkrstate != PATH_UP && oldchkrstate != PATH_GHOST)
++			chkr_new_path_up = 1;
++
+ 		/*
+ 		 * if at least one path is up in a group, and
+ 		 * the group is disabled, re-enable it
+@@ -1233,7 +1265,8 @@ check_path (struct vectors * vecs, struc
  		    (new_path_up || pp->mpp->failback_tick <= 0))
  			pp->mpp->failback_tick =
  				pp->mpp->pgfailback + 1;
 -		else if (pp->mpp->pgfailback == -FAILBACK_IMMEDIATE)
 +		else if (pp->mpp->pgfailback == -FAILBACK_IMMEDIATE ||
-+			 followover_should_failback(pp))
++			 (chkr_new_path_up && followover_should_failback(pp)))
  			switch_pathgroup(pp->mpp);
  	}
  }
-Index: multipath-tools-120123/multipath/multipath.conf.5
+Index: multipath-tools-120518/multipath/multipath.conf.5
 ===================================================================
---- multipath-tools-120123.orig/multipath/multipath.conf.5
-+++ multipath-tools-120123/multipath/multipath.conf.5
-@@ -258,6 +258,11 @@ active paths.
+--- multipath-tools-120518.orig/multipath/multipath.conf.5
++++ multipath-tools-120518/multipath/multipath.conf.5
+@@ -254,6 +254,11 @@ active paths.
  .B manual
  Do not perform automatic failback.
  .TP
@@ -154,3 +191,45 @@ Index: multipath-tools-120123/multipath/multipath.conf.5
  .B values > 0
  deferred failback (time to defer in seconds)
  .TP
+Index: multipath-tools-120518/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-120518.orig/libmultipath/discovery.c
++++ multipath-tools-120518/libmultipath/discovery.c
+@@ -878,13 +878,13 @@ pathinfo (struct path *pp, vector hwtabl
+ 
+ 	if (mask & DI_CHECKER) {
+ 		if (path_state == PATH_UP) {
+-			pp->state = get_state(pp, 0);
++			pp->chkrstate = pp->state = get_state(pp, 0);
+ 			if (pp->state == PATH_UNCHECKED ||
+ 			    pp->state == PATH_WILD)
+ 				goto blank;
+ 		} else {
+ 			condlog(3, "%s: path inaccessible", pp->dev);
+-			pp->state = path_state;
++			pp->chkrstate = pp->state = path_state;
+ 		}
+ 	}
+ 
+@@ -912,7 +912,7 @@ blank:
+ 	 * Recoverable error, for example faulty or offline path
+ 	 */
+ 	memset(pp->wwid, 0, WWID_SIZE);
+-	pp->state = PATH_DOWN;
++	pp->chkrstate = pp->state = PATH_DOWN;
+ 
+ 	return 0;
+ }
+Index: multipath-tools-120518/multipath/main.c
+===================================================================
+--- multipath-tools-120518.orig/multipath/main.c
++++ multipath-tools-120518/multipath/main.c
+@@ -144,7 +144,7 @@ update_paths (struct multipath * mpp)
+ 					/*
+ 					 * path is not in sysfs anymore
+ 					 */
+-					pp->state = PATH_DOWN;
++					pp->chkrstate = pp->state = PATH_DOWN;
+ 					continue;
+ 				}
+ 				pp->mpp = mpp;
