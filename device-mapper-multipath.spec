@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 27%{?dist}
+Release: 28%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -186,6 +186,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.9-28
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Thu Jun 28 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-27
 - Updated to latest upstream 0.4.9 code : multipath-tools-120613.tgz
   (git commit id: cb0f7127ba90ab5e8e71fc534a0a16cdbe96a88f)
