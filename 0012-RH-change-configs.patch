@@ -3,11 +3,11 @@
  libmultipath/hwtable.c |   65 -------------------------------------------------
  2 files changed, 1 insertion(+), 65 deletions(-)
 
-Index: multipath-tools-120613/libmultipath/config.c
+Index: multipath-tools-120817/libmultipath/config.c
 ===================================================================
---- multipath-tools-120613.orig/libmultipath/config.c
-+++ multipath-tools-120613/libmultipath/config.c
-@@ -515,6 +515,7 @@ load_config (char * file)
+--- multipath-tools-120817.orig/libmultipath/config.c
++++ multipath-tools-120817/libmultipath/config.c
+@@ -518,6 +518,7 @@ load_config (char * file)
  	conf->checkint = DEFAULT_CHECKINT;
  	conf->max_checkint = MAX_CHECKINT(conf->checkint);
  	conf->find_multipaths = DEFAULT_FIND_MULTIPATHS;
@@ -15,10 +15,10 @@ Index: multipath-tools-120613/libmultipath/config.c
  
  	/*
  	 * preload default hwtable
-Index: multipath-tools-120613/libmultipath/hwtable.c
+Index: multipath-tools-120817/libmultipath/hwtable.c
 ===================================================================
---- multipath-tools-120613.orig/libmultipath/hwtable.c
-+++ multipath-tools-120613/libmultipath/hwtable.c
+--- multipath-tools-120817.orig/libmultipath/hwtable.c
++++ multipath-tools-120817/libmultipath/hwtable.c
 @@ -28,7 +28,6 @@ static struct hwentry default_hw[] = {
  		.product       = "Compellent Vol",
  		.features      = DEFAULT_FEATURES,

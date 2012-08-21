@@ -1,29 +1,26 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 28%{?dist}
+Release: 29%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
-Source0: multipath-tools-120613.tgz
+Source0: multipath-tools-120821.tgz
 Source1: multipath.conf
-Patch0001: 0001-RH-remove_callout.patch
-Patch0002: 0002-RH-add-wwids-file.patch
-Patch0003: 0003-RH-add-followover.patch
-Patch0004: 0004-RH-fix-cciss-names.patch
-Patch0005: 0005-RH-dont_start_with_no_config.patch
-Patch0006: 0006-RH-multipath.rules.patch
-Patch0007: 0007-RH-Make-build-system-RH-Fedora-friendly.patch
-Patch0008: 0008-RH-multipathd-blacklist-all-by-default.patch
-Patch0009: 0009-RH-add-mpathconf.patch
-Patch0010: 0010-RH-add-find-multipaths.patch
-Patch0011: 0011-RH-add-hp_tur-checker.patch
-Patch0012: 0012-RH-RHEL5-style-partitions.patch
-Patch0013: 0013-RH-dont-remove-map-on-enomem.patch
-Patch0014: 0014-RH-deprecate-uid-gid-mode.patch
-Patch0015: 0015-RH-use-sync-support.patch
-Patch0016: 0016-RH-change-configs.patch
+Patch0001: 0001-RH-dont_start_with_no_config.patch
+Patch0002: 0002-RH-multipath.rules.patch
+Patch0003: 0003-RH-Make-build-system-RH-Fedora-friendly.patch
+Patch0004: 0004-RH-multipathd-blacklist-all-by-default.patch
+Patch0005: 0005-RH-add-mpathconf.patch
+Patch0006: 0006-RH-add-find-multipaths.patch
+Patch0007: 0007-RH-add-hp_tur-checker.patch
+Patch0008: 0008-RH-RHEL5-style-partitions.patch
+Patch0009: 0009-RH-dont-remove-map-on-enomem.patch
+Patch0010: 0010-RH-deprecate-uid-gid-mode.patch
+Patch0011: 0011-RH-use-sync-support.patch
+Patch0012: 0012-RH-change-configs.patch
+Patch0013: 0013-RH-kpartx-msg.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -75,7 +72,7 @@ Group: System Environment/Base
 kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
-%setup -q -n multipath-tools-120613
+%setup -q -n multipath-tools-120821
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -89,9 +86,6 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0011 -p1
 %patch0012 -p1
 %patch0013 -p1
-%patch0014 -p1
-%patch0015 -p1
-%patch0016 -p1
 cp %{SOURCE1} .
 
 %build
@@ -186,6 +180,15 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Aug 21 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-29
+- Updated to latest upstrem 0.4.9 code: multipath-tools-120821.tgz
+  (git commit id: 050b24b33d3c60e29f7820d2fb75e84a9edde528)
+  * includes 0001-RH-remove_callout.patch, 0002-RH-add-wwids-file.patch,
+    0003-RH-add-followover.patch, 0004-RH-fix-cciss-names.patch
+- Add 0013-RH-kpartx-msg.patch
+- Modify 0002-RH-multipath.rules.patch
+  * removed socket call from rules file
+
 * Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.9-28
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 

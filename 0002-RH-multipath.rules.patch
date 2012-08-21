@@ -1,13 +1,13 @@
 ---
  multipath/Makefile        |    6 +++---
- multipath/multipath.rules |   30 ++++++++++++++++++++++++------
- 2 files changed, 27 insertions(+), 9 deletions(-)
+ multipath/multipath.rules |   29 +++++++++++++++++++++++------
+ 2 files changed, 26 insertions(+), 9 deletions(-)
 
-Index: multipath-tools-120613/multipath/multipath.rules
+Index: multipath-tools-120821/multipath/multipath.rules
 ===================================================================
---- multipath-tools-120613.orig/multipath/multipath.rules
-+++ multipath-tools-120613/multipath/multipath.rules
-@@ -1,7 +1,25 @@
+--- multipath-tools-120821.orig/multipath/multipath.rules
++++ multipath-tools-120821/multipath/multipath.rules
+@@ -1,7 +1,24 @@
 -#
 -# udev rules for multipathing.
 -# The persistent symlinks are created with the kpartx rules
@@ -30,7 +30,6 @@ Index: multipath-tools-120613/multipath/multipath.rules
 +ENV{DM_MULTIPATH_DEVICE_PATH}=="1", ENV{DEVTYPE}!="partition", \
 +	RUN+="/sbin/partx -d --nr 1-1024 $env{DEVNAME}"
 +
-+RUN+="socket:/org/kernel/dm/multipath_event"
 +KERNEL!="dm-*", GOTO="end_mpath"
 +ACTION!="change", GOTO="end_mpath"
 +ENV{DM_UUID}=="mpath-?*|part[0-9]*-mpath-?*", OPTIONS+="link_priority=10"
@@ -39,10 +38,10 @@ Index: multipath-tools-120613/multipath/multipath.rules
 +ENV{DM_ACTION}=="PATH_FAILED", GOTO="end_mpath"
 +RUN+="$env{MPATH_SBIN_PATH}/kpartx -a -p p $tempnode"
 +LABEL="end_mpath"
-Index: multipath-tools-120613/multipath/Makefile
+Index: multipath-tools-120821/multipath/Makefile
 ===================================================================
---- multipath-tools-120613.orig/multipath/Makefile
-+++ multipath-tools-120613/multipath/Makefile
+--- multipath-tools-120821.orig/multipath/Makefile
++++ multipath-tools-120821/multipath/Makefile
 @@ -21,15 +21,15 @@ $(EXEC): $(OBJS)
  install:
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
