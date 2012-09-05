@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 29%{?dist}
+Release: 30%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -113,21 +113,13 @@ install -d %{buildroot}/etc/multipath
 rm -rf %{buildroot}
 
 %post
-if [ $1 -eq 1 ] ; then
-	/bin/systemctl enable multipathd.service >/dev/null 2>&1 || :
-fi
+%systemd_post multipathd.service
 
 %preun
-if [ $1 -eq 0 ] ; then
-	/bin/systemctl --no-reload disable multipathd.service > /dev/null 2>&1 || :
-	bin/systemctl stop multipathd.service > /dev/null 2>&1 || :
-fi
+%systemd_preun multipathd.service
 
 %postun
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-	/bin/systemctl try-restart multipathd.service >/dev/null 2>&1 || :
-fi
+%systemd_postun_with_restart multipathd.service
 
 %triggerun --  %{name} < 0.4.9-16
 %{_bindir}/systemd-sysv-convert --save multipathd >/dev/null 2>&1 ||: 
@@ -180,6 +172,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Sep 05 2012 Václav Pavlín <vpavlin@redhat.com> - 0.4.9-30
+- Scriptlets replaced with new systemd macros (#850088)
+
 * Tue Aug 21 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-29
 - Updated to latest upstrem 0.4.9 code: multipath-tools-120821.tgz
   (git commit id: 050b24b33d3c60e29f7820d2fb75e84a9edde528)
