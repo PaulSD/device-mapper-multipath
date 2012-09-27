@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 30%{?dist}
+Release: 31%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -21,6 +21,11 @@ Patch0010: 0010-RH-deprecate-uid-gid-mode.patch
 Patch0011: 0011-RH-use-sync-support.patch
 Patch0012: 0012-RH-change-configs.patch
 Patch0013: 0013-RH-kpartx-msg.patch
+Patch0014: 0014-RH-dm_reassign.patch
+Patch0015: 0015-RH-selector_change.patch
+Patch0016: 0016-RH-retain_hwhandler.patch
+Patch0017: 0017-RH-netapp_config.patch
+Patch0018: 0018-RH-remove-config-dups.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -86,6 +91,11 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0011 -p1
 %patch0012 -p1
 %patch0013 -p1
+%patch0014 -p1
+%patch0015 -p1
+%patch0016 -p1
+%patch0017 -p1
+%patch0018 -p1
 cp %{SOURCE1} .
 
 %build
@@ -172,6 +182,18 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Sep 27 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-31
+- Add 0014-RH-dm_reassign.patch
+  * Fix reassign_maps option
+- Add 0015-RH-selector_change.patch
+  * devices default to using service-time selector
+- Add 0016-RH-retain_hwhandler.patch
+  * add retain_attached_hw_handler option, to let multipath keep an
+    already attached scsi device handler
+- Add 0017-RH-netapp_config.patch
+- Add 0018-RH-remove-config-dups.patch
+  * Clean up duplicates in the devices and blacklist sections
+
 * Wed Sep 05 2012 Václav Pavlín <vpavlin@redhat.com> - 0.4.9-30
 - Scriptlets replaced with new systemd macros (#850088)
 
