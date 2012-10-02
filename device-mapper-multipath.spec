@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 31%{?dist}
+Release: 32%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -182,6 +182,11 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Oct  2 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-32
+- Modified 0018-RH-remove-config-dups.patch
+  * Made modified config remove original only if the vendor/product
+    exactly match
+
 * Thu Sep 27 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-31
 - Add 0014-RH-dm_reassign.patch
   * Fix reassign_maps option
