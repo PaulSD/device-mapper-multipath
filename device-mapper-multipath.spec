@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 32%{?dist}
+Release: 33%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -24,8 +24,10 @@ Patch0013: 0013-RH-kpartx-msg.patch
 Patch0014: 0014-RH-dm_reassign.patch
 Patch0015: 0015-RH-selector_change.patch
 Patch0016: 0016-RH-retain_hwhandler.patch
-Patch0017: 0017-RH-netapp_config.patch
+# Patch0017: 0017-RH-netapp_config.patch
 Patch0018: 0018-RH-remove-config-dups.patch
+Patch0019: 0019-RH-detect-prio.patch
+Patch0020: 0020-RH-netapp-config.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -94,8 +96,10 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0014 -p1
 %patch0015 -p1
 %patch0016 -p1
-%patch0017 -p1
+# %patch0017 -p1
 %patch0018 -p1
+%patch0019 -p1
+%patch0020 -p1
 cp %{SOURCE1} .
 
 %build
@@ -182,6 +186,18 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Oct 23 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-33
+- Modify 0016-RH-retain_hwhandler.patch
+  * Check the dm-multipath module version, and don't enable
+    retain_attached_hw_handler if the kernel doesn't support it
+- Add 0019-RH-detect-prio.patch
+  * add detect_prio option, to make multipath check if the device
+    supports the ALUA prio, before defaulting to the configured prio
+- Remove 0017-RH-netapp_config.patch
+- Add 0020-RH-netapp-config.patch
+  * new netapp config that uses retain_attached_hw_handler and
+    detect_prio to autoconfigure ALUA and non-ALUA devices.
+
 * Tue Oct  2 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-32
 - Modified 0018-RH-remove-config-dups.patch
   * Made modified config remove original only if the vendor/product

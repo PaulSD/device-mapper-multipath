@@ -1,14 +1,16 @@
 ---
- libmultipath/config.c    |    3 +
- libmultipath/config.h    |    2 +
+ libmultipath/config.c    |    5 ++-
+ libmultipath/config.h    |    4 +-
  libmultipath/configure.c |    7 +++-
  libmultipath/defaults.h  |    1 
+ libmultipath/devmapper.c |   34 +++------------------
+ libmultipath/devmapper.h |    8 ++++-
  libmultipath/dict.c      |   74 +++++++++++++++++++++++++++++++++++++++++++++++
  libmultipath/dmparser.c  |    3 +
- libmultipath/propsel.c   |   17 ++++++++++
+ libmultipath/propsel.c   |   29 +++++++++++++++++-
  libmultipath/propsel.h   |    1 
  libmultipath/structs.h   |    7 ++++
- 9 files changed, 113 insertions(+), 2 deletions(-)
+ 11 files changed, 138 insertions(+), 35 deletions(-)
 
 Index: multipath-tools-120821/libmultipath/config.c
 ===================================================================
@@ -30,6 +32,15 @@ Index: multipath-tools-120821/libmultipath/config.c
  
  	if (dhwe->bl_product && !(hwe->bl_product = set_param_str(dhwe->bl_product)))
  		goto out;
+@@ -502,7 +504,7 @@ load_config (char * file)
+ 		conf->verbosity = DEFAULT_VERBOSITY;
+ 
+ 	conf->udev = udev_new();
+-	conf->dmrq = dm_drv_get_rq();
++	dm_drv_version(conf->version, TGT_MPATH);
+ 	conf->dev_type = DEV_NONE;
+ 	conf->minio = DEFAULT_MINIO;
+ 	conf->minio_rq = DEFAULT_MINIO_RQ;
 @@ -519,6 +521,7 @@ load_config (char * file)
  	conf->max_checkint = MAX_CHECKINT(conf->checkint);
  	conf->find_multipaths = DEFAULT_FIND_MULTIPATHS;
@@ -50,11 +61,20 @@ Index: multipath-tools-120821/libmultipath/config.h
  	char * bl_product;
  };
  
-@@ -110,6 +111,7 @@ struct config {
+@@ -75,7 +76,6 @@ struct mpentry {
+ };
+ 
+ struct config {
+-	int dmrq;
+ 	int verbosity;
+ 	int dry_run;
+ 	int list;
+@@ -110,6 +110,8 @@ struct config {
  	mode_t mode;
  	uint32_t cookie;
  	int reassign_maps;
 +	int retain_hwhandler;
++	unsigned int version[3];
  
  	char * dev;
  	struct udev * udev;
@@ -265,13 +285,32 @@ Index: multipath-tools-120821/libmultipath/propsel.c
 ===================================================================
 --- multipath-tools-120821.orig/libmultipath/propsel.c
 +++ multipath-tools-120821/libmultipath/propsel.c
-@@ -674,3 +674,20 @@ select_reservation_key (struct multipath
+@@ -513,7 +513,9 @@ select_minio_bio (struct multipath * mp)
+ extern int
+ select_minio (struct multipath * mp)
+ {
+-	if (conf->dmrq)
++	unsigned int minv_dmrq[3] = {1, 1, 0};
++
++	if (VERSION_GE(conf->version, minv_dmrq))
+ 		return select_minio_rq(mp);
+ 	else
+ 		return select_minio_bio(mp);
+@@ -674,3 +676,28 @@ select_reservation_key (struct multipath
  	return 0;
  }
  
 +extern int
 +select_retain_hwhandler (struct multipath * mp)
 +{
++	unsigned int minv_dm_retain[3] = {1, 5, 0};
++
++	if (!VERSION_GE(conf->version, minv_dm_retain)) {
++		mp->retain_hwhandler = RETAIN_HWHANDLER_OFF;
++		condlog(3, "%s: retain_attached_hw_hander disabled (requires kernel version >= 1.5.0)", mp->alias);
++		return 0;
++	}
++
 +	if (mp->hwe && mp->hwe->retain_hwhandler) {
 +		mp->retain_hwhandler = mp->hwe->retain_hwhandler;
 +		condlog(3, "%s: retain_attached_hw_handler = %d (controller default)", mp->alias, mp->retain_hwhandler);
@@ -294,4 +333,94 @@ Index: multipath-tools-120821/libmultipath/propsel.h
  int select_fast_io_fail(struct multipath *mp);
  int select_dev_loss(struct multipath *mp);
  int select_reservation_key(struct multipath *mp);
-+extern int select_retain_hwhandler (struct multipath * mp);
++int select_retain_hwhandler (struct multipath * mp);
+Index: multipath-tools-120821/libmultipath/devmapper.c
+===================================================================
+--- multipath-tools-120821.orig/libmultipath/devmapper.c
++++ multipath-tools-120821/libmultipath/devmapper.c
+@@ -98,12 +98,6 @@ dm_init(void) {
+ 	dm_log_init_verbose(conf ? conf->verbosity + 3 : 0);
+ }
+ 
+-#define VERSION_GE(v, minv) ( \
+- (v[0] > minv[0]) || \
+- ((v[0] == minv[0]) && (v[1] > minv[1])) || \
+- ((v[0] == minv[0]) && (v[1] == minv[1]) && (v[2] >= minv[2])) \
+-)
+-
+ static int
+ dm_lib_prereq (void)
+ {
+@@ -126,7 +120,7 @@ dm_lib_prereq (void)
+ 	return 1;
+ }
+ 
+-static int
++int
+ dm_drv_version (unsigned int * version, char * str)
+ {
+ 	int r = 2;
+@@ -135,6 +129,10 @@ dm_drv_version (unsigned int * version,
+ 	struct dm_versions *last_target;
+ 	unsigned int *v;
+ 
++	version[0] = 0;
++	version[1] = 0;
++	version[2] = 0;
++
+ 	if (!(dmt = dm_task_create(DM_DEVICE_LIST_VERSIONS)))
+ 		return 1;
+ 
+@@ -169,28 +167,6 @@ out:
+ 	return r;
+ }
+ 
+-int
+-dm_drv_get_rq (void)
+-{
+-	unsigned int minv_dmrq[3] = {1, 1, 0};
+-	unsigned int version[3] = {0, 0, 0};
+-        unsigned int * v = version;
+-
+-	if (dm_drv_version(v, TGT_MPATH)) {
+-		/* in doubt return least capable */
+-		return 0;
+-	}
+-
+-	/* test request based multipath capability */
+-	if VERSION_GE(v, minv_dmrq) {
+-		condlog(3, "activate request-based multipathing mode "
+-			   "(driver >= v%u.%u.%u)",
+-			minv_dmrq[0], minv_dmrq[1], minv_dmrq[2]);
+-		return 1;
+-	}
+-	return 0;
+-}
+-
+ static int
+ dm_drv_prereq (void)
+ {
+Index: multipath-tools-120821/libmultipath/devmapper.h
+===================================================================
+--- multipath-tools-120821.orig/libmultipath/devmapper.h
++++ multipath-tools-120821/libmultipath/devmapper.h
+@@ -8,7 +8,7 @@
+ 
+ void dm_init(void);
+ int dm_prereq (void);
+-int dm_drv_get_rq (void);
++int dm_drv_version (unsigned int * version, char * str);
+ int dm_simplecmd_flush (int, const char *, int);
+ int dm_simplecmd_noflush (int, const char *);
+ int dm_addmap_create (struct multipath *mpp, char *params);
+@@ -46,4 +46,10 @@ int dm_setgeometry(struct multipath *mpp
+ void udev_wait(unsigned int c);
+ void udev_set_sync_support(int c);
+ 
++#define VERSION_GE(v, minv) ( \
++ (v[0] > minv[0]) || \
++ ((v[0] == minv[0]) && (v[1] > minv[1])) || \
++ ((v[0] == minv[0]) && (v[1] == minv[1]) && (v[2] >= minv[2])) \
++)
++
+ #endif /* _DEVMAPPER_H */
