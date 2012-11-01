@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 35%{?dist}
+Release: 36%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -31,6 +31,7 @@ Patch0020: 0020-RH-netapp-config.patch
 Patch0021: 0021-RH-fix-oom-adj.patch
 Patch0022: 0022-RHBZ-864368-disable-libdm-failback.patch
 Patch0023: 0023-RHBZ-866291-update-documentation.patch
+Patch0024: 0024-RH-start-multipathd-service-before-lvm.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -106,6 +107,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0021 -p1
 %patch0022 -p1
 %patch0023 -p1
+%patch0024 -p1
 cp %{SOURCE1} .
 
 %build
@@ -192,6 +194,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Nov 01 2012 Peter Rajnoha <prajnoha@redhat.com> 0.4.9-36
+- Start multipathd.service systemd unit before LVM units.
+
 * Thu Oct 24 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-35
 - Add 0022-RHBZ-864368-disable-libdm-failback.patch
   * make kpartx and multiapthd disable libdm failback device creation
