@@ -5,7 +5,7 @@ diff -purN old/multipathd/multipathd.service new/multipathd/multipathd.service
  [Unit]
  Description=Device-Mapper Multipath Device Controller
 -Before=iscsi.service iscsid.service
-+Before=iscsi.service iscsid.service lvm2-activation-early.service lvm2-lvmetad.service
++Before=iscsi.service iscsid.service lvm2-activation-early.service
  After=syslog.target
  ConditionPathExists=/etc/multipath.conf
  
