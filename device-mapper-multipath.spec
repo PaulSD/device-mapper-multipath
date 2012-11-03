@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 36%{?dist}
+Release: 37%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -32,6 +32,7 @@ Patch0021: 0021-RH-fix-oom-adj.patch
 Patch0022: 0022-RHBZ-864368-disable-libdm-failback.patch
 Patch0023: 0023-RHBZ-866291-update-documentation.patch
 Patch0024: 0024-RH-start-multipathd-service-before-lvm.patch
+Patch0025: 0025-RH-fix-systemd-start-order.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -108,6 +109,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0022 -p1
 %patch0023 -p1
 %patch0024 -p1
+%patch0025 -p1
 cp %{SOURCE1} .
 
 %build
@@ -142,6 +144,11 @@ rm -rf %{buildroot}
 
 %postun
 %systemd_postun_with_restart multipathd.service
+
+%triggerun -- %{name} < 0.4.9-37
+# make sure old systemd symlinks are removed after changing the [Install]
+# section in multipathd.service from multi-user.target to sysinit.target
+/bin/systemctl --quiet is-enabled multipathd.service >/dev/null 2>&1 && /bin/systemctl reenable multipathd.service ||:
 
 %triggerun --  %{name} < 0.4.9-16
 %{_bindir}/systemd-sysv-convert --save multipathd >/dev/null 2>&1 ||: 
@@ -194,6 +201,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Sat Nov 03 2012 Peter Rajnoha <prajnoha@redhat.com> 0.4.9-37
+- Install multipathd.service for sysinit.target instead of multi-user.target.
+
 * Thu Nov 01 2012 Peter Rajnoha <prajnoha@redhat.com> 0.4.9-36
 - Start multipathd.service systemd unit before LVM units.
 
