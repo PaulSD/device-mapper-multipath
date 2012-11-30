@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 37%{?dist}
+Release: 38%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -33,6 +33,11 @@ Patch0022: 0022-RHBZ-864368-disable-libdm-failback.patch
 Patch0023: 0023-RHBZ-866291-update-documentation.patch
 Patch0024: 0024-RH-start-multipathd-service-before-lvm.patch
 Patch0025: 0025-RH-fix-systemd-start-order.patch
+Patch0026: 0026-RH-fix-mpathpersist-fns.patch
+Patch0027: 0027-RH-default-partition-delimiters.patch
+Patch0028: 0028-RH-storagetek-config.patch
+Patch0029: 0029-RH-kpartx-retry.patch
+Patch0030: 0030-RH-early-blacklist.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -110,6 +115,11 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0023 -p1
 %patch0024 -p1
 %patch0025 -p1
+%patch0026 -p1
+%patch0027 -p1
+%patch0028 -p1
+%patch0029 -p1
+%patch0030 -p1
 cp %{SOURCE1} .
 
 %build
@@ -201,6 +211,18 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Nov 30 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-38
+- Add 0026-RH-fix-mpathpersist-fns.patch
+- Add 0027-RH-default-partition-delimiters.patch
+  * Only use the -p delimiter when the device name ends in a number
+- Add 0028-RH-storagetek-config.patch
+- Add 0029-RH-kpartx-retry.patch
+  * retry delete on busy loop devices
+- Add 0030-RH-early-blacklist.patch
+  * multipath will now blacklist devices by device type and wwid in
+    store_pathinfo, so that it doesn't do a bunch of unnecessary work
+    on paths that it would only be removing later on.
+
 * Sat Nov 03 2012 Peter Rajnoha <prajnoha@redhat.com> 0.4.9-37
 - Install multipathd.service for sysinit.target instead of multi-user.target.
 
