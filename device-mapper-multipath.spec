@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 38%{?dist}
+Release: 39%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -38,6 +38,7 @@ Patch0027: 0027-RH-default-partition-delimiters.patch
 Patch0028: 0028-RH-storagetek-config.patch
 Patch0029: 0029-RH-kpartx-retry.patch
 Patch0030: 0030-RH-early-blacklist.patch
+Patch0031: 0031-RHBZ-882060-fix-null-strncmp.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -120,6 +121,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0028 -p1
 %patch0029 -p1
 %patch0030 -p1
+%patch0031 -p1
 cp %{SOURCE1} .
 
 %build
@@ -211,6 +213,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Nov 30 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-39
+- Add 0031-RHBZ-882060-fix-null-strncmp.patch
+
 * Fri Nov 30 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-38
 - Add 0026-RH-fix-mpathpersist-fns.patch
 - Add 0027-RH-default-partition-delimiters.patch
