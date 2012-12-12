@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 39%{?dist}
+Release: 40%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -39,6 +39,7 @@ Patch0028: 0028-RH-storagetek-config.patch
 Patch0029: 0029-RH-kpartx-retry.patch
 Patch0030: 0030-RH-early-blacklist.patch
 Patch0031: 0031-RHBZ-882060-fix-null-strncmp.patch
+Patch0032: 0032-RH-make-path-fd-readonly.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -122,6 +123,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0029 -p1
 %patch0030 -p1
 %patch0031 -p1
+%patch0032 -p1
 cp %{SOURCE1} .
 
 %build
@@ -213,6 +215,11 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Nov 30 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-40
+- Add 0032-RH-make-path-fd-readonly.patch
+  * revert change made when adding persistent reservations, so that path fds
+    are again opened O_RDONLY
+
 * Fri Nov 30 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-39
 - Add 0031-RHBZ-882060-fix-null-strncmp.patch
 
