@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 40%{?dist}
+Release: 41%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -40,6 +40,7 @@ Patch0029: 0029-RH-kpartx-retry.patch
 Patch0030: 0030-RH-early-blacklist.patch
 Patch0031: 0031-RHBZ-882060-fix-null-strncmp.patch
 Patch0032: 0032-RH-make-path-fd-readonly.patch
+Patch0033: 0033-RH-dont-disable-libdm-failback-for-sync-case.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -124,6 +125,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0030 -p1
 %patch0031 -p1
 %patch0032 -p1
+%patch0033 -p1
 cp %{SOURCE1} .
 
 %build
@@ -215,6 +217,11 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Dec 17 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-41
+- Add 0033-RH-dont-disable-libdm-failback-for-sync-case.patch
+  * make kpartx -s and multipath use libdm failback device creation, so
+    that they work in environments without udev
+
 * Fri Nov 30 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-40
 - Add 0032-RH-make-path-fd-readonly.patch
   * revert change made when adding persistent reservations, so that path fds
