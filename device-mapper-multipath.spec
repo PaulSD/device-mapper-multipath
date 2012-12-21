@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 41%{?dist}
+Release: 42%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -41,6 +41,8 @@ Patch0030: 0030-RH-early-blacklist.patch
 Patch0031: 0031-RHBZ-882060-fix-null-strncmp.patch
 Patch0032: 0032-RH-make-path-fd-readonly.patch
 Patch0033: 0033-RH-dont-disable-libdm-failback-for-sync-case.patch
+Patch0034: 0034-RHBZ-887737-check-for-null-key.patch
+Patch0035: 0035-RHBZ-883981-cleanup-rpmdiff-issues.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -126,11 +128,13 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0031 -p1
 %patch0032 -p1
 %patch0033 -p1
+%patch0034 -p1
+%patch0035 -p1
 cp %{SOURCE1} .
 
 %build
-%define _sbindir /sbin
-%define _libdir /%{_lib}
+%define _sbindir /usr/sbin
+%define _libdir /usr/%{_lib}
 %define _libmpathdir %{_libdir}/multipath
 make %{?_smp_mflags} LIB=%{_lib}
 
@@ -146,7 +150,6 @@ make install \
 	unitdir=%{_unitdir}
 
 # tree fix up
-# install -m 0644 %{SOURCE1} %{buildroot}/etc/multipath.conf
 install -d %{buildroot}/etc/multipath
 
 %clean
@@ -213,10 +216,15 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 
 %files -n kpartx
 %defattr(-,root,root,-)
-/sbin/kpartx
+%{_sbindir}/kpartx
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Dec 21 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-42
+- Add 0034-RHBZ-887737-check-for-null-key.patch
+- Add 0035-RHBZ-883981-cleanup-rpmdiff-issues.patch
+  * Compile multipathd with full RELRO and PIE and install to /usr
+
 * Mon Dec 17 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-41
 - Add 0033-RH-dont-disable-libdm-failback-for-sync-case.patch
   * make kpartx -s and multipath use libdm failback device creation, so
