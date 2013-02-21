@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 43%{?dist}
+Release: 44%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -43,6 +43,11 @@ Patch0032: 0032-RH-make-path-fd-readonly.patch
 Patch0033: 0033-RH-dont-disable-libdm-failback-for-sync-case.patch
 Patch0034: 0034-RHBZ-887737-check-for-null-key.patch
 Patch0035: 0035-RHBZ-883981-cleanup-rpmdiff-issues.patch
+Patch0036: 0036-UP-fix-state-handling.patch
+Patch0037: 0037-UP-fix-params-size.patch
+Patch0038: 0038-RH-fix-multipath.rules.patch
+Patch0039: 0039-RH-handle-other-sector-sizes.patch
+Patch0040: 0040-RH-fix-output-buffer.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -130,6 +135,11 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0033 -p1
 %patch0034 -p1
 %patch0035 -p1
+%patch0036 -p1
+%patch0037 -p1
+%patch0038 -p1
+%patch0039 -p1
+%patch0040 -p1
 cp %{SOURCE1} .
 
 %build
@@ -220,6 +230,17 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Feb 19 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-44
+- Add 0036-UP-fix-state-handling.patch
+  * handle transport-offline and quiesce sysfs state
+- Add 0037-UP-fix-params-size.patch
+- Add 0038-RH-fix-multipath.rules.patch
+  * make sure multipath's link priority gets increased
+- Add 0039-RH-handle-other-sector-sizes.patch
+  * allow gpt partitions on 4k sector size block devices.
+- Add 0040-RH-fix-output-buffer.patch
+  * fix multipath -ll for large configuration.
+
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.9-43
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
