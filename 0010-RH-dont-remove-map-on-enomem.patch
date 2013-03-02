@@ -2,11 +2,11 @@
  multipathd/main.c |    3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
-Index: multipath-tools-120518/multipathd/main.c
+Index: multipath-tools-130222/multipathd/main.c
 ===================================================================
---- multipath-tools-120518.orig/multipathd/main.c
-+++ multipath-tools-120518/multipathd/main.c
-@@ -993,7 +993,8 @@ mpvec_garbage_collector (struct vectors
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -990,7 +990,8 @@ mpvec_garbage_collector (struct vectors
  		return;
  
  	vector_foreach_slot (vecs->mpvec, mpp, i) {

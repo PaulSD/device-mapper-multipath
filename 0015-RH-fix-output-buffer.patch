@@ -2,10 +2,10 @@
  libmultipath/print.c |   30 ++++++++++++++++++++++++++----
  1 file changed, 26 insertions(+), 4 deletions(-)
 
-Index: multipath-tools-120821/libmultipath/print.c
+Index: multipath-tools-130222/libmultipath/print.c
 ===================================================================
---- multipath-tools-120821.orig/libmultipath/print.c
-+++ multipath-tools-120821/libmultipath/print.c
+--- multipath-tools-130222.orig/libmultipath/print.c
++++ multipath-tools-130222/libmultipath/print.c
 @@ -8,6 +8,8 @@
  #include <sys/stat.h>
  #include <dirent.h>
@@ -23,7 +23,7 @@ Index: multipath-tools-120821/libmultipath/print.c
  
  #define MAX(x,y) (x > y) ? x : y
  #define TAIL     (line + len - 1 - c)
-@@ -757,11 +760,30 @@ snprint_pathgroup (char * line, int len,
+@@ -754,11 +757,30 @@ snprint_pathgroup (char * line, int len,
  extern void
  print_multipath_topology (struct multipath * mpp, int verbosity)
  {

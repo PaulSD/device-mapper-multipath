@@ -6,10 +6,10 @@
  kpartx/sun.c    |   35 ---------------
  5 files changed, 24 insertions(+), 177 deletions(-)
 
-Index: multipath-tools-120123/kpartx/bsd.c
+Index: multipath-tools-130222/kpartx/bsd.c
 ===================================================================
---- multipath-tools-120123.orig/kpartx/bsd.c
-+++ multipath-tools-120123/kpartx/bsd.c
+--- multipath-tools-130222.orig/kpartx/bsd.c
++++ multipath-tools-130222/kpartx/bsd.c
 @@ -50,10 +50,10 @@ int
  read_bsd_pt(int fd, struct slice all, struct slice *sp, int ns) {
  	struct bsd_disklabel *l;
@@ -60,10 +60,10 @@ Index: multipath-tools-120123/kpartx/bsd.c
 -	}
  	return n;
  }
-Index: multipath-tools-120123/kpartx/dos.c
+Index: multipath-tools-130222/kpartx/dos.c
 ===================================================================
---- multipath-tools-120123.orig/kpartx/dos.c
-+++ multipath-tools-120123/kpartx/dos.c
+--- multipath-tools-130222.orig/kpartx/dos.c
++++ multipath-tools-130222/kpartx/dos.c
 @@ -16,7 +16,7 @@ is_extended(int type) {
  }
  
@@ -92,11 +92,11 @@ Index: multipath-tools-120123/kpartx/dos.c
  		}
  	}
  	return n;
-Index: multipath-tools-120123/kpartx/kpartx.c
+Index: multipath-tools-130222/kpartx/kpartx.c
 ===================================================================
---- multipath-tools-120123.orig/kpartx/kpartx.c
-+++ multipath-tools-120123/kpartx/kpartx.c
-@@ -190,7 +190,7 @@ get_hotplug_device(void)
+--- multipath-tools-130222.orig/kpartx/kpartx.c
++++ multipath-tools-130222/kpartx/kpartx.c
+@@ -192,7 +192,7 @@ get_hotplug_device(void)
  
  int
  main(int argc, char **argv){
@@ -105,7 +105,7 @@ Index: multipath-tools-120123/kpartx/kpartx.c
  	int fd = -1;
  	struct slice all;
  	struct pt *ptp;
-@@ -380,49 +380,30 @@ main(int argc, char **argv){
+@@ -381,49 +381,30 @@ main(int argc, char **argv){
  		else
  			continue;
  
@@ -169,7 +169,7 @@ Index: multipath-tools-120123/kpartx/kpartx.c
  
  			break;
  
-@@ -461,16 +442,10 @@ main(int argc, char **argv){
+@@ -462,16 +443,10 @@ main(int argc, char **argv){
  		case ADD:
  		case UPDATE:
  			/* ADD and UPDATE share the same code that adds new partitions. */
@@ -187,7 +187,7 @@ Index: multipath-tools-120123/kpartx/kpartx.c
  				if (safe_sprintf(partname, "%s%s%d",
  					     mapname, delim, j+1)) {
  					fprintf(stderr, "partname too small\n");
-@@ -511,72 +486,6 @@ main(int argc, char **argv){
+@@ -512,72 +487,6 @@ main(int argc, char **argv){
  					       slices[j].minor, slices[j].size,
  					       DM_TARGET, params);
  			}
@@ -260,10 +260,10 @@ Index: multipath-tools-120123/kpartx/kpartx.c
  
  			if (what == ADD) {
  				/* Skip code that removes devmappings for deleted partitions */
-Index: multipath-tools-120123/kpartx/kpartx.h
+Index: multipath-tools-130222/kpartx/kpartx.h
 ===================================================================
---- multipath-tools-120123.orig/kpartx/kpartx.h
-+++ multipath-tools-120123/kpartx/kpartx.h
+--- multipath-tools-130222.orig/kpartx/kpartx.h
++++ multipath-tools-130222/kpartx/kpartx.h
 @@ -24,7 +24,6 @@
  struct slice {
  	uint64_t start;
@@ -272,10 +272,10 @@ Index: multipath-tools-120123/kpartx/kpartx.h
  	int major;
  	int minor;
  };
-Index: multipath-tools-120123/kpartx/sun.c
+Index: multipath-tools-130222/kpartx/sun.c
 ===================================================================
---- multipath-tools-120123.orig/kpartx/sun.c
-+++ multipath-tools-120123/kpartx/sun.c
+--- multipath-tools-130222.orig/kpartx/sun.c
++++ multipath-tools-130222/kpartx/sun.c
 @@ -62,8 +62,8 @@ int
  read_sun_pt(int fd, struct slice all, struct slice *sp, int ns) {
  	struct sun_disk_label *l;

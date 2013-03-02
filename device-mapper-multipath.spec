@@ -1,12 +1,12 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 44%{?dist}
+Release: 45%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
-Source0: multipath-tools-120821.tgz
+Source0: multipath-tools-130222.tgz
 Source1: multipath.conf
 Patch0001: 0001-RH-dont_start_with_no_config.patch
 Patch0002: 0002-RH-multipath.rules.patch
@@ -15,39 +15,18 @@ Patch0004: 0004-RH-multipathd-blacklist-all-by-default.patch
 Patch0005: 0005-RH-add-mpathconf.patch
 Patch0006: 0006-RH-add-find-multipaths.patch
 Patch0007: 0007-RH-add-hp_tur-checker.patch
-Patch0008: 0008-RH-RHEL5-style-partitions.patch
-Patch0009: 0009-RH-dont-remove-map-on-enomem.patch
-Patch0010: 0010-RH-deprecate-uid-gid-mode.patch
-Patch0011: 0011-RH-use-sync-support.patch
-Patch0012: 0012-RH-change-configs.patch
-Patch0013: 0013-RH-kpartx-msg.patch
-Patch0014: 0014-RH-dm_reassign.patch
-Patch0015: 0015-RH-selector_change.patch
-Patch0016: 0016-RH-retain_hwhandler.patch
-# Patch0017: 0017-RH-netapp_config.patch
-Patch0018: 0018-RH-remove-config-dups.patch
-Patch0019: 0019-RH-detect-prio.patch
-Patch0020: 0020-RH-netapp-config.patch
-Patch0021: 0021-RH-fix-oom-adj.patch
-Patch0022: 0022-RHBZ-864368-disable-libdm-failback.patch
-Patch0023: 0023-RHBZ-866291-update-documentation.patch
-Patch0024: 0024-RH-start-multipathd-service-before-lvm.patch
-Patch0025: 0025-RH-fix-systemd-start-order.patch
-Patch0026: 0026-RH-fix-mpathpersist-fns.patch
-Patch0027: 0027-RH-default-partition-delimiters.patch
-Patch0028: 0028-RH-storagetek-config.patch
-Patch0029: 0029-RH-kpartx-retry.patch
-Patch0030: 0030-RH-early-blacklist.patch
-Patch0031: 0031-RHBZ-882060-fix-null-strncmp.patch
-Patch0032: 0032-RH-make-path-fd-readonly.patch
-Patch0033: 0033-RH-dont-disable-libdm-failback-for-sync-case.patch
-Patch0034: 0034-RHBZ-887737-check-for-null-key.patch
-Patch0035: 0035-RHBZ-883981-cleanup-rpmdiff-issues.patch
-Patch0036: 0036-UP-fix-state-handling.patch
-Patch0037: 0037-UP-fix-params-size.patch
-Patch0038: 0038-RH-fix-multipath.rules.patch
-Patch0039: 0039-RH-handle-other-sector-sizes.patch
-Patch0040: 0040-RH-fix-output-buffer.patch
+Patch0008: 0008-RH-revert-partition-changes.patch
+Patch0009: 0009-RH-RHEL5-style-partitions.patch
+Patch0010: 0010-RH-dont-remove-map-on-enomem.patch
+Patch0011: 0011-RH-deprecate-uid-gid-mode.patch
+Patch0012: 0012-RH-kpartx-msg.patch
+Patch0013: 0013-RHBZ-883981-cleanup-rpmdiff-issues.patch
+Patch0014: 0014-RH-handle-other-sector-sizes.patch
+Patch0015: 0015-RH-fix-output-buffer.patch
+Patch0016: 0016-RH-dont-print-ghost-messages.patch
+Patch0017: 0017-RH-fix-sigusr1.patch
+Patch0018: 0018-RH-fix-factorize.patch
+Patch0019: 0019-RH-fix-sockets.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -99,7 +78,7 @@ Group: System Environment/Base
 kpartx manages partition creation and removal for device-mapper devices.
 
 %prep
-%setup -q -n multipath-tools-120821
+%setup -q -n multipath-tools-130222
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -116,30 +95,9 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0014 -p1
 %patch0015 -p1
 %patch0016 -p1
-# %patch0017 -p1
+%patch0017 -p1
 %patch0018 -p1
 %patch0019 -p1
-%patch0020 -p1
-%patch0021 -p1
-%patch0022 -p1
-%patch0023 -p1
-%patch0024 -p1
-%patch0025 -p1
-%patch0026 -p1
-%patch0027 -p1
-%patch0028 -p1
-%patch0029 -p1
-%patch0030 -p1
-%patch0031 -p1
-%patch0032 -p1
-%patch0033 -p1
-%patch0034 -p1
-%patch0035 -p1
-%patch0036 -p1
-%patch0037 -p1
-%patch0038 -p1
-%patch0039 -p1
-%patch0040 -p1
 cp %{SOURCE1} .
 
 %build
@@ -230,6 +188,37 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Sat Mar  2 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-45
+- Updated to latest upstrem 0.4.9 code: multipath-tools-130222
+  (git commit id: 67b82ad6fe280caa1770025a6bb8110b633fa136)
+- Refresh 0001-RH-dont_start_with_no_config.patch
+- Modify 0002-RH-multipath.rules.patch
+- Modify 0003-RH-Make-build-system-RH-Fedora-friendly.patch
+- Refresh 0004-RH-multipathd-blacklist-all-by-default.patch
+- Refresh 0005-RH-add-mpathconf.patch
+- Refresh 0006-RH-add-find-multipaths.patch
+- Add 0008-RH-revert-partition-changes.patch
+- Rename 0008-RH-RHEL5-style-partitions.patch to
+	 0009-RH-RHEL5-style-partitions.patch
+- Rename 0009-RH-dont-remove-map-on-enomem.patch to
+	 0010-RH-dont-remove-map-on-enomem.patch
+- Rename 0010-RH-deprecate-uid-gid-mode.patch to
+	 0011-RH-deprecate-uid-gid-mode.patch
+- Rename 0013-RH-kpartx-msg.patch to 0012-RH-kpartx-msg.patch
+- Rename 0035-RHBZ-883981-cleanup-rpmdiff-issues.patch to
+         0013-RHBZ-883981-cleanup-rpmdiff-issues.patch
+- Rename 0039-RH-handle-other-sector-sizes.patch to
+	 0014-RH-handle-other-sector-sizes.patch
+- Rename 0040-RH-fix-output-buffer.patch to 0015-RH-fix-output-buffer.patch
+- Add 0016-RH-dont-print-ghost-messages.patch
+- Add 0017-RH-fix-sigusr1.patch
+  * Actually this fixes a number of issues related to signals
+- Rename 0018-RH-remove-config-dups.patch to 0018-RH-fix-factorize.patch
+  * just the part that isn't upstream
+- Add 0019-RH-fix-sockets.patch
+  * makes abstract multipathd a cli sockets use the correct name.
+- Set find_multipaths in the default config
+
 * Wed Feb 19 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-44
 - Add 0036-UP-fix-state-handling.patch
   * handle transport-offline and quiesce sysfs state

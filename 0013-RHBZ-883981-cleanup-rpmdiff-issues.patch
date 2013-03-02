@@ -9,10 +9,10 @@
  multipathd/Makefile                |    5 +++--
  8 files changed, 15 insertions(+), 12 deletions(-)
 
-Index: multipath-tools-120821/Makefile.inc
+Index: multipath-tools-130222/Makefile.inc
 ===================================================================
---- multipath-tools-120821.orig/Makefile.inc
-+++ multipath-tools-120821/Makefile.inc
+--- multipath-tools-130222.orig/Makefile.inc
++++ multipath-tools-130222/Makefile.inc
 @@ -23,15 +23,15 @@ endif
  
  prefix      = 
@@ -43,27 +43,27 @@ Index: multipath-tools-120821/Makefile.inc
  SHARED_FLAGS = -shared
  
  %.o:	%.c
-Index: multipath-tools-120821/multipathd/Makefile
+Index: multipath-tools-130222/multipathd/Makefile
 ===================================================================
---- multipath-tools-120821.orig/multipathd/Makefile
-+++ multipath-tools-120821/multipathd/Makefile
+--- multipath-tools-130222.orig/multipathd/Makefile
++++ multipath-tools-130222/multipathd/Makefile
 @@ -5,9 +5,10 @@ include ../Makefile.inc
  #
  # basic flags setting
  #
 -CFLAGS += -I$(multipathdir) -I$(mpathpersistdir)
 +CFLAGS += -fPIE -DPIE -I$(multipathdir) -I$(mpathpersistdir)
- LDFLAGS += -lpthread -ldevmapper -lreadline -lncurses -ludev -ldl \
+ LDFLAGS += -lpthread -ldevmapper -lreadline -ludev -ldl \
 -	   -L$(multipathdir) -lmultipath -L$(mpathpersistdir) -lmpathpersist
 +	   -L$(multipathdir) -lmultipath -L$(mpathpersistdir) -lmpathpersist \
 +	   -Wl,-z,now -pie
  
  #
  # debuging stuff
-Index: multipath-tools-120821/kpartx/Makefile
+Index: multipath-tools-130222/kpartx/Makefile
 ===================================================================
---- multipath-tools-120821.orig/kpartx/Makefile
-+++ multipath-tools-120821/kpartx/Makefile
+--- multipath-tools-130222.orig/kpartx/Makefile
++++ multipath-tools-130222/kpartx/Makefile
 @@ -4,7 +4,7 @@
  #
  include ../Makefile.inc
@@ -73,10 +73,10 @@ Index: multipath-tools-120821/kpartx/Makefile
  
  LIBDM_API_COOKIE = $(shell grep -Ecs '^[a-z]*[[:space:]]+dm_task_set_cookie' /usr/include/libdevmapper.h)
  
-Index: multipath-tools-120821/libmpathpersist/Makefile
+Index: multipath-tools-130222/libmpathpersist/Makefile
 ===================================================================
---- multipath-tools-120821.orig/libmpathpersist/Makefile
-+++ multipath-tools-120821/libmpathpersist/Makefile
+--- multipath-tools-130222.orig/libmpathpersist/Makefile
++++ multipath-tools-130222/libmpathpersist/Makefile
 @@ -10,7 +10,7 @@ DEVLIB = libmpathpersist.so
  LIBS = $(DEVLIB).$(SONAME)
  
@@ -95,10 +95,10 @@ Index: multipath-tools-120821/libmpathpersist/Makefile
  	$(CC)  -shared $(LIBDEPS) -Wl,-soname=$@ $(CFLAGS) -o $@ $(OBJS)
  	ln -s $(LIBS) $(DEVLIB)
  	$(GZIP) mpath_persistent_reserve_in.3 > mpath_persistent_reserve_in.3.gz	
-Index: multipath-tools-120821/libmultipath/Makefile
+Index: multipath-tools-130222/libmultipath/Makefile
 ===================================================================
---- multipath-tools-120821.orig/libmultipath/Makefile
-+++ multipath-tools-120821/libmultipath/Makefile
+--- multipath-tools-130222.orig/libmultipath/Makefile
++++ multipath-tools-130222/libmultipath/Makefile
 @@ -8,6 +8,7 @@ SONAME=0
  DEVLIB = libmultipath.so
  LIBS = $(DEVLIB).$(SONAME)
@@ -107,10 +107,10 @@ Index: multipath-tools-120821/libmultipath/Makefile
  
  OBJS = memory.o parser.o vector.o devmapper.o \
         hwtable.o blacklist.o util.o dmparser.o config.o \
-Index: multipath-tools-120821/libmultipath/checkers/Makefile
+Index: multipath-tools-130222/libmultipath/checkers/Makefile
 ===================================================================
---- multipath-tools-120821.orig/libmultipath/checkers/Makefile
-+++ multipath-tools-120821/libmultipath/checkers/Makefile
+--- multipath-tools-130222.orig/libmultipath/checkers/Makefile
++++ multipath-tools-130222/libmultipath/checkers/Makefile
 @@ -14,7 +14,7 @@ LIBS= \
  	libcheckhp_sw.so \
  	libcheckrdac.so
@@ -120,10 +120,10 @@ Index: multipath-tools-120821/libmultipath/checkers/Makefile
  
  all: $(LIBS)
  
-Index: multipath-tools-120821/libmultipath/prioritizers/Makefile
+Index: multipath-tools-130222/libmultipath/prioritizers/Makefile
 ===================================================================
---- multipath-tools-120821.orig/libmultipath/prioritizers/Makefile
-+++ multipath-tools-120821/libmultipath/prioritizers/Makefile
+--- multipath-tools-130222.orig/libmultipath/prioritizers/Makefile
++++ multipath-tools-130222/libmultipath/prioritizers/Makefile
 @@ -17,7 +17,7 @@ LIBS = \
  	libprioweightedpath.so \
  	libprioiet.so
@@ -133,10 +133,10 @@ Index: multipath-tools-120821/libmultipath/prioritizers/Makefile
  
  all: $(LIBS)
  
-Index: multipath-tools-120821/multipath/Makefile
+Index: multipath-tools-130222/multipath/Makefile
 ===================================================================
---- multipath-tools-120821.orig/multipath/Makefile
-+++ multipath-tools-120821/multipath/Makefile
+--- multipath-tools-130222.orig/multipath/Makefile
++++ multipath-tools-130222/multipath/Makefile
 @@ -6,7 +6,7 @@ include ../Makefile.inc
  
  OBJS = main.o
