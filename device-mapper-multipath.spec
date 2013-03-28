@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 45%{?dist}
+Release: 46%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -27,6 +27,7 @@ Patch0016: 0016-RH-dont-print-ghost-messages.patch
 Patch0017: 0017-RH-fix-sigusr1.patch
 Patch0018: 0018-RH-fix-factorize.patch
 Patch0019: 0019-RH-fix-sockets.patch
+Patch0020: 0020-RHBZ-907360-static-pthread-init.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -98,6 +99,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0017 -p1
 %patch0018 -p1
 %patch0019 -p1
+%patch0020 -p1
 cp %{SOURCE1} .
 
 %build
@@ -188,6 +190,10 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Mar 28 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-46
+- Add 0020-RHBZ-907360-static-pthread-init.patch
+  * statically initialize the uevent pthread structures 
+
 * Sat Mar  2 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-45
 - Updated to latest upstrem 0.4.9 code: multipath-tools-130222
   (git commit id: 67b82ad6fe280caa1770025a6bb8110b633fa136)
