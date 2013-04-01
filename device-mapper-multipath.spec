@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 46%{?dist}
+Release: 47%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -28,6 +28,11 @@ Patch0017: 0017-RH-fix-sigusr1.patch
 Patch0018: 0018-RH-fix-factorize.patch
 Patch0019: 0019-RH-fix-sockets.patch
 Patch0020: 0020-RHBZ-907360-static-pthread-init.patch
+Patch0021: 0021-RHBZ-919119-respect-kernel-cmdline.patch
+Patch0022: 0022-RH-multipathd-check-wwids.patch
+Patch0023: 0023-RH-multipath-wipe-wwid.patch
+Patch0024: 0024-RH-multipath-wipe-wwids.patch
+Patch0025: 0025-UPBZ-916668_add_maj_min.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -100,6 +105,11 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0018 -p1
 %patch0019 -p1
 %patch0020 -p1
+%patch0021 -p1
+%patch0022 -p1
+%patch0023 -p1
+%patch0024 -p1
+%patch0025 -p1
 cp %{SOURCE1} .
 
 %build
@@ -190,6 +200,21 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Apr  1 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-47
+- Add 0021-RHBZ-919119-respect-kernel-cmdline.patch
+  * keep the multipath.rules udev file from running and multipathd from
+    starting if nompath is on the kernel command line
+- Add 0022-RH-multipathd-check-wwids.patch
+  * Whenever multipath runs configure, it will check the wwids, and
+    add any missing ones to the wwids file
+- Add 0023-RH-multipath-wipe-wwid.patch
+  * multipath's -w command will remove a wwid from the wwids file
+- Add 0024-RH-multipath-wipe-wwids.patch
+  * multipath's -W command will set reset the wwids file to just the current
+    devices
+- Add 0025-UPBZ-916668_add_maj_min.patch
+- Resolves: bz #919119
+
 * Thu Mar 28 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-46
 - Add 0020-RHBZ-907360-static-pthread-init.patch
   * statically initialize the uevent pthread structures 
