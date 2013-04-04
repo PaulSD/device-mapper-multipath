@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 47%{?dist}
+Release: 48%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -33,6 +33,9 @@ Patch0022: 0022-RH-multipathd-check-wwids.patch
 Patch0023: 0023-RH-multipath-wipe-wwid.patch
 Patch0024: 0024-RH-multipath-wipe-wwids.patch
 Patch0025: 0025-UPBZ-916668_add_maj_min.patch
+Patch0026: 0026-fix-checker-time.patch
+Patch0027: 0027-RH-get-wwid.patch
+Patch0028: 0028-RHBZ-929078-refresh-udev-dev.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -110,6 +113,9 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0023 -p1
 %patch0024 -p1
 %patch0025 -p1
+%patch0026 -p1
+%patch0027 -p1
+%patch0028 -p1
 cp %{SOURCE1} .
 
 %build
@@ -200,6 +206,18 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Apr  4 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-48
+- Add 0026-fix-checker-time.patch
+  * Once multipathd hit it max checker interval, it was reverting to
+    to shortest checker interval
+- Add 0027-RH-get-wwid.patch
+  * Multipath wasn't correctly setting the multipath wwid when it read devices
+    in from the kernel
+- Add 0028-RHBZ-929078-refresh-udev-dev.patch
+  * Make multipath try to get the UID of down devices.  Also, on ev_add_path,
+    make multipathd reinitialize existing devices that weren't fully
+    initialized before.
+
 * Mon Apr  1 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-47
 - Add 0021-RHBZ-919119-respect-kernel-cmdline.patch
   * keep the multipath.rules udev file from running and multipathd from
