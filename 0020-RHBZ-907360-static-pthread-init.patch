@@ -1,6 +1,6 @@
 ---
- libmultipath/uevent.c |   10 ++++------
- 1 file changed, 4 insertions(+), 6 deletions(-)
+ libmultipath/uevent.c |   12 ++++--------
+ 1 file changed, 4 insertions(+), 8 deletions(-)
 
 Index: multipath-tools-130222/libmultipath/uevent.c
 ===================================================================
@@ -19,16 +19,18 @@ Index: multipath-tools-130222/libmultipath/uevent.c
  uev_trigger *my_uev_trigger;
  void * my_trigger_data;
  int servicing_uev;
-@@ -411,8 +413,6 @@ int uevent_listen(void)
+@@ -409,10 +411,6 @@ int uevent_listen(void)
+ 	 * thereby not getting to empty the socket's receive buffer queue
+ 	 * often enough.
  	 */
- 	INIT_LIST_HEAD(&uevq);
- 
+-	INIT_LIST_HEAD(&uevq);
+-
 -	pthread_mutex_init(uevq_lockp, NULL);
 -	pthread_cond_init(uev_condp, NULL);
  	pthread_cleanup_push(uevq_stop, NULL);
  
  	monitor = udev_monitor_new_from_netlink(conf->udev, "udev");
-@@ -525,8 +525,6 @@ out:
+@@ -525,8 +523,6 @@ out:
  	if (need_failback)
  		err = failback_listen();
  	pthread_cleanup_pop(1);

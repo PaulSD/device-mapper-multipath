@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 48%{?dist}
+Release: 49%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -36,6 +36,8 @@ Patch0025: 0025-UPBZ-916668_add_maj_min.patch
 Patch0026: 0026-fix-checker-time.patch
 Patch0027: 0027-RH-get-wwid.patch
 Patch0028: 0028-RHBZ-929078-refresh-udev-dev.patch
+Patch0029: 0029-RH-no-prio-put-msg.patch
+Patch0030: 0030-RHBZ-916528-override-queue-no-daemon.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -116,6 +118,8 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0026 -p1
 %patch0027 -p1
 %patch0028 -p1
+%patch0029 -p1
+%patch0030 -p1
 cp %{SOURCE1} .
 
 %build
@@ -148,6 +152,9 @@ rm -rf %{buildroot}
 %systemd_preun multipathd.service
 
 %postun
+if [ $1 -ge 1 ] ; then
+	/sbin/multipathd forcequeueing daemon > /dev/null 2>&1 || :
+fi
 %systemd_postun_with_restart multipathd.service
 
 %triggerun -- %{name} < 0.4.9-37
@@ -206,6 +213,16 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Apr 26 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-49
+- Modify 0020-RHBZ-907360-static-pthread-init.patch
+  * Don't initialize uevent list twice
+- Add 0029-RH-no-prio-put-msg.patch
+- Add 0030-RHBZ-916528-override-queue-no-daemon.patch
+  * Default to "queue_without_daemon no"
+  * Add "forcequeueing daemon" and "restorequeueing daemon" cli commands
+- Modify spec file to force queue_without_daemon when restarting
+  multipathd on upgrades.
+
 * Thu Apr  4 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-48
 - Add 0026-fix-checker-time.patch
   * Once multipathd hit it max checker interval, it was reverting to
