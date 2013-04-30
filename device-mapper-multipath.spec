@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 49%{?dist}
+Release: 50%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -38,6 +38,7 @@ Patch0027: 0027-RH-get-wwid.patch
 Patch0028: 0028-RHBZ-929078-refresh-udev-dev.patch
 Patch0029: 0029-RH-no-prio-put-msg.patch
 Patch0030: 0030-RHBZ-916528-override-queue-no-daemon.patch
+Patch0031: 0031-RHBZ-957188-kpartx-use-dm-name.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -120,6 +121,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0028 -p1
 %patch0029 -p1
 %patch0030 -p1
+%patch0031 -p1
 cp %{SOURCE1} .
 
 %build
@@ -213,6 +215,12 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Apr 30 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-50
+- Add 0031-RHBZ-957188-kpartx-use-dm-name.patch
+  * use the basename of the devices that will be created to choose the
+    delimiter instead of using the device name from the command line
+- Resolves: bz #957188
+
 * Fri Apr 26 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-49
 - Modify 0020-RHBZ-907360-static-pthread-init.patch
   * Don't initialize uevent list twice
