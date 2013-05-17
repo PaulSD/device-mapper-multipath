@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 50%{?dist}
+Release: 51%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -39,6 +39,12 @@ Patch0028: 0028-RHBZ-929078-refresh-udev-dev.patch
 Patch0029: 0029-RH-no-prio-put-msg.patch
 Patch0030: 0030-RHBZ-916528-override-queue-no-daemon.patch
 Patch0031: 0031-RHBZ-957188-kpartx-use-dm-name.patch
+Patch0032: 0032-RHBZ-956464-mpathconf-defaults.patch
+Patch0033: 0033-RHBZ-829963-e-series-conf.patch
+Patch0034: 0034-RHBZ-851416-mpathconf-display.patch
+Patch0035: 0035-RHBZ-891921-list-mpp.patch
+Patch0036: 0036-RHBZ-949239-load-multipath-module.patch
+Patch0037: 0037-RHBZ-768873-fix-rename.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -122,6 +128,12 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0029 -p1
 %patch0030 -p1
 %patch0031 -p1
+%patch0032 -p1
+%patch0033 -p1
+%patch0034 -p1
+%patch0035 -p1
+%patch0036 -p1
+%patch0037 -p1
 cp %{SOURCE1} .
 
 %build
@@ -215,6 +227,24 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri May 17 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-51
+- Add 0032-RHBZ-956464-mpathconf-defaults.patch
+  * fix defaults listed in usage
+- Add 0033-RHBZ-829963-e-series-conf.patch
+- Add 0034-RHBZ-851416-mpathconf-display.patch
+  * display whether or not multipathd is running in the status
+- Add 0035-RHBZ-891921-list-mpp.patch
+  * add a new path format wilcard to list the multipath device associated
+    with a path
+- Add 0036-RHBZ-949239-load-multipath-module.patch
+  * load the dm-multipath kernel module when multipathd starts
+- Add 0037-RHBZ-768873-fix-rename.patch
+  * When deciding on a multipth devices name on reload, don't default to
+    the existing name if there is no config file alias and user_friendly_names
+    isn't set. Use the wwid.
+- Modify multipath.conf
+- Resolves: bz #768873, #950252
+
 * Tue Apr 30 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-50
 - Add 0031-RHBZ-957188-kpartx-use-dm-name.patch
   * use the basename of the devices that will be created to choose the
