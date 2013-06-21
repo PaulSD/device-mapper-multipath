@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 51%{?dist}
+Release: 52%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -24,7 +24,7 @@ Patch0013: 0013-RHBZ-883981-cleanup-rpmdiff-issues.patch
 Patch0014: 0014-RH-handle-other-sector-sizes.patch
 Patch0015: 0015-RH-fix-output-buffer.patch
 Patch0016: 0016-RH-dont-print-ghost-messages.patch
-Patch0017: 0017-RH-fix-sigusr1.patch
+#Patch0017: 0017-RH-fix-sigusr1.patch
 Patch0018: 0018-RH-fix-factorize.patch
 Patch0019: 0019-RH-fix-sockets.patch
 Patch0020: 0020-RHBZ-907360-static-pthread-init.patch
@@ -45,6 +45,12 @@ Patch0034: 0034-RHBZ-851416-mpathconf-display.patch
 Patch0035: 0035-RHBZ-891921-list-mpp.patch
 Patch0036: 0036-RHBZ-949239-load-multipath-module.patch
 Patch0037: 0037-RHBZ-768873-fix-rename.patch
+Patch0038: 0038-RHBZ-799860-netapp-config.patch
+Patch0039: 0039-RH-detect-prio-fix.patch
+Patch0040: 0040-RH-bindings-fix.patch
+Patch0041: 0041-RH-check-for-erofs.patch
+Patch0042: 0042-UP-fix-signal-handling.patch
+Patch0043: 0043-RH-signal-waiter.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -113,7 +119,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0014 -p1
 %patch0015 -p1
 %patch0016 -p1
-%patch0017 -p1
+#%patch0017 -p1
 %patch0018 -p1
 %patch0019 -p1
 %patch0020 -p1
@@ -134,6 +140,12 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0035 -p1
 %patch0036 -p1
 %patch0037 -p1
+%patch0038 -p1
+%patch0039 -p1
+%patch0040 -p1
+%patch0041 -p1
+%patch0042 -p1
+%patch0043 -p1
 cp %{SOURCE1} .
 
 %build
@@ -227,6 +239,24 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Jun 21 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-52
+- Add 0038-RHBZ-799860-netapp-config.patch
+- Add 0039-RH-detect-prio-fix.patch
+  * Don't autodetect ALUA prioritizer unless it actually can get a priority
+- Add 0040-RH-bindings-fix.patch
+  * Do a better job of trying to get the first free user_friendly_name
+- Add 0041-RH-check-for-erofs.patch
+  * Don't create/reload a device read-only unless doing it read/write fails
+    with EROFS
+- Remove 0017-RH-fix-sigusr1.patch
+  * fix signal handling upstream way instead
+- Add 0042-UP-fix-signal-handling.patch
+  * uxlsnr now handles all the signals sent to multipathd. This makes its
+    signal handling posix compliant, and harder to mess up.
+- Add 0043-RH-signal-waiter.patch
+  * ioctl isn't a pthread cancellation point.  Send a signal to the waiter
+    thread to break out of waiting in ioctl for a dm event.
+
 * Fri May 17 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-51
 - Add 0032-RHBZ-956464-mpathconf-defaults.patch
   * fix defaults listed in usage
