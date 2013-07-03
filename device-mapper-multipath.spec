@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 52%{?dist}
+Release: 53%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -51,6 +51,9 @@ Patch0040: 0040-RH-bindings-fix.patch
 Patch0041: 0041-RH-check-for-erofs.patch
 Patch0042: 0042-UP-fix-signal-handling.patch
 Patch0043: 0043-RH-signal-waiter.patch
+Patch0044: 0044-RHBZ-976688-fix-wipe-wwids.patch
+Patch0045: 0045-RHBZ-977297-man-page-fix.patch
+Patch0046: 0046-RHBZ-883981-move-udev-rules.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -119,7 +122,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0014 -p1
 %patch0015 -p1
 %patch0016 -p1
-#%patch0017 -p1
+# %%patch0017 -p1
 %patch0018 -p1
 %patch0019 -p1
 %patch0020 -p1
@@ -146,6 +149,9 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0041 -p1
 %patch0042 -p1
 %patch0043 -p1
+%patch0044 -p1
+%patch0045 -p1
+%patch0046 -p1
 cp %{SOURCE1} .
 
 %build
@@ -211,7 +217,7 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/multipathd.8.gz
 %{_mandir}/man8/mpathconf.8.gz
 %{_mandir}/man8/mpathpersist.8.gz
-%config /lib/udev/rules.d/62-multipath.rules
+%config /usr/lib/udev/rules.d/62-multipath.rules
 %doc AUTHOR COPYING FAQ
 %doc multipath.conf
 %dir /etc/multipath
@@ -239,6 +245,15 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Jul  3 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-53
+- Add 0044-RHBZ-976688-fix-wipe-wwids.patch
+  * Seek back to the start of the file after truncating it
+- Add 0045-RHBZ-977297-man-page-fix.patch
+  * update man page to match actual defaults
+- Add 0046-RHBZ-883981-move-udev-rules.patch
+  * move udev rules file from /lib to /usr/lib
+- Resolves: bz #883981, #976688, #977297
+
 * Fri Jun 21 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-52
 - Add 0038-RHBZ-799860-netapp-config.patch
 - Add 0039-RH-detect-prio-fix.patch
@@ -353,7 +368,7 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
   * makes abstract multipathd a cli sockets use the correct name.
 - Set find_multipaths in the default config
 
-* Wed Feb 19 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-44
+* Wed Feb 20 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-44
 - Add 0036-UP-fix-state-handling.patch
   * handle transport-offline and quiesce sysfs state
 - Add 0037-UP-fix-params-size.patch
@@ -403,17 +418,17 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 * Thu Nov 01 2012 Peter Rajnoha <prajnoha@redhat.com> 0.4.9-36
 - Start multipathd.service systemd unit before LVM units.
 
-* Thu Oct 24 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-35
+* Wed Oct 24 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-35
 - Add 0022-RHBZ-864368-disable-libdm-failback.patch
   * make kpartx and multiapthd disable libdm failback device creation
 - Add 0023-RHBZ-866291-update-documentation.patch
 - Resolves: bz #864368, #866291
 
-* Wed Oct 23 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-34
+* Tue Oct 23 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-34
 - Add 0021-RH-fix-oom-adj.patch
   * don't use OOM_ADJUST_MIN unless you're sure it's defined
 
-* Wed Oct 23 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-33
+* Tue Oct 23 2012 Benjamin Marzinski <bmarizns@redhat.com> 0.4.9-33
 - Modify 0016-RH-retain_hwhandler.patch
   * Check the dm-multipath module version, and don't enable
     retain_attached_hw_handler if the kernel doesn't support it
@@ -473,7 +488,7 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 Resolves: bz #831978
 
 
-* Mon May 18 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-26
+* Thu May 17 2012 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-26
 - Add 0025-RHBZ-822714-update-nodes.patch
 - Resolves: bz #822714
 
@@ -521,11 +536,11 @@ Resolves: bz #831978
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
 * Tue Sep 20 2011 Benjamin Marzinski <bmarzins@redhat.com> -0.4.9-19
-  - Modify 0103-add-disable-sync-option.patch
-  - Add 0104-RHBZ-737989-systemd-unit-fix.patch
-    * systemd will only start multipathd if /etc/multipath.conf exists
-  - Add 0105-fix-oom-adj.patch
-    * first try setting oom_score_adj
+- Modify 0103-add-disable-sync-option.patch
+- Add 0104-RHBZ-737989-systemd-unit-fix.patch
+  * systemd will only start multipathd if /etc/multipath.conf exists
+- Add 0105-fix-oom-adj.patch
+  * first try setting oom_score_adj
 
 * Mon Aug 15 2011 Kalev Lember <kalevlember@gmail.com> - 0.4.9-18
 - Rebuilt for rpm bug #728707
@@ -681,7 +696,7 @@ Resolves: bz #831978
 - split the multipath libs out to a device-mapper-multipath-libs package
 - if appropriate, install multipath libs in /lib64 and /lib64/multipath
 
-* Thu Apr 7 2009 Milan Broz <mbroz@redhat.com> - 0.4.8-10
+* Tue Apr 7 2009 Milan Broz <mbroz@redhat.com> - 0.4.8-10
 - Fix insecure permissions on multipathd.sock (CVE-2009-0115)
 
 * Fri Mar 6 2009 Milan Broz <mbroz@redhat.com> - 0.4.8-9
@@ -778,7 +793,7 @@ Resolves: bz #831978
 * Wed Jun 28 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-2.0
 - Updated to latest upstream source, fixes kpartx udev rule issue
 
-* Mon Jun 06 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-1.0
+* Tue Jun 06 2006 Benjamin Marzinski <bmarzins@redhat.com> 0.4.7-1.0
 - Updated to Christophe's latest source
 
 * Mon May 22 2006 Alasdair Kergon <agk@redhat.com> - 0.4.5-16.0
