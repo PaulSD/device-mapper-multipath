@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 53%{?dist}
+Release: 54%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -54,6 +54,7 @@ Patch0043: 0043-RH-signal-waiter.patch
 Patch0044: 0044-RHBZ-976688-fix-wipe-wwids.patch
 Patch0045: 0045-RHBZ-977297-man-page-fix.patch
 Patch0046: 0046-RHBZ-883981-move-udev-rules.patch
+Patch0047: 0047-RHBZ-980777-kpartx-read-only-loop-devs.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -152,6 +153,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0044 -p1
 %patch0045 -p1
 %patch0046 -p1
+%patch0047 -p1
 cp %{SOURCE1} .
 
 %build
@@ -245,6 +247,11 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Jul  5 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-54
+- Add 0047-RHBZ-980777-kpartx-read-only-loop-devs.patch
+  * make kpartx support read-only files better
+- Resolves: bz #980777
+
 * Wed Jul  3 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-53
 - Add 0044-RHBZ-976688-fix-wipe-wwids.patch
   * Seek back to the start of the file after truncating it
