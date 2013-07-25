@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 54%{?dist}
+Release: 55%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -55,6 +55,19 @@ Patch0044: 0044-RHBZ-976688-fix-wipe-wwids.patch
 Patch0045: 0045-RHBZ-977297-man-page-fix.patch
 Patch0046: 0046-RHBZ-883981-move-udev-rules.patch
 Patch0047: 0047-RHBZ-980777-kpartx-read-only-loop-devs.patch
+Patch0048: 0048-RH-print-defaults.patch
+Patch0049: 0049-RH-remove-ID_FS_TYPE.patch
+#Patch0050: 0050-RH-listing-speedup.patch
+Patch0051: 0051-UP-fix-cli-resize.patch
+Patch0052: 0052-RH-fix-bad-derefs.patch
+Patch0053: 0053-UP-fix-failback.patch
+Patch0054: 0054-UP-keep-udev-ref.patch
+Patch0055: 0055-UP-handle-quiesced-paths.patch
+Patch0056: 0056-UP-alua-prio-fix.patch
+Patch0057: 0057-UP-fix-tmo.patch
+Patch0058: 0058-UP-fix-failback.patch
+Patch0059: 0059-UP-flush-failure-queueing.patch
+Patch0060: 0060-UP-uevent-loop-udev.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -154,6 +167,19 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0045 -p1
 %patch0046 -p1
 %patch0047 -p1
+%patch0048 -p1
+%patch0049 -p1
+# %%patch0050 -p1
+%patch0051 -p1
+%patch0052 -p1
+%patch0053 -p1
+%patch0054 -p1
+%patch0055 -p1
+%patch0056 -p1
+%patch0057 -p1
+%patch0058 -p1
+%patch0059 -p1
+%patch0060 -p1
 cp %{SOURCE1} .
 
 %build
@@ -247,6 +273,40 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Jul 25 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-55
+- Modify 0015-RH-fix-output-buffer.patch
+  * Fix memory leak
+- Add 0047-RHBZ-kpartx-read-only-loop-devs.patch
+  * Fix read only loop device handling
+- Add 0048-RH-print-defaults.patch
+- Add 0049-RH-remove-ID_FS_TYPE.patch
+  * remove ID_FS_TYPE udev enviroment variable for multipath devices
+- Add 0051-UP-fix-cli-resize.patch
+  * check before dereferencing variables
+- Add 0052-RH-fix-bad-derefs.patch
+  * setup multipath free the multipath device when it fails, so don't keep
+    using it.
+- Add 0053-UP-fix-failback.patch
+  * setting failback in the devices section was broken
+- Add 0054-UP-keep-udev-ref.patch
+  * multipathd needs to keep the same udev object across reconfigures
+- Add 0055-UP-handle-quiesced-paths.patch
+  * quiesced paths should be treated as down
+- Add 0056-UP-alua-prio-fix.patch
+  * Don't count the preferred bit for paths that are active/optimized
+- Add 0057-UP-fix-tmo.patch
+  * Cleanup how multipath sets dev_loss_tmo and fast_io_fail_tmo.  Also
+    make multipath get changing values directly from sysfs, instead of
+    from udev, which caches them.
+- Add 0058-UP-fix-failback.patch
+  * make failback print the default value when you show configs.
+- Add 0059-UP-flush-failure-queueing.patch
+  * If you can't flush a multipath device, restore the queue_if_no_paths
+    value
+- Add 0060-UP-uevent-loop-udev.patch
+  * make ueventloop grab it's own udev reference, since it is cancelled
+    asychnrously.
+
 * Fri Jul  5 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-54
 - Add 0047-RHBZ-980777-kpartx-read-only-loop-devs.patch
   * make kpartx support read-only files better
