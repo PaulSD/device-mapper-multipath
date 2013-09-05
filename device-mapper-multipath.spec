@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 55%{?dist}
+Release: 56%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -68,6 +68,8 @@ Patch0057: 0057-UP-fix-tmo.patch
 Patch0058: 0058-UP-fix-failback.patch
 Patch0059: 0059-UP-flush-failure-queueing.patch
 Patch0060: 0060-UP-uevent-loop-udev.patch
+Patch0061: 0061-RH-display-find-mpaths.patch
+Patch0062: 0062-RH-dont-free-vecs.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -180,6 +182,8 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0058 -p1
 %patch0059 -p1
 %patch0060 -p1
+%patch0061 -p1
+%patch0062 -p1
 cp %{SOURCE1} .
 
 %build
@@ -273,6 +277,13 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Sep  5 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-56
+- Add 0061-RH-display-find-mpaths.patch
+  * display the find_multipaths value in show config
+- Add 0062-RH-dont-free-vecs.patch
+  * don't free the vecs structure on shutdown. It's more pain than
+    it's worth.
+
 * Thu Jul 25 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-55
 - Modify 0015-RH-fix-output-buffer.patch
   * Fix memory leak
