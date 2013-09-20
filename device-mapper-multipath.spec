@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 56%{?dist}
+Release: 57%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -70,6 +70,8 @@ Patch0059: 0059-UP-flush-failure-queueing.patch
 Patch0060: 0060-UP-uevent-loop-udev.patch
 Patch0061: 0061-RH-display-find-mpaths.patch
 Patch0062: 0062-RH-dont-free-vecs.patch
+Patch0063: 0063-RH-fix-warning.patch
+Patch0064: 0064-fix-ID_FS-attrs.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -184,6 +186,8 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0060 -p1
 %patch0061 -p1
 %patch0062 -p1
+%patch0063 -p1
+%patch0064 -p1
 cp %{SOURCE1} .
 
 %build
@@ -277,6 +281,14 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Sep 20 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-57
+- Add 0063-RH-fix-warning.patch
+  * Fix complier warning
+- 0064-fix-ID_FS-attrs.patch
+  * make multipath create a timestamp file /run/multipathd/timestamp, and
+    add -T<timestamp>:<valid> option to shortcut processing if the
+    timestamp hasn't changed
+
 * Thu Sep  5 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-56
 - Add 0061-RH-display-find-mpaths.patch
   * display the find_multipaths value in show config
