@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 58%{?dist}
+Release: 59%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -73,6 +73,7 @@ Patch0062: 0062-RH-dont-free-vecs.patch
 Patch0063: 0063-RH-fix-warning.patch
 Patch0064: 0064-fix-ID_FS-attrs.patch
 Patch0065: 0065-UPBZ-995538-fail-rdac-on-unavailable.patch
+Patch0066: 0066-UP-dos-4k-partition-fix.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -190,6 +191,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0063 -p1
 %patch0064 -p1
 %patch0065 -p1
+%patch0066 -p1
 cp %{SOURCE1} .
 
 %build
@@ -283,6 +285,10 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Sat Oct 12 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-59
+- Add 0066-UP-dos-4k-partition-fix.patch
+  * Make kpartx correctly handle 4K sector size devices with dos partitions.
+
 * Fri Sep 27 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-58
 - Add 0065-UPBZ-995538-fail-rdac-on-unavailable.patch
   * make rdac checker always mark paths with asymmetric access state of
