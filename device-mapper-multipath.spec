@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 59%{?dist}
+Release: 60%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -74,6 +74,11 @@ Patch0063: 0063-RH-fix-warning.patch
 Patch0064: 0064-fix-ID_FS-attrs.patch
 Patch0065: 0065-UPBZ-995538-fail-rdac-on-unavailable.patch
 Patch0066: 0066-UP-dos-4k-partition-fix.patch
+Patch0067: 0067-RHBZ-1022899-fix-udev-partition-handling.patch
+Patch0068: 0068-RHBZ-1034578-label-partition-devices.patch
+Patch0069: 0069-UPBZ-1033791-improve-rdac-checker.patch
+Patch0070: 0070-RHBZ-1036503-blacklist-td-devs.patch
+Patch0071: 0071-RHBZ-1031546-strip-dev.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -192,6 +197,11 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0064 -p1
 %patch0065 -p1
 %patch0066 -p1
+%patch0067 -p1
+%patch0068 -p1
+%patch0069 -p1
+%patch0070 -p1
+%patch0071 -p1
 cp %{SOURCE1} .
 
 %build
@@ -285,6 +295,19 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Dec  9 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-60
+- Add 0067-RHBZ-1022899-fix-udev-partition-handling.patch
+  * Make sure to wipe partition devices on change event if they weren't
+    wiped on the device add event
+- Add 0068-RHBZ-1034578-label-partition-devices.patch
+  * Make sure that partition devices are labeled like the whole device
+- Add 0069-UPBZ-1033791-improve-rdac-checker.patch
+  *  Use RTPG data in RDAC checker
+- Add 0070-RHBZ-1036503-blacklist-td-devs.patch
+- Add 0071-RHBZ-1031546-strip-dev.patch
+  * make multipathd interactive commands able to handle /dev/<devnode>
+    instead of just <devnode>
+
 * Sat Oct 12 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-59
 - Add 0066-UP-dos-4k-partition-fix.patch
   * Make kpartx correctly handle 4K sector size devices with dos partitions.
