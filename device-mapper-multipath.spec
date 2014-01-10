@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 60%{?dist}
+Release: 61%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -79,6 +79,7 @@ Patch0068: 0068-RHBZ-1034578-label-partition-devices.patch
 Patch0069: 0069-UPBZ-1033791-improve-rdac-checker.patch
 Patch0070: 0070-RHBZ-1036503-blacklist-td-devs.patch
 Patch0071: 0071-RHBZ-1031546-strip-dev.patch
+Patch0072: 0072-RHBZ-1039199-check-loop-control.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -202,6 +203,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0069 -p1
 %patch0070 -p1
 %patch0071 -p1
+%patch0072 -p1
 cp %{SOURCE1} .
 
 %build
@@ -295,6 +297,11 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Dec 10 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-61
+- Add 0072-RHBZ-1039199-check-loop-control.patch
+  * Make kpartx use LOOP_CTL_GET_FREE and loop-control to find a free
+    loop device. This will autoload the loop module.
+
 * Mon Dec  9 2013 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-60
 - Add 0067-RHBZ-1022899-fix-udev-partition-handling.patch
   * Make sure to wipe partition devices on change event if they weren't
