@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 62%{?dist}
+Release: 63%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -81,18 +81,21 @@ Patch0070: 0070-RHBZ-1036503-blacklist-td-devs.patch
 Patch0071: 0071-RHBZ-1031546-strip-dev.patch
 Patch0072: 0072-RHBZ-1039199-check-loop-control.patch
 Patch0073: 0073-RH-update-build-flags.patch
+Patch0074: 0074-RHBZ-1056976-dm-mpath-rules.patch
+Patch0075: 0075-RHBZ-1056976-reload-flag.patch
+Patch0076: 0076-RHBZ-1056686-add-hw_str_match.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
-Requires: device-mapper >= 1.02.39-1
+Requires: device-mapper >= 1.02.82-2
 Requires: initscripts
 Requires(post): systemd-units systemd-sysv chkconfig
 Requires(preun): systemd-units
 Requires(postun): systemd-units
 
 # build/setup
-BuildRequires: libaio-devel, device-mapper-devel >= 1.02.39-1
+BuildRequires: libaio-devel, device-mapper-devel >= 1.02.82-2
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
 BuildRequires: systemd-units, systemd-devel
@@ -206,6 +209,9 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0071 -p1
 %patch0072 -p1
 %patch0073 -p1
+%patch0074 -p1
+%patch0075 -p1
+%patch0076 -p1
 cp %{SOURCE1} .
 
 %build
@@ -272,6 +278,7 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/mpathconf.8.gz
 %{_mandir}/man8/mpathpersist.8.gz
 %config /usr/lib/udev/rules.d/62-multipath.rules
+%config /usr/lib/udev/rules.d/11-dm-mpath.rules
 %doc AUTHOR COPYING FAQ
 %doc multipath.conf
 %dir /etc/multipath
@@ -299,6 +306,19 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Jan 24 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-63
+- Add 0074-RHBZ-1056976-dm-mpath-rules.patch
+  * Add rules to keep from doing work in udev if there are no
+    active paths, or if the event was for a multipath device
+    reloading its table due to a path change.
+- Add 0075-RHBZ-1056976-reload-flag.patch
+  * multipath code to identify reloads that the new rules can
+    ignore
+- Add 0076-RHBZ-1056686-add-hw_str_match.patch
+  * add a new default config paramter, "hw_str_match", to make user
+    device configs only overwrite builtin device configs if the
+    identifier strings match exactly, like the default in RHEL6.
+
 * Fri Jan 10 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-62
 - Modify 0072-RHBZ-1039199-check-loop-control.patch
   * only call close on the /dev/loop-control fd the open succeeds
