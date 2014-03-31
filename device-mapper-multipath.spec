@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 63%{?dist}
+Release: 64%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -84,6 +84,10 @@ Patch0073: 0073-RH-update-build-flags.patch
 Patch0074: 0074-RHBZ-1056976-dm-mpath-rules.patch
 Patch0075: 0075-RHBZ-1056976-reload-flag.patch
 Patch0076: 0076-RHBZ-1056686-add-hw_str_match.patch
+#Patch0077:
+Patch0078: 0078-RHBZ-1054044-fix-mpathconf-manpage.patch
+Patch0079: 0079-RHBZ-1070581-add-wwid-option.patch
+Patch0080: 0080-RHBZ-1075796-cmdline-wwid.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -212,6 +216,9 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0074 -p1
 %patch0075 -p1
 %patch0076 -p1
+%patch0078 -p1
+%patch0079 -p1
+%patch0080 -p1
 cp %{SOURCE1} .
 
 %build
@@ -306,6 +313,17 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Mar 31 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-64
+- Modify 0076-RHBZ-1056686-add-hw_str_match.patch
+  * free temporary memory used during configuration
+- Add 0078-RHBZ-1054044-fix-mpathconf-manpage.patch
+  * fix typo
+- Add 0079-RHBZ-1070581-add-wwid-option.patch
+  * add multipath option "-a". To add a device's wwid to the wwids file
+- Add 0080-RHBZ-1075796-cmdline-wwid.patch
+  * add multipath option "-A" to add wwids specified by the kernel
+    command line mapth.wwid options.
+
 * Fri Jan 24 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-63
 - Add 0074-RHBZ-1056976-dm-mpath-rules.patch
   * Add rules to keep from doing work in udev if there are no

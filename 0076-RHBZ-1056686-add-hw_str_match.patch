@@ -1,8 +1,9 @@
 ---
- libmultipath/config.c |   10 ++++++++--
- libmultipath/config.h |    1 +
- libmultipath/dict.c   |   26 ++++++++++++++++++++++++++
- 3 files changed, 35 insertions(+), 2 deletions(-)
+ libmultipath/config.c      |   10 ++++++++--
+ libmultipath/config.h      |    1 +
+ libmultipath/dict.c        |   28 ++++++++++++++++++++++++++++
+ multipath/multipath.conf.5 |   11 +++++++++++
+ 4 files changed, 48 insertions(+), 2 deletions(-)
 
 Index: multipath-tools-130222/libmultipath/config.c
 ===================================================================
@@ -51,7 +52,7 @@ Index: multipath-tools-130222/libmultipath/dict.c
 ===================================================================
 --- multipath-tools-130222.orig/libmultipath/dict.c
 +++ multipath-tools-130222/libmultipath/dict.c
-@@ -693,6 +693,23 @@ def_detect_prio_handler(vector strvec)
+@@ -693,6 +693,25 @@ def_detect_prio_handler(vector strvec)
  	return 0;
  }
  
@@ -69,13 +70,15 @@ Index: multipath-tools-130222/libmultipath/dict.c
 +		conf->hw_strmatch = 1;
 +	else
 +		conf->hw_strmatch = 0;
++
++	FREE(buff);
 +	return 0;
 +}
 +
  /*
   * blacklist block handlers
   */
-@@ -2795,6 +2812,14 @@ snprint_def_detect_prio(char * buff, int
+@@ -2795,6 +2814,14 @@ snprint_def_detect_prio(char * buff, int
  }
  
  static int
@@ -90,7 +93,7 @@ Index: multipath-tools-130222/libmultipath/dict.c
  snprint_ble_simple (char * buff, int len, void * data)
  {
  	struct blentry * ble = (struct blentry *)data;
-@@ -2861,6 +2886,7 @@ init_keywords(void)
+@@ -2861,6 +2888,7 @@ init_keywords(void)
  	install_keyword("find_multipaths", &def_find_multipaths_handler, &snprint_def_find_multipaths);
  	install_keyword("retain_attached_hw_handler", &def_retain_hwhandler_handler, &snprint_def_retain_hwhandler_handler);
  	install_keyword("detect_prio", &def_detect_prio_handler, &snprint_def_detect_prio);
@@ -98,3 +101,25 @@ Index: multipath-tools-130222/libmultipath/dict.c
  	__deprecated install_keyword("default_selector", &def_selector_handler, NULL);
  	__deprecated install_keyword("default_path_grouping_policy", &def_pgpolicy_handler, NULL);
  	__deprecated install_keyword("default_uid_attribute", &def_uid_attribute_handler, NULL);
+Index: multipath-tools-130222/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools-130222.orig/multipath/multipath.conf.5
++++ multipath-tools-130222/multipath/multipath.conf.5
+@@ -400,6 +400,17 @@ will automatically use the
+ .I alua
+ prioritizer. If not, the prioritizer will be selected as usual. Default is
+ .I no
++.TP
++.B hw_str_match
++If set to
++.I yes
++, the vendor, product, and revision parameters of user device configs will be
++string matched against the built-in device configs to determine if they should
++modify an existing config, or create a new one. If set to
++.I no
++, the user device configs will be regular expression matched against the
++built-in configs instead. Default is
++.I no
+ .
+ .SH "blacklist section"
+ The
