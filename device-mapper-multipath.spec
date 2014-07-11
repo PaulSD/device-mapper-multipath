@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 65%{?dist}
+Release: 66%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -286,13 +286,17 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/mpathpersist.8.gz
 %config /usr/lib/udev/rules.d/62-multipath.rules
 %config /usr/lib/udev/rules.d/11-dm-mpath.rules
-%doc AUTHOR COPYING FAQ
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%doc AUTHOR FAQ
 %doc multipath.conf
 %dir /etc/multipath
 
 %files libs
 %defattr(-,root,root,-)
-%doc AUTHOR COPYING
+%doc AUTHOR
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 %{_libdir}/libmultipath.so
 %{_libdir}/libmultipath.so.*
 %{_libdir}/libmpathpersist.so
@@ -313,6 +317,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Jul 11 2014 Tom Callaway <spot@fedoraproject.org> - 0.4.9-66
+- fix license handling
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.9-65
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
