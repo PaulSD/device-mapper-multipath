@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 68%{?dist}
+Release: 69%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -359,6 +359,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Nov 13 2014 Benjmain Marzinski <bmarzins@redhat.com> 0.4.9-69
+- Rebuild
+
 * Tue Sep 16 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-68
 - Modify multipath.conf
   * remove getuid_callout example
