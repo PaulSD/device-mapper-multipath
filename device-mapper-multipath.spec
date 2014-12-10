@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 69%{?dist}
+Release: 70%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -109,6 +109,7 @@ Patch0098: 0098-UPBZ-1067171-mutipath-i.patch
 Patch0099: 0099-RH-add-all-devs.patch
 Patch0100: 0100-RHBZ-1067171-multipath-i-update.patch
 Patch0101: 0101-RH-adapter-name-wildcard.patch
+Patch0102: 0102-RHBZ-1160478-mpathconf-template.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -261,6 +262,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0099 -p1
 %patch0100 -p1
 %patch0101 -p1
+%patch0102 -p1
 cp %{SOURCE1} .
 
 %build
@@ -359,6 +361,12 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Tue Dec  9 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-70
+- Add 0102-RHBZ-1160478-mpathconf-template.patch
+  * mpathconf no longer copies the default config template for the
+    docs directory.  It simply writes the template itself.
+- Resolves: bz# 1160478
+
 * Thu Nov 13 2014 Benjmain Marzinski <bmarzins@redhat.com> 0.4.9-69
 - Rebuild
 
