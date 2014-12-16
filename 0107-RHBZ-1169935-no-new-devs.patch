@@ -1,0 +1,117 @@
+---
+ libmultipath/config.h    |    1 +
+ libmultipath/configure.c |    4 ++--
+ libmultipath/wwids.c     |   16 +++++++++-------
+ multipathd/main.c        |    8 ++++++--
+ multipathd/multipathd.8  |    6 ++++++
+ 5 files changed, 24 insertions(+), 11 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/config.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.h
++++ multipath-tools-130222/libmultipath/config.h
+@@ -131,6 +131,7 @@ struct config {
+ 	int detect_prio;
+ 	int force_sync;
+ 	int deferred_remove;
++	int no_new_devs;
+ 	unsigned int version[3];
+ 
+ 	char * dev;
+Index: multipath-tools-130222/libmultipath/configure.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.c
++++ multipath-tools-130222/libmultipath/configure.c
+@@ -776,8 +776,8 @@ coalesce_paths (struct vectors * vecs, v
+ 			continue;
+ 
+ 		/* If find_multipaths was selected check if the path is valid */
+-		if (conf->find_multipaths && !refwwid &&
+-		    !should_multipath(pp1, pathvec)) {
++		if ((conf->find_multipaths || conf->no_new_devs)
++		    && !refwwid && !should_multipath(pp1, pathvec)) {
+ 			orphan_path(pp1);
+ 			continue;
+ 		}
+Index: multipath-tools-130222/libmultipath/wwids.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/wwids.c
++++ multipath-tools-130222/libmultipath/wwids.c
+@@ -270,13 +270,15 @@ should_multipath(struct path *pp1, vecto
+ 	struct path *pp2;
+ 
+ 	condlog(4, "checking if %s should be multipathed", pp1->dev);
+-	vector_foreach_slot(pathvec, pp2, i) {
+-		if (pp1->dev == pp2->dev)
+-			continue;
+-		if (strncmp(pp1->wwid, pp2->wwid, WWID_SIZE) == 0) {
+-			condlog(3, "found multiple paths with wwid %s, "
+-				"multipathing %s", pp1->wwid, pp1->dev);
+-			return 1;
++	if (!conf->no_new_devs) {
++		vector_foreach_slot(pathvec, pp2, i) {
++			if (pp1->dev == pp2->dev)
++				continue;
++			if (strncmp(pp1->wwid, pp2->wwid, WWID_SIZE) == 0) {
++				condlog(3, "found multiple paths with wwid %s, "
++					"multipathing %s", pp1->wwid, pp1->dev);
++				return 1;
++			}
+ 		}
+ 	}
+ 	if (check_wwids_file(pp1->wwid, 0) < 0) {
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -503,7 +503,7 @@ rescan:
+ 			return 1;
+ 		}
+ 
+-		if (conf->find_multipaths &&
++		if ((conf->find_multipaths || conf->no_new_devs) &&
+ 		    !should_multipath(pp, vecs->pathvec)) {
+ 			orphan_path(pp);
+ 			return 0;
+@@ -1427,6 +1427,7 @@ reconfigure (struct vectors * vecs)
+ 
+ 	if (!load_config(DEFAULT_CONFIGFILE, udev)) {
+ 		conf->verbosity = old->verbosity;
++		conf->no_new_devs = old->no_new_devs;
+ 		conf->daemon = 1;
+ 		configure(vecs, 1);
+ 		free_config(old);
+@@ -1880,12 +1881,15 @@ main (int argc, char *argv[])
+ 	if (!conf)
+ 		exit(1);
+ 
+-	while ((arg = getopt(argc, argv, ":dv:k::")) != EOF ) {
++	while ((arg = getopt(argc, argv, ":dnv:k::")) != EOF ) {
+ 	switch(arg) {
+ 		case 'd':
+ 			logsink = 0;
+ 			//debug=1; /* ### comment me out ### */
+ 			break;
++		case 'n':
++			conf->no_new_devs = 1;
++			break;
+ 		case 'v':
+ 			if (sizeof(optarg) > sizeof(char *) ||
+ 			    !isdigit(optarg[0]))
+Index: multipath-tools-130222/multipathd/multipathd.8
+===================================================================
+--- multipath-tools-130222.orig/multipathd/multipathd.8
++++ multipath-tools-130222/multipathd/multipathd.8
+@@ -22,6 +22,12 @@ devmap reconfiguration, so that it can r
+ .B \-d
+ Forground Mode. Don't daemonize, and print all messages to stdout and stderr.
+ .TP 
++.B -n
++No new devs mode. When multipathd is started in this mode, it will only
++create multipath devices if the device wwid is listed in /etc/multipath/wwids.
++This means multipathd will never create a device that hasn't never been
++created before.
++.TP
+ .B -v "level"
+ Verbosity level. Print additional information while running multipathd. A  level of 0 means only print errors. A level of 3 or greater prints debugging information as well. 
+ .TP

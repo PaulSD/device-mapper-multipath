@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 70%{?dist}
+Release: 71%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -110,6 +110,13 @@ Patch0099: 0099-RH-add-all-devs.patch
 Patch0100: 0100-RHBZ-1067171-multipath-i-update.patch
 Patch0101: 0101-RH-adapter-name-wildcard.patch
 Patch0102: 0102-RHBZ-1160478-mpathconf-template.patch
+Patch0103: 0103-RH-cleanup-partmaps-code.patch
+Patch0104: 0104-RHBZ-631009-deferred-remove.patch
+Patch0105: 0105-RHBZ-1148979-fix-partition-mapping-creation-race-with-kpartx.patch
+Patch0106: 0106-RHBZ-1159337-fix-double-free.patch
+Patch0107: 0107-RHBZ-1169935-no-new-devs.patch
+Patch0108: 0108-RHBZ-1153832-kpartx-remove-devs.patch
+Patch0109: 0109-RH-read-only-bindings.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -263,6 +270,13 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0100 -p1
 %patch0101 -p1
 %patch0102 -p1
+%patch0103 -p1
+%patch0104 -p1
+%patch0105 -p1
+%patch0106 -p1
+%patch0107 -p1
+%patch0108 -p1
+%patch0109 -p1
 cp %{SOURCE1} .
 
 %build
@@ -361,6 +375,24 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Dec 15 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-71
+- Add 0103-RH-cleanup-partmaps-code.patch
+  * code refactoring to prepare for next patch
+- Add 0104-RHBZ-631009-deferred-remove.patch
+  * add deferred_remove option to /etc/multipath.conf
+- Add 0105-RHBZ-1148979-fix-partition-mapping-creation-race-with-kpartx.patch
+  * Only run kpartx on device activation
+- Add 0106-RHBZ-1159337-fix-double-free.patch
+  * made ev_remove_path exit immediately after failing setup_multipath, since
+    it handles cleaning up the device
+- Add 0107-RHBZ-1169935-no-new-devs.patch
+  * Add new multipathd option '-n' which keeps multipathd from creating any
+    multipath devices that aren't in the /etc/multipath/wwids file.
+- Add 0108-RHBZ-1153832-kpartx-remove-devs.patch
+  * switch from 'kpartx -a' to 'kpartx -u' to remove missing devices as well.
+- Add 0109-RH-read-only-bindings.patch
+  * re-enabled -B option for multipathd
+
 * Tue Dec  9 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-70
 - Add 0102-RHBZ-1160478-mpathconf-template.patch
   * mpathconf no longer copies the default config template for the
