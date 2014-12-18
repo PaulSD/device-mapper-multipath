@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 71%{?dist}
+Release: 72%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -375,6 +375,15 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Dec 18 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-72
+- Modify 0107-RHBZ-1169935-no-new-devs.patch
+  * instead of using "-n" there is now a new configuration option,
+    'ignore_new_boot_devs'. If set to 'yes', multipath will ignore
+    devices that aren't in /etc/multipath/wwids when running in the
+    initramfs. This option does nothing while multipathd is running
+    in the real root filesystem.
+- Update 0109-RH-read-only-bindings.patch
+
 * Mon Dec 15 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-71
 - Add 0103-RH-cleanup-partmaps-code.patch
   * code refactoring to prepare for next patch
