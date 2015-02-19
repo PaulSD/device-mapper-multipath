@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 72%{?dist}
+Release: 73%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -117,6 +117,7 @@ Patch0106: 0106-RHBZ-1159337-fix-double-free.patch
 Patch0107: 0107-RHBZ-1169935-no-new-devs.patch
 Patch0108: 0108-RHBZ-1153832-kpartx-remove-devs.patch
 Patch0109: 0109-RH-read-only-bindings.patch
+Patch0110: 0110-RHBZ-blacklist-vd-devs.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -277,6 +278,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0107 -p1
 %patch0108 -p1
 %patch0109 -p1
+%patch0110 -p1
 cp %{SOURCE1} .
 
 %build
@@ -375,6 +377,11 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Feb 18 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-73
+- Add 0110-RHBZ-blacklist-vd-devs.patch
+  * blacklist vd[a-z] devices, since they don't have a WWID for
+    multipath to use.
+
 * Thu Dec 18 2014 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-72
 - Modify 0107-RHBZ-1169935-no-new-devs.patch
   * instead of using "-n" there is now a new configuration option,
