@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 73%{?dist}
+Release: 74%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -153,6 +153,7 @@ The %{name}-libs provides the path checker
 and prioritizer modules. It also contains the multipath shared library,
 libmultipath.
 
+%if 0%{?fedora} < 23
 %package sysvinit
 Summary: SysV init script for device-mapper-multipath
 Group: System Environment/Libraries
@@ -160,6 +161,7 @@ Group: System Environment/Libraries
 %description sysvinit
 SysV style init script for device-mapper-multipth. It needs to be
 installed only if systemd is not used as the system init process.
+%endif
 
 %package -n kpartx
 Summary: Partition device manager for device-mapper devices
@@ -301,6 +303,11 @@ make install \
 # tree fix up
 install -d %{buildroot}/etc/multipath
 
+%if 0%{?fedora} >= 23
+rm -rf %{buildroot}/%{_initrddir}
+%endif
+
+
 %clean
 rm -rf %{buildroot}
 
@@ -327,8 +334,10 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 /sbin/chkconfig --del multipathd >/dev/null 2>&1 || :
 /bin/systemctl try-restart multipathd.service >/dev/null 2>&1 || :
 
+%if 0%{?fedora} < 23
 %triggerpostun -n %{name}-sysvinit -- %{name} < 0.4.9-16
 /sbin/chkconfig --add mdmonitor >/dev/null 2>&1 || :
+%endif
 
 %files
 %defattr(-,root,root,-)
@@ -368,8 +377,10 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 
 %postun libs -p /sbin/ldconfig
 
+%if 0%{?fedora} < 23
 %files sysvinit
 %{_initrddir}/multipathd
+%endif
 
 %files -n kpartx
 %defattr(-,root,root,-)
@@ -377,6 +388,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Mar 05 2015 Adam Jackson <ajax@redhat.com> 0.4.9-74
+- Drop sysvinit subpackage from F23+
+
 * Wed Feb 18 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-73
 - Add 0110-RHBZ-blacklist-vd-devs.patch
   * blacklist vd[a-z] devices, since they don't have a WWID for
