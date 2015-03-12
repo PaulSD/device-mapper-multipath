@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 74%{?dist}
+Release: 75%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -118,6 +118,13 @@ Patch0107: 0107-RHBZ-1169935-no-new-devs.patch
 Patch0108: 0108-RHBZ-1153832-kpartx-remove-devs.patch
 Patch0109: 0109-RH-read-only-bindings.patch
 Patch0110: 0110-RHBZ-blacklist-vd-devs.patch
+Patch0111: 0111-RH-dont-show-pg-timeout.patch
+Patch0112: 0112-RHBZ-1194917-add-config_dir-option.patch
+Patch0113: 0113-RHBZ-1194917-cleanup.patch
+Patch0114: 0114-RHBZ-1196394-delayed-reintegration.patch
+Patch0115: 0115-RHBZ-1198418-fix-double-free.patch
+Patch0116: 0116-UPBZ-1188179-dell-36xxi.patch
+Patch0117: 0117-RHBZ-1198424-autodetect-clariion-alua.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -281,6 +288,13 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0108 -p1
 %patch0109 -p1
 %patch0110 -p1
+%patch0111 -p1
+%patch0112 -p1
+%patch0113 -p1
+%patch0114 -p1
+%patch0115 -p1
+%patch0116 -p1
+%patch0117 -p1
 cp %{SOURCE1} .
 
 %build
@@ -388,6 +402,28 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Mar 11 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-75
+- Add 0111-RH-dont-show-pg-timeout.patch
+  * The kernel doesn't support pg_timeout, so multipath shouldn't
+    bother to display it
+- Add 0112-RHBZ-1194917-add-config_dir-option.patch
+  * multipath will now also read its configuration from files with
+    the .conf suffix in the directory specified by config_dir
+    which defaults to /etc/multipath/conf.d
+- Add 0113-RHBZ-1194917-cleanup.patch
+  * cleanup some unnecessary code
+- Add 0114-RHBZ-1196394-delayed-reintegration.patch
+  * Add "delay_watch_checks" and "delay_wait_checks" options to delay
+    reintegration of flakey paths.
+- Add 0115-RHBZ-1198418-fix-double-free.patch
+  * multipath was freeing the multipath alias twice if it failed to create the
+    multipath device.
+- Add 0116-UPBZ-1188179-dell-36xxi.patch
+  * new builtin configurations.
+- Add 0117-RHBZ-1198424-autodetect-clariion-alua.patch
+  * configure multipath to automatically detect alua settings on clariion
+    devices.
+
 * Thu Mar 05 2015 Adam Jackson <ajax@redhat.com> 0.4.9-74
 - Drop sysvinit subpackage from F23+
 
