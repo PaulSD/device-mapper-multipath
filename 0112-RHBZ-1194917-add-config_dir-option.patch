@@ -600,7 +600,7 @@ Index: multipath-tools-130222/multipath/multipath.conf.5
 ===================================================================
 --- multipath-tools-130222.orig/multipath/multipath.conf.5
 +++ multipath-tools-130222/multipath/multipath.conf.5
-@@ -430,6 +430,13 @@ still in use, it will be freed when the
+@@ -452,6 +452,13 @@ still in use, it will be freed when the
  to the multipath device before the last user closes it, the deferred remove
  will be canceled. Default is
  .I no

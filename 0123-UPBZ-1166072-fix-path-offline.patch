@@ -1,0 +1,19 @@
+---
+ libmultipath/discovery.c |    4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.c
++++ multipath-tools-130222/libmultipath/discovery.c
+@@ -946,9 +946,7 @@ path_offline (struct path * pp)
+ 
+ 	condlog(3, "%s: path state = %s", pp->dev, buff);
+ 
+-	if (!strncmp(buff, "offline", 7) ||
+-	    !strncmp(buff, "quiesce", 7) ||
+-	    !strncmp(buff, "transport-offline", 17)) {
++	if (!strncmp(buff, "offline", 7)) {
+ 		pp->offline = 1;
+ 		return PATH_DOWN;
+ 	}

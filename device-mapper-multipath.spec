@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 76%{?dist}
+Release: 77%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -125,6 +125,18 @@ Patch0114: 0114-RHBZ-1196394-delayed-reintegration.patch
 Patch0115: 0115-RHBZ-1198418-fix-double-free.patch
 Patch0116: 0116-UPBZ-1188179-dell-36xxi.patch
 Patch0117: 0117-RHBZ-1198424-autodetect-clariion-alua.patch
+Patch0118: 0118-UPBZ-1200738-update-eternus-config.patch
+Patch0119: 0119-RHBZ-1081397-save-alua-info.patch
+Patch0120: 0120-RHBZ-1043093-realloc-fix.patch
+Patch0121: 0121-RHBZ-1197234-rules-fix.patch
+Patch0122: 0122-RHBZ-1212590-dont-use-var.patch
+Patch0123: 0123-UPBZ-1166072-fix-path-offline.patch
+Patch0124: 0124-RHBZ-1209275-retrigger-uevents.patch
+Patch0125: 0125-RHBZ-1153832-kpartx-delete.patch
+Patch0126: 0126-RHBZ-1211383-alias-collision.patch
+Patch0127: 0127-RHBZ-1201030-use-blk-availability.patch
+Patch0128: 0128-RHBZ-1222123-mpathconf-allow.patch
+Patch0129: 0129-RHBZ-1241774-sun-partition-numbering.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -295,6 +307,18 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0115 -p1
 %patch0116 -p1
 %patch0117 -p1
+%patch0118 -p1
+%patch0119 -p1
+%patch0120 -p1
+%patch0121 -p1
+%patch0122 -p1
+%patch0123 -p1
+%patch0124 -p1
+%patch0125 -p1
+%patch0126 -p1
+%patch0127 -p1
+%patch0128 -p1
+%patch0129 -p1
 cp %{SOURCE1} .
 
 %build
@@ -402,6 +426,42 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Aug  7 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-77
+- Modify 0104-RHBZ-631009-deferred-remove.patch
+  * add man page info
+- Refresh 0112-RHBZ-1194917-add-config_dir-option.patch
+- Refresh 0114-RHBZ-1196394-delayed-reintegration.patch
+- Add 0118-UPBZ-1200738-update-eternus-config.patch
+  * update default config
+- Add 0119-RHBZ-1081397-save-alua-info.patch
+  * make prioritizers save information between calls to speed them up.
+- Add 0120-RHBZ-1043093-realloc-fix.patch
+  * free old memory if realloc fails.
+- Add 0121-RHBZ-1197234-rules-fix.patch
+  * make sure kpartx runs after an DM_ACTIVATION event occurs.
+- Add 0122-RHBZ-1212590-dont-use-var.patch
+  * use /run instead of /var/run
+- Add 0123-UPBZ-1166072-fix-path-offline.patch
+  * Don't mark quiesce and transport-offline paths as offline
+- Add 0124-RHBZ-1209275-retrigger-uevents.patch
+  * Make multipathd retrigger uevents when paths haven't successfully had
+    their udev_attribute environment variable set by udev and add
+    "retrigger_ties" and "retrigger_delay" to control this
+- Add 0125-RHBZ-1153832-kpartx-delete.patch
+  * Delete all partition devices with -d (not just the ones in the partition
+    table)
+- Add 0126-RHBZ-1211383-alias-collision.patch
+  * make multipathd use the old alias, if rename failed and add
+    "new_bindings_in_boot" to determine if new bindings can be added to
+    the bindings file in the initramfs
+- Add 0127-RHBZ-1201030-use-blk-availability.patch
+  * Make multipath use blk-availability.service
+- Add 0128-RHBZ-1222123-mpathconf-allow.patch
+  * Add mpathconf --allow for creating specialized config files.
+- Add 0129-RHBZ-1241774-sun-partition-numbering.patch
+  * Make kpartx correctly number sun partitions.
+
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.9-76
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 

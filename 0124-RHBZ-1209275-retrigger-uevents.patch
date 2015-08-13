@@ -1,0 +1,214 @@
+---
+ libmultipath/config.c    |    2 ++
+ libmultipath/config.h    |    2 ++
+ libmultipath/defaults.h  |    2 ++
+ libmultipath/dict.c      |   46 ++++++++++++++++++++++++++++++++++++++++++++++
+ libmultipath/discovery.c |    8 +++++---
+ libmultipath/structs.h   |    8 ++++++++
+ multipathd/main.c        |   15 ++++++++++++++-
+ 7 files changed, 79 insertions(+), 4 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/config.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.c
++++ multipath-tools-130222/libmultipath/config.c
+@@ -673,6 +673,8 @@ load_config (char * file, struct udev *u
+ 	conf->force_sync = 0;
+ 	conf->ignore_new_boot_devs = 0;
+ 	conf->processed_main_config = 0;
++	conf->retrigger_tries = DEFAULT_RETRIGGER_TRIES;
++	conf->retrigger_delay = DEFAULT_RETRIGGER_DELAY;
+ 
+ 	/*
+ 	 * preload default hwtable
+Index: multipath-tools-130222/libmultipath/config.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.h
++++ multipath-tools-130222/libmultipath/config.h
+@@ -139,6 +139,8 @@ struct config {
+ 	int processed_main_config;
+ 	int delay_watch_checks;
+ 	int delay_wait_checks;
++	int retrigger_tries;
++	int retrigger_delay;
+ 	unsigned int version[3];
+ 
+ 	char * dev;
+Index: multipath-tools-130222/libmultipath/defaults.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/defaults.h
++++ multipath-tools-130222/libmultipath/defaults.h
+@@ -21,6 +21,8 @@
+ #define DEFAULT_DETECT_PRIO DETECT_PRIO_OFF
+ #define DEFAULT_DEFERRED_REMOVE DEFERRED_REMOVE_OFF
+ #define DEFAULT_DELAY_CHECKS DELAY_CHECKS_OFF
++#define DEFAULT_RETRIGGER_DELAY 10
++#define DEFAULT_RETRIGGER_TRIES 3
+ 
+ #define DEFAULT_CHECKINT	5
+ #define MAX_CHECKINT(a)		(a << 2)
+Index: multipath-tools-130222/libmultipath/dict.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/dict.c
++++ multipath-tools-130222/libmultipath/dict.c
+@@ -839,6 +839,38 @@ def_delay_wait_checks_handler(vector str
+ 	return 0;
+ }
+ 
++static int
++def_retrigger_tries_handler(vector strvec)
++{
++	char * buff;
++
++	buff = set_value(strvec);
++
++	if (!buff)
++		return 1;
++
++	conf->retrigger_tries = atoi(buff);
++	FREE(buff);
++
++	return 0;
++}
++
++static int
++def_retrigger_delay_handler(vector strvec)
++{
++	char * buff;
++
++	buff = set_value(strvec);
++
++	if (!buff)
++		return 1;
++
++	conf->retrigger_delay = atoi(buff);
++	FREE(buff);
++
++	return 0;
++}
++
+ /*
+  * blacklist block handlers
+  */
+@@ -3194,6 +3226,18 @@ snprint_def_delay_wait_checks(char * buf
+ }
+ 
+ static int
++snprint_def_retrigger_tries (char * buff, int len, void * data)
++{
++	return snprintf(buff, len, "%i", conf->retrigger_tries);
++}
++
++static int
++snprint_def_retrigger_delay (char * buff, int len, void * data)
++{
++	return snprintf(buff, len, "%i", conf->retrigger_delay);
++}
++
++static int
+ snprint_ble_simple (char * buff, int len, void * data)
+ {
+ 	struct blentry * ble = (struct blentry *)data;
+@@ -3267,6 +3311,8 @@ init_keywords(void)
+ 	install_keyword("config_dir", &def_config_dir_handler, &snprint_def_config_dir);
+ 	install_keyword("delay_watch_checks", &def_delay_watch_checks_handler, &snprint_def_delay_watch_checks);
+ 	install_keyword("delay_wait_checks", &def_delay_wait_checks_handler, &snprint_def_delay_wait_checks);
++	install_keyword("retrigger_tries", &def_retrigger_tries_handler, &snprint_def_retrigger_tries);
++	install_keyword("retrigger_delay", &def_retrigger_delay_handler, &snprint_def_retrigger_delay);
+ 	__deprecated install_keyword("default_selector", &def_selector_handler, NULL);
+ 	__deprecated install_keyword("default_path_grouping_policy", &def_pgpolicy_handler, NULL);
+ 	__deprecated install_keyword("default_uid_attribute", &def_uid_attribute_handler, NULL);
+Index: multipath-tools-130222/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.c
++++ multipath-tools-130222/libmultipath/discovery.c
+@@ -1111,9 +1111,13 @@ get_uid (struct path * pp)
+ 			len = strlen(value);
+ 		}
+ 		strncpy(pp->wwid, value, len);
++		pp->missing_udev_info = INFO_OK;
++		pp->tick = 0;
+ 	} else {
+ 		condlog(3, "%s: no %s attribute", pp->dev,
+ 			pp->uid_attribute);
++		pp->missing_udev_info = INFO_MISSING;
++		pp->tick = conf->retrigger_delay;
+ 	}
+ 
+ 	/* Strip any trailing blanks */
+@@ -1201,10 +1205,8 @@ pathinfo (struct path *pp, vector hwtabl
+ 	  * Retrieve path priority, even for PATH_DOWN paths if it has never
+ 	  * been successfully obtained before.
+ 	  */
+-	if ((mask & DI_PRIO) && path_state == PATH_UP) {
++	if ((mask & DI_PRIO) && path_state == PATH_UP && strlen(pp->wwid)) {
+ 		if (pp->state != PATH_DOWN || pp->priority == PRIO_UNDEF) {
+-			if (!strlen(pp->wwid))
+-				get_uid(pp);
+ 			get_prio(pp);
+ 		}
+ 	}
+Index: multipath-tools-130222/libmultipath/structs.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/structs.h
++++ multipath-tools-130222/libmultipath/structs.h
+@@ -139,6 +139,12 @@ enum delay_checks_states {
+ 	DELAY_CHECKS_UNDEF = 0,
+ };
+ 
++enum missing_udev_info_states {
++	INFO_OK,
++	INFO_MISSING,
++	INFO_REQUESTED,
++};
++
+ struct sg_id {
+ 	int host_no;
+ 	int channel;
+@@ -193,6 +199,8 @@ struct path {
+ 	struct checker checker;
+ 	struct multipath * mpp;
+ 	int fd;
++	int missing_udev_info;
++	int retriggers;
+ 
+ 	/* configlet pointers */
+ 	struct hwentry * hwe;
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -708,6 +708,10 @@ uev_update_path (struct uevent *uev, str
+ 			uev->kernel);
+ 		return 1;
+ 	}
++
++	if (pp->missing_udev_info == INFO_REQUESTED)
++		return uev_add_path(uev, vecs);
++
+ 	/* reinit the prio values on change event, in case something is
+ 	 * different */
+ 	prio_init(&pp->prio);
+@@ -1133,12 +1137,21 @@ check_path (struct vectors * vecs, struc
+ 	int chkr_new_path_up = 0;
+ 	int oldchkrstate = pp->chkrstate;
+ 
+-	if (!pp->mpp)
++	if (!pp->mpp && (pp->missing_udev_info != INFO_MISSING ||
++			 pp->retriggers >= conf->retrigger_tries))
+ 		return;
+ 
+ 	if (pp->tick && --pp->tick)
+ 		return; /* don't check this path yet */
+ 
++	if (!pp->mpp) {
++		pp->missing_udev_info = INFO_REQUESTED;
++		pp->retriggers++;
++		sysfs_attr_set_value(pp->udev, "uevent", "change",
++				     strlen("change"));
++		return;
++	}
++
+ 	/*
+ 	 * provision a next check soonest,
+ 	 * in case we exit abnormaly from here

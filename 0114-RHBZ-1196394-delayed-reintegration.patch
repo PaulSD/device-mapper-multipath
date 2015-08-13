@@ -658,7 +658,7 @@ Index: multipath-tools-130222/multipath/multipath.conf.5
 ===================================================================
 --- multipath-tools-130222.orig/multipath/multipath.conf.5
 +++ multipath-tools-130222/multipath/multipath.conf.5
-@@ -437,6 +437,25 @@ alphabetically for file ending in ".conf
+@@ -459,6 +459,25 @@ alphabetically for file ending in ".conf
  information from them, just as if it was in /etc/multipath.conf.  config_dir
  must either be "" or a fully qualified directory name. Default is
  .I "/etc/multipath/conf.d"
@@ -684,7 +684,7 @@ Index: multipath-tools-130222/multipath/multipath.conf.5
  .
  .SH "blacklist section"
  The
-@@ -540,6 +559,10 @@ section:
+@@ -562,6 +581,10 @@ section:
  .B reservation_key
  .TP
  .B deferred_remove
@@ -695,7 +695,7 @@ Index: multipath-tools-130222/multipath/multipath.conf.5
  .RE
  .PD
  .LP
-@@ -632,6 +655,10 @@ section:
+@@ -654,6 +677,10 @@ section:
  .B detect_prio
  .TP
  .B deferred_remove
