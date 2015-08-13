@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 77%{?dist}
+Release: 78%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -141,7 +141,7 @@ Patch0129: 0129-RHBZ-1241774-sun-partition-numbering.patch
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
-Requires: device-mapper >= 1.02.82-2
+Requires: device-mapper >= 1.02.96
 Requires: initscripts
 Requires(post): systemd-units systemd-sysv chkconfig
 Requires(preun): systemd-units
@@ -366,12 +366,6 @@ fi
 # section in multipathd.service from multi-user.target to sysinit.target
 /bin/systemctl --quiet is-enabled multipathd.service >/dev/null 2>&1 && /bin/systemctl reenable multipathd.service ||:
 
-%triggerun --  %{name} < 0.4.9-16
-%{_bindir}/systemd-sysv-convert --save multipathd >/dev/null 2>&1 ||: 
-bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
-/sbin/chkconfig --del multipathd >/dev/null 2>&1 || :
-/bin/systemctl try-restart multipathd.service >/dev/null 2>&1 || :
-
 %if 0%{?fedora} < 23
 %triggerpostun -n %{name}-sysvinit -- %{name} < 0.4.9-16
 /sbin/chkconfig --add mdmonitor >/dev/null 2>&1 || :
@@ -426,6 +420,9 @@ bin/systemctl --no-reload enable multipathd.service >/dev/null 2>&1 ||:
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Aug 13 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-78
+- fix triggerun issue and updated requires in spec file.
+
 * Fri Aug  7 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-77
 - Modify 0104-RHBZ-631009-deferred-remove.patch
   * add man page info
