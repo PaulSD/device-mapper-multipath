@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 78%{?dist}
+Release: 79%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -137,6 +137,7 @@ Patch0126: 0126-RHBZ-1211383-alias-collision.patch
 Patch0127: 0127-RHBZ-1201030-use-blk-availability.patch
 Patch0128: 0128-RHBZ-1222123-mpathconf-allow.patch
 Patch0129: 0129-RHBZ-1241774-sun-partition-numbering.patch
+Patch0130: 0130-UPBZ-1254292-iscsi-targetname.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -319,6 +320,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0127 -p1
 %patch0128 -p1
 %patch0129 -p1
+%patch0130 -p1
 cp %{SOURCE1} .
 
 %build
@@ -420,6 +422,10 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Mon Aug 17 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-79
+- Add 0130-UPBZ-1254292-iscsi-targetname.patch
+  * check for targetname iscsi sysfs value
+
 * Thu Aug 13 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-78
 - fix triggerun issue and updated requires in spec file.
 

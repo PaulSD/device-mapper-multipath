@@ -1,0 +1,17 @@
+---
+ libmultipath/discovery.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+Index: multipath-tools-130222/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.c
++++ multipath-tools-130222/libmultipath/discovery.c
+@@ -280,6 +280,8 @@ sysfs_get_tgt_nodename (struct path *pp,
+ 			const char *value;
+ 
+ 			value = udev_device_get_sysattr_value(tgtdev, "tgtname");
++			if (!value)
++				value = udev_device_get_sysattr_value(tgtdev, "targetname");
+ 			if (value) {
+ 				pp->sg_id.proto_id = SCSI_PROTOCOL_ISCSI;
+ 				pp->sg_id.transport_id = tgtid;
