@@ -1,0 +1,33 @@
+---
+ multipathd/main.c |   11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -462,6 +462,7 @@ ev_add_path (struct path * pp, struct ve
+ 	char params[PARAMS_SIZE] = {0};
+ 	int retries = 3;
+ 	int start_waiter = 0;
++	int ret;
+ 
+ 	/*
+ 	 * need path UID to go any further
+@@ -540,7 +541,15 @@ rescan:
+ 	/*
+ 	 * reload the map for the multipath mapped device
+ 	 */
+-	if (domap(mpp, params) <= 0) {
++retry:
++	ret = domap(mpp, params);
++	if (ret <= 0) {
++		if (ret < 0 && retries-- > 0) {
++			condlog(0, "%s: retry domap for addition of new "
++				"path %s", mpp->alias, pp->dev);
++			sleep(1);
++			goto retry;
++		}
+ 		condlog(0, "%s: failed in domap for addition of new "
+ 			"path %s", mpp->alias, pp->dev);
+ 		/*
