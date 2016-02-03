@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 80%{?dist}
+Release: 81%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -426,6 +426,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.4.9-81
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Fri Sep 25 2015 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-80
 - Add 0131-RHBZ-1259523-host_name_len.patch
   * increase size of host string
