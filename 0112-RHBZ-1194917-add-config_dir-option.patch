@@ -517,9 +517,9 @@ Index: multipath-tools-130222/libmultipath/config.c
  	} else {
 -		init_keywords();
  		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
- 		condlog(0, "A default multipath.conf file is located at");
- 		condlog(0, "/usr/share/doc/device-mapper-multipath-%d.%d.%d/multipath.conf", MULTIPATH_VERSION(VERSION_CODE));
-@@ -677,6 +723,12 @@ load_config (char * file, struct udev *u
+ 		condlog(0, "run \"/sbin/mpathconf --enable\" to create a default /etc/multipath.conf");
+ 		if (conf->blist_devnode == NULL) {
+@@ -675,6 +721,12 @@ load_config (char * file, struct udev *u
  		}
  	}
  

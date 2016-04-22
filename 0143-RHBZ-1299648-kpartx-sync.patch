@@ -1,0 +1,59 @@
+---
+ kpartx/kpartx.c           |   10 +++++++---
+ multipath/multipath.rules |    2 +-
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+Index: multipath-tools-130222/kpartx/kpartx.c
+===================================================================
+--- multipath-tools-130222.orig/kpartx/kpartx.c
++++ multipath-tools-130222/kpartx/kpartx.c
+@@ -57,7 +57,7 @@ struct pt {
+ } pts[MAXTYPES];
+ 
+ int ptct = 0;
+-int udev_sync = 0;
++int udev_sync = 1;
+ 
+ static void
+ addpts(char *t, ptreader f)
+@@ -85,7 +85,7 @@ initpts(void)
+ 	addpts("ps3", read_ps3_pt);
+ }
+ 
+-static char short_opts[] = "rladfgvp:t:su";
++static char short_opts[] = "rladfgvp:t:snu";
+ 
+ /* Used in gpt.c */
+ int force_gpt=0;
+@@ -104,7 +104,8 @@ usage(void) {
+ 	printf("\t-g force GUID partition table (GPT)\n");
+ 	printf("\t-f force devmap create\n");
+ 	printf("\t-v verbose\n");
+-	printf("\t-s sync mode. Don't return until the partitions are created\n");
++	printf("\t-n nosync mode. Return before the partitions are created\n");
++	printf("\t-s sync mode. Don't return until the partitions are created. Default.\n");
+ 	return 1;
+ }
+ 
+@@ -285,6 +286,9 @@ main(int argc, char **argv){
+ 		case 's':
+ 			udev_sync = 1;
+ 			break;
++		case 'n':
++			udev_sync = 0;
++			break;
+ 		case 'u':
+ 			what = UPDATE;
+ 			break;
+Index: multipath-tools-130222/multipath/multipath.rules
+===================================================================
+--- multipath-tools-130222.orig/multipath/multipath.rules
++++ multipath-tools-130222/multipath/multipath.rules
+@@ -48,6 +48,6 @@ ENV{DM_ACTIVATION}=="1", ENV{DM_MULTIPAT
+ ENV{DM_SUSPENDED}=="1", GOTO="end_mpath"
+ ENV{DM_ACTION}=="PATH_FAILED", GOTO="end_mpath"
+ ENV{DM_ACTIVATION}!="1", ENV{DM_MULTIPATH_NEED_KPARTX}!="1", GOTO="end_mpath"
+-RUN+="$env{MPATH_SBIN_PATH}/kpartx -a $tempnode", \
++RUN+="$env{MPATH_SBIN_PATH}/kpartx -an $tempnode", \
+ 	ENV{DM_MULTIPATH_NEED_KPARTX}=""
+ LABEL="end_mpath"

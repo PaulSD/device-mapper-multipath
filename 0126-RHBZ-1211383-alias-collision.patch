@@ -31,7 +31,7 @@ Index: multipath-tools-130222/libmultipath/config.c
  
  	/*
  	 * preload default hwtable
-@@ -794,6 +795,9 @@ load_config (char * file, struct udev *u
+@@ -792,6 +793,9 @@ load_config (char * file, struct udev *u
  	if (conf->ignore_new_boot_devs)
  		in_initrd();
  

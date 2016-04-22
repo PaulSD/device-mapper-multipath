@@ -1,19 +1,19 @@
 ---
- libmultipath/Makefile      |    6 ++
- libmultipath/config.c      |    3 +
- libmultipath/config.h      |    3 +
+ libmultipath/Makefile      |    6 +
+ libmultipath/config.c      |    3 
+ libmultipath/config.h      |    3 
  libmultipath/configure.c   |    1 
  libmultipath/defaults.h    |    1 
- libmultipath/devmapper.c   |  130 +++++++++++++++++++++++++++++++++++++++------
- libmultipath/devmapper.h   |   12 ++--
- libmultipath/dict.c        |  116 +++++++++++++++++++++++++++++++++++++++-
- libmultipath/propsel.c     |   28 +++++++++
+ libmultipath/devmapper.c   |  142 ++++++++++++++++++++++++++++++++++++++++-----
+ libmultipath/devmapper.h   |   11 ++-
+ libmultipath/dict.c        |  116 ++++++++++++++++++++++++++++++++++++
+ libmultipath/propsel.c     |   28 ++++++++
  libmultipath/propsel.h     |    1 
  libmultipath/structs.h     |    8 ++
- libmultipath/structs_vec.c |    3 -
- multipath/multipath.conf.5 |   36 ++++++++++++
+ libmultipath/structs_vec.c |    3 
+ multipath/multipath.conf.5 |   36 +++++++++++
  multipathd/main.c          |   23 +++++--
- 14 files changed, 344 insertions(+), 27 deletions(-)
+ 14 files changed, 355 insertions(+), 27 deletions(-)
 
 Index: multipath-tools-130222/libmultipath/config.c
 ===================================================================
@@ -99,7 +99,16 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
 ===================================================================
 --- multipath-tools-130222.orig/libmultipath/devmapper.c
 +++ multipath-tools-130222/libmultipath/devmapper.c
-@@ -103,7 +103,9 @@ dm_lib_prereq (void)
+@@ -32,6 +32,8 @@
+ #define UUID_PREFIX "mpath-"
+ #define UUID_PREFIX_LEN 6
+ 
++static int dm_cancel_remove_partmaps(const char * mapname);
++
+ #ifndef LIBDM_API_COOKIE
+ static inline int dm_task_set_cookie(struct dm_task *dmt, uint32_t *c, int a)
+ {
+@@ -103,7 +105,9 @@ dm_lib_prereq (void)
  {
  	char version[64];
  	int v[3];
@@ -110,28 +119,31 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
  	int minv[3] = {1, 2, 82};
  #elif defined(LIBDM_API_COOKIE)
  	int minv[3] = {1, 2, 38};
-@@ -202,7 +204,7 @@ dm_prereq (void)
+@@ -201,8 +205,10 @@ dm_prereq (void)
+ 	return dm_drv_prereq();
  }
  
++#define do_deferred(x) ((x) == DEFERRED_REMOVE_ON || (x) == DEFERRED_REMOVE_IN_PROGRESS)
++
  static int
 -dm_simplecmd (int task, const char *name, int no_flush, int need_sync, uint16_t udev_flags) {
 +dm_simplecmd (int task, const char *name, int no_flush, int need_sync, uint16_t udev_flags, int deferred_remove) {
  	int r = 0;
  	int udev_wait_flag = (need_sync && (task == DM_DEVICE_RESUME ||
  					    task == DM_DEVICE_REMOVE));
-@@ -220,7 +222,10 @@ dm_simplecmd (int task, const char *name
+@@ -220,7 +226,10 @@ dm_simplecmd (int task, const char *name
  	if (no_flush)
  		dm_task_no_flush(dmt);		/* for DM_DEVICE_SUSPEND/RESUME */
  #endif
 -
 +#ifdef LIBDM_API_DEFERRED
-+	if (deferred_remove)
++	if (do_deferred(deferred_remove))
 +		dm_task_deferred_remove(dmt);
 +#endif
  	if (udev_wait_flag && !dm_task_set_cookie(dmt, &conf->cookie, ((conf->daemon)? DM_UDEV_DISABLE_LIBRARY_FALLBACK : 0) | udev_flags))
  		goto out;
  	r = dm_task_run (dmt);
-@@ -232,12 +237,18 @@ dm_simplecmd (int task, const char *name
+@@ -232,12 +241,18 @@ dm_simplecmd (int task, const char *name
  
  extern int
  dm_simplecmd_flush (int task, const char *name, int needsync, uint16_t udev_flags) {
@@ -145,14 +157,14 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
 +	return dm_simplecmd(task, name, 1, 1, udev_flags, 0);
 +}
 +
-+extern int
++static int
 +dm_device_remove (const char *name, int needsync, int deferred_remove) {
 +	return dm_simplecmd(DM_DEVICE_REMOVE, name, 0, needsync, 0,
 +			    deferred_remove);
  }
  
  extern int
-@@ -653,7 +664,7 @@ out:
+@@ -653,7 +668,7 @@ out:
  }
  
  extern int
@@ -161,7 +173,7 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
  {
  	int r;
  
-@@ -663,23 +674,46 @@ _dm_flush_map (const char * mapname, int
+@@ -663,23 +678,46 @@ _dm_flush_map (const char * mapname, int
  	if (dm_type(mapname, TGT_MPATH) <= 0)
  		return 0; /* nothing to do */
  
@@ -170,7 +182,7 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
  		return 1;
  
 -	if (dm_get_opencount(mapname)) {
-+	if (!deferred_remove && dm_get_opencount(mapname)) {
++	if (!do_deferred(deferred_remove) && dm_get_opencount(mapname)) {
  		condlog(2, "%s: map in use", mapname);
  		return 1;
  	}
@@ -179,7 +191,7 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
 +	r = dm_device_remove(mapname, need_sync, deferred_remove);
  
  	if (r) {
-+		if (deferred_remove && dm_map_present(mapname)) {
++		if (do_deferred(deferred_remove) && dm_map_present(mapname)) {
 +			condlog(4, "multipath map %s remove deferred",
 +				mapname);
 +			return 2;
@@ -211,7 +223,7 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
  extern int
  dm_suspend_and_flush_map (const char * mapname)
  {
-@@ -1076,6 +1110,7 @@ out:
+@@ -1076,6 +1114,7 @@ out:
  
  struct remove_data {
  	int need_sync;
@@ -219,14 +231,15 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
  };
  
  static int
-@@ -1084,25 +1119,90 @@ remove_partmap(char *name, void *data)
+@@ -1084,25 +1123,98 @@ remove_partmap(char *name, void *data)
  	struct remove_data *rd = (struct remove_data *)data;
  
  	if (dm_get_opencount(name)) {
 -		dm_remove_partmaps(name, rd->need_sync);
 -		if (dm_get_opencount(name)) {
 +		dm_remove_partmaps(name, rd->need_sync, rd->deferred_remove);
-+		if (!rd->deferred_remove && dm_get_opencount(name)) {
++		if (!do_deferred(rd->deferred_remove) &&
++		    dm_get_opencount(name)) {
  			condlog(2, "%s: map in use", name);
  			return 1;
  		}
@@ -252,6 +265,8 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
 +static int
 +cancel_remove_partmap (char *name, void *unused)
 +{
++	if (dm_get_opencount(name))
++		dm_cancel_remove_partmaps(name);
 +	if (dm_message(name, "@cancel_deferred_remove") != 0)
 +		condlog(0, "%s: can't cancel deferred remove: %s", name,
 +			strerror(errno));
@@ -283,6 +298,11 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
 +	return r;
 +}
 +
++static int
++dm_cancel_remove_partmaps(const char * mapname) {
++	return do_foreach_partmaps(mapname, cancel_remove_partmap, NULL);
++}
++
 +int
 +dm_cancel_deferred_remove (struct multipath *mpp)
 +{
@@ -293,7 +313,7 @@ Index: multipath-tools-130222/libmultipath/devmapper.c
 +	if (mpp->deferred_remove == DEFERRED_REMOVE_IN_PROGRESS)
 +		mpp->deferred_remove = DEFERRED_REMOVE_ON;
 +
-+	do_foreach_partmaps(mpp->alias, cancel_remove_partmap, NULL);
++	dm_cancel_remove_partmaps(mpp->alias);
 +	r = dm_message(mpp->alias, "@cancel_deferred_remove");
 +	if (r)
 +		condlog(0, "%s: can't cancel deferred remove: %s", mpp->alias,
@@ -320,14 +340,7 @@ Index: multipath-tools-130222/libmultipath/devmapper.h
 ===================================================================
 --- multipath-tools-130222.orig/libmultipath/devmapper.h
 +++ multipath-tools-130222/libmultipath/devmapper.h
-@@ -17,15 +17,18 @@ int dm_prereq (void);
- int dm_drv_version (unsigned int * version, char * str);
- int dm_simplecmd_flush (int, const char *, int, uint16_t);
- int dm_simplecmd_noflush (int, const char *, uint16_t);
-+int dm_device_remove (const char *, int, int);
- int dm_addmap_create (struct multipath *mpp, char *params);
- int dm_addmap_reload (struct multipath *mpp, char *params);
- int dm_map_present (const char *);
+@@ -23,9 +23,11 @@ int dm_map_present (const char *);
  int dm_get_map(const char *, unsigned long long *, char *);
  int dm_get_status(char *, char *);
  int dm_type(const char *, char *);
@@ -342,7 +355,7 @@ Index: multipath-tools-130222/libmultipath/devmapper.h
  int dm_suspend_and_flush_map(const char * mapname);
  int dm_flush_maps (void);
  int dm_fail_path(char * mapname, char * path);
-@@ -40,7 +43,8 @@ int dm_geteventnr (char *name);
+@@ -40,7 +42,8 @@ int dm_geteventnr (char *name);
  int dm_get_major (char *name);
  int dm_get_minor (char *name);
  char * dm_mapname(int major, int minor);

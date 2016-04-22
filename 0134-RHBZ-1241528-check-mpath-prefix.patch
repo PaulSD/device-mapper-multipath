@@ -1,0 +1,168 @@
+---
+ libmpathpersist/mpath_persist.c |    4 +-
+ libmultipath/devmapper.c        |   67 +++++++++++++++++++++++++++++-----------
+ libmultipath/devmapper.h        |    1 
+ multipathd/main.c               |    2 -
+ 4 files changed, 53 insertions(+), 21 deletions(-)
+
+Index: multipath-tools-130222/libmpathpersist/mpath_persist.c
+===================================================================
+--- multipath-tools-130222.orig/libmpathpersist/mpath_persist.c
++++ multipath-tools-130222/libmpathpersist/mpath_persist.c
+@@ -160,7 +160,7 @@ int mpath_persistent_reserve_in (int fd,
+ 
+ 	condlog(3, "alias = %s", alias);
+ 	map_present = dm_map_present(alias);
+-	if (map_present && dm_type(alias, TGT_MPATH) <= 0){
++	if (map_present && !dm_is_mpath(alias)){
+ 		condlog( 0, "%s: not a multipath device.", alias);
+ 		ret = MPATH_PR_DMMP_ERROR;
+ 		goto out;
+@@ -250,7 +250,7 @@ int mpath_persistent_reserve_out ( int f
+ 	condlog(3, "alias = %s", alias);
+ 	map_present = dm_map_present(alias);
+ 
+-	if (map_present && dm_type(alias, TGT_MPATH) <= 0){
++	if (map_present && !dm_is_mpath(alias)){
+ 		condlog(3, "%s: not a multipath device.", alias);
+ 		ret = MPATH_PR_DMMP_ERROR;
+ 		goto out;
+Index: multipath-tools-130222/libmultipath/devmapper.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/devmapper.c
++++ multipath-tools-130222/libmultipath/devmapper.c
+@@ -564,6 +564,48 @@ out:
+ 	return r;
+ }
+ 
++extern int
++dm_is_mpath(const char * name)
++{
++	int r = 0;
++	struct dm_task *dmt;
++	struct dm_info info;
++	uint64_t start, length;
++	char *target_type = NULL;
++	char *params;
++	const char *uuid;
++
++	if (!(dmt = dm_task_create(DM_DEVICE_TABLE)))
++		return 0;
++
++	if (!dm_task_set_name(dmt, name))
++		goto out;
++
++	dm_task_no_open_count(dmt);
++
++	if (!dm_task_run(dmt))
++		goto out;
++
++	if (!dm_task_get_info(dmt, &info) || !info.exists)
++		goto out;
++
++	uuid = dm_task_get_uuid(dmt);
++
++	if (!uuid || strncmp(uuid, UUID_PREFIX, UUID_PREFIX_LEN) != 0)
++		goto out;
++
++	/* Fetch 1st target */
++	dm_get_next_target(dmt, NULL, &start, &length, &target_type, &params);
++
++	if (!target_type || strcmp(target_type, TGT_MPATH) != 0)
++		goto out;
++
++	r = 1;
++out:
++	dm_task_destroy(dmt);
++	return r;
++}
++
+ static int
+ dm_dev_t (const char * mapname, char * dev_t, int len)
+ {
+@@ -672,10 +714,7 @@ _dm_flush_map (const char * mapname, int
+ {
+ 	int r;
+ 
+-	if (!dm_map_present(mapname))
+-		return 0;
+-
+-	if (dm_type(mapname, TGT_MPATH) <= 0)
++	if (!dm_is_mpath(mapname))
+ 		return 0; /* nothing to do */
+ 
+ 	if (dm_remove_partmaps(mapname, need_sync, deferred_remove))
+@@ -725,10 +764,7 @@ dm_suspend_and_flush_map (const char * m
+ 	unsigned long long mapsize;
+ 	char params[PARAMS_SIZE] = {0};
+ 
+-	if (!dm_map_present(mapname))
+-		return 0;
+-
+-	if (dm_type(mapname, TGT_MPATH) <= 0)
++	if (!dm_is_mpath(mapname))
+ 		return 0; /* nothing to do */
+ 
+ 	if (!dm_get_map(mapname, &mapsize, params)) {
+@@ -899,7 +935,6 @@ dm_get_maps (vector mp)
+ {
+ 	struct multipath * mpp;
+ 	int r = 1;
+-	int info;
+ 	struct dm_task *dmt;
+ 	struct dm_names *names;
+ 	unsigned next = 0;
+@@ -924,9 +959,7 @@ dm_get_maps (vector mp)
+ 	}
+ 
+ 	do {
+-		info = dm_type(names->name, TGT_MPATH);
+-
+-		if (info <= 0)
++		if (!dm_is_mpath(names->name))
+ 			goto next;
+ 
+ 		mpp = alloc_multipath();
+@@ -939,13 +972,11 @@ dm_get_maps (vector mp)
+ 		if (!mpp->alias)
+ 			goto out1;
+ 
+-		if (info > 0) {
+-			if (dm_get_map(names->name, &mpp->size, NULL))
+-				goto out1;
++		if (dm_get_map(names->name, &mpp->size, NULL))
++			goto out1;
+ 
+-			dm_get_uuid(names->name, mpp->wwid);
+-			dm_get_info(names->name, &mpp->dmi);
+-		}
++		dm_get_uuid(names->name, mpp->wwid);
++		dm_get_info(names->name, &mpp->dmi);
+ 
+ 		if (!vector_alloc_slot(mp))
+ 			goto out1;
+Index: multipath-tools-130222/libmultipath/devmapper.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/devmapper.h
++++ multipath-tools-130222/libmultipath/devmapper.h
+@@ -23,6 +23,7 @@ int dm_map_present (const char *);
+ int dm_get_map(const char *, unsigned long long *, char *);
+ int dm_get_status(char *, char *);
+ int dm_type(const char *, char *);
++int dm_is_mpath(const char *);
+ int _dm_flush_map (const char *, int, int);
+ int dm_flush_map_nopaths(const char * mapname, int deferred_remove);
+ #define dm_flush_map(mapname) _dm_flush_map(mapname, 1, 0)
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -285,7 +285,7 @@ ev_add_map (char * dev, char * alias, st
+ 
+ 	map_present = dm_map_present(alias);
+ 
+-	if (map_present && dm_type(alias, TGT_MPATH) <= 0) {
++	if (map_present && !dm_is_mpath(alias)) {
+ 		condlog(4, "%s: not a multipath map", alias);
+ 		return 0;
+ 	}

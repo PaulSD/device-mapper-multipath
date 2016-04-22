@@ -1,0 +1,26 @@
+---
+ multipath/multipath.8 |   11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+Index: multipath-tools-130222/multipath/multipath.8
+===================================================================
+--- multipath-tools-130222.orig/multipath/multipath.8
++++ multipath-tools-130222/multipath/multipath.8
+@@ -83,6 +83,17 @@ remove the wwid for the specified device
+ .B \-W
+ reset the wwids file to only include the current multipath devices
+ .TP
++.B \-T "tm:valid"
++check if
++.I tm
++matches the multipathd configuration timestamp value from
++.I "/run/multipathd/timestamp"
++If so, return success if
++.I valid
++is 1. Otherwise, return failure. If the timestamp doesn't match continue
++with multipath execution.  This option is designed to be used with -c by
++the udev rules.
++.TP
+ .BI \-p " policy"
+ force new maps to use the specified policy:
+ .RS 1.2i

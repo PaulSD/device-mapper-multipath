@@ -1,0 +1,86 @@
+---
+ multipath/mpathconf |   37 ++++++++++++++++++++++++++-----------
+ 1 file changed, 26 insertions(+), 11 deletions(-)
+
+Index: multipath-tools-130222/multipath/mpathconf
+===================================================================
+--- multipath-tools-130222.orig/multipath/mpathconf
++++ multipath-tools-130222/multipath/mpathconf
+@@ -59,6 +59,19 @@ function usage
+ 	echo ""
+ }
+ 
++function add_wwid
++{
++	INDEX=0
++	while [ "$INDEX" -lt "$WWIDS" ] ; do
++		if [ "$1" = "${WWID_LIST[$INDEX]}" ] ; then
++			return
++		fi
++		((INDEX++))
++	done
++	WWID_LIST[$WWIDS]="$1"
++	((WWIDS++))
++}
++
+ function get_dm_deps
+ {
+ 	shift 3
+@@ -76,11 +89,9 @@ function get_dm_deps
+ function set_dm_wwid
+ {
+ 	if [[ "$1" =~ ^part[[:digit:]]+-mpath- ]] ; then
+-		WWID_LIST[$WWIDS]="${1##part*-mpath-}"
+-		((WWIDS++))
++		add_wwid "${1##part*-mpath-}"
+ 	elif [[ "$1" =~ ^mpath- ]] ; then
+-		WWID_LIST[$WWIDS]="${1##mpath-}"
+-		((WWIDS++))
++		add_wwid "${1##mpath-}"
+ 	else
+ 		get_dm_deps `dmsetup deps -u $1`
+ 	fi
+@@ -99,8 +110,7 @@ function set_wwid
+ 	if [ -n "$UUID" ] ; then
+ 		set_dm_wwid $UUID
+ 	else
+-		WWID_LIST[$WWIDS]="$1"
+-		((WWIDS++))
++		add_wwid "$1"
+ 	fi
+ }
+ 
+@@ -215,13 +225,13 @@ function validate_args
+ 
+ function add_blacklist_exceptions
+ {
+-	echo "blacklist_exceptions {" >> $TMPFILE
+ 	INDEX=0
+ 	while [ "$INDEX" -lt "$WWIDS" ] ; do
+-		echo "	wwid \"${WWID_LIST[$INDEX]}\"" >> $TMPFILE
++		sed -i '/^blacklist_exceptions[[:space:]]*{/ a\
++	wwid '"\"${WWID_LIST[$INDEX]}\""'
++' $TMPFILE
+ 		((INDEX++))
+ 	done
+-	echo "}" >> $TMPFILE
+ }
+ 
+ umask 0077
+@@ -364,9 +374,14 @@ if [ "$ENABLE" = 2 ]; then
+ 		sed -i '/^blacklist[[:space:]]*{/,/^}/ s/^[[:space:]]*#[[:space:]]*wwid \"\.\?\*\"/	wwid ".*"/' $TMPFILE
+ 	fi
+ 	if [ "$HAVE_EXCEPTIONS" = 1 ]; then
+-		sed -i '/^blacklist_exceptions[[:space:]]*{/,/^}/d' $TMPFILE
++		sed -i '/^blacklist_exceptions[[:space:]]*{/,/^}/ {/^[[:space:]]*wwid/ d}' $TMPFILE
++	else
++		cat >> $TMPFILE <<- _EOF_
++
++blacklist_exceptions {
++}
++_EOF_
+ 	fi
+-	echo $HAVE_WWID_DISABLE
+ 	add_blacklist_exceptions
+ elif [ "$ENABLE" = 1 ]; then
+ 	if [ "$HAVE_DISABLE" = 1 ]; then

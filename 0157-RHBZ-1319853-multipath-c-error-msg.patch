@@ -1,0 +1,63 @@
+---
+ libmultipath/alias.c |    8 ++++++++
+ libmultipath/alias.h |    1 +
+ multipath/main.c     |    7 ++++++-
+ 3 files changed, 15 insertions(+), 1 deletion(-)
+
+Index: multipath-tools-130222/libmultipath/alias.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/alias.c
++++ multipath-tools-130222/libmultipath/alias.c
+@@ -36,6 +36,14 @@
+  * See the file COPYING included with this distribution for more details.
+  */
+ 
++int
++valid_alias(char *alias)
++{
++	if (strchr(alias, '/') != NULL)
++		return 0;
++	return 1;
++}
++
+ 
+ static int
+ format_devname(char *name, int id, int len, char *prefix)
+Index: multipath-tools-130222/libmultipath/alias.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/alias.h
++++ multipath-tools-130222/libmultipath/alias.h
+@@ -7,6 +7,7 @@
+ "# alias wwid\n" \
+ "#\n"
+ 
++int valid_alias(char *alias);
+ char *get_user_friendly_alias(char *wwid, char *file, char *prefix,
+ 			      int bindings_readonly);
+ int get_user_friendly_wwid(char *alias, char *buff, char *file);
+Index: multipath-tools-130222/multipath/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipath/main.c
++++ multipath-tools-130222/multipath/main.c
+@@ -454,8 +454,9 @@ get_dev_type(char *dev) {
+ 	}
+ 	else if (sscanf(dev, "%d:%d", &i, &i) == 2)
+ 		return DEV_DEVT;
+-	else
++	else if (valid_alias(dev))
+ 		return DEV_DEVMAP;
++	return DEV_NONE;
+ }
+ 
+ int
+@@ -607,6 +608,10 @@ main (int argc, char *argv[])
+ 
+ 		strncpy(conf->dev, argv[optind], FILE_NAME_SIZE);
+ 		conf->dev_type = get_dev_type(conf->dev);
++		if (conf->dev_type == DEV_NONE) {
++			condlog(0, "'%s' is not a valid argument\n", conf->dev);
++			goto out;
++		}
+ 	}
+ 	conf->daemon = 0;
+ 

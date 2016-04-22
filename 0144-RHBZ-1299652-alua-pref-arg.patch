@@ -1,0 +1,136 @@
+---
+ libmultipath/prioritizers/alua.c |   20 +++++++++++++++++++-
+ libmultipath/propsel.c           |   18 ++++++++++--------
+ multipath/multipath.conf.5       |   19 ++++++++++++++++---
+ 3 files changed, 45 insertions(+), 12 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/prioritizers/alua.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/prioritizers/alua.c
++++ multipath-tools-130222/libmultipath/prioritizers/alua.c
+@@ -86,15 +86,33 @@ get_alua_info(int fd, struct alua_contex
+ 	return rc;
+ }
+ 
++int get_exclusive_perf_arg(char *args)
++{
++	char *ptr;
++
++	if (args == NULL)
++		return 0;
++	ptr = strstr(args, "exclusive_pref_bit");
++	if (!ptr)
++		return 0;
++	if (ptr[18] != '\0' && ptr[18] != ' ' && ptr[18] != '\t')
++		return 0;
++	if (ptr != args && ptr[-1] != ' ' && ptr[-1] != '\t')
++		return 0;
++	return 1;
++}
++
+ int getprio (struct path * pp, char * args)
+ {
+ 	int rc;
+ 	int aas;
+ 	int priopath;
++	int exclusive_perf;
+ 
+ 	if (pp->fd < 0)
+ 		return -ALUA_PRIO_NO_INFORMATION;
+ 
++	exclusive_perf = get_exclusive_perf_arg(args);
+ 	rc = get_alua_info(pp->fd, pp->prio.context);
+ 	if (rc >= 0) {
+ 		aas = (rc & 0x0f);
+@@ -115,7 +133,7 @@ int getprio (struct path * pp, char * ar
+ 			default:
+ 				rc = 0;
+ 		}
+-		if (priopath && aas != AAS_OPTIMIZED)
++		if (priopath && (aas != AAS_OPTIMIZED || exclusive_perf))
+ 			rc += 80;
+ 	} else {
+ 		switch(-rc) {
+Index: multipath-tools-130222/libmultipath/propsel.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/propsel.c
++++ multipath-tools-130222/libmultipath/propsel.c
+@@ -420,17 +420,19 @@ select_prio (struct path * pp)
+ 		if (prio_selected(p)) {
+ 			condlog(3, "%s: prio = %s (detected setting)",
+ 				pp->dev, prio_name(p));
++			condlog(3, "%s: prio args = %s (detected setting)",
++				pp->dev, prio_args(p));
+ 			return 0;
+ 		}
+ 	}
+ 
+-	if ((mpe = find_mpe(pp->wwid))) {
+-		if (mpe->prio_name) {
+-			prio_get(p, mpe->prio_name, mpe->prio_args);
+-			condlog(3, "%s: prio = %s (LUN setting)",
+-				pp->dev, prio_name(p));
+-			return 0;
+-		}
++	if ((mpe = find_mpe(pp->wwid)) && mpe->prio_name) {
++		prio_get(p, mpe->prio_name, mpe->prio_args);
++		condlog(3, "%s: prio = %s (LUN setting)",
++			pp->dev, prio_name(p));
++		condlog(3, "%s: prio args = %s (LUN setting)",
++			pp->dev, prio_args(p));
++		return 0;
+ 	}
+ 
+ 	if (pp->hwe && pp->hwe->prio_name) {
+@@ -452,7 +454,7 @@ select_prio (struct path * pp)
+ 	prio_get(p, DEFAULT_PRIO, DEFAULT_PRIO_ARGS);
+ 	condlog(3, "%s: prio = %s (internal default)",
+ 		pp->dev, DEFAULT_PRIO);
+-	condlog(3, "%s: prio = %s (internal default)",
++	condlog(3, "%s: prio args = %s (internal default)",
+ 		pp->dev, DEFAULT_PRIO_ARGS);
+ 	return 0;
+ }
+Index: multipath-tools-130222/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools-130222.orig/multipath/multipath.conf.5
++++ multipath-tools-130222/multipath/multipath.conf.5
+@@ -182,7 +182,9 @@ Return a constant priority of \fI1\fR.
+ Generate the path priority for EMC arrays.
+ .TP
+ .B alua
+-Generate the path priority based on the SCSI-3 ALUA settings.
++Generate the path priority based on the SCSI-3 ALUA settings. This prioritizer
++accepts the optional prio_arg
++.I exclusive_pref_bit
+ .TP
+ .B ontap
+ Generate the path priority for NetApp arrays.
+@@ -208,14 +210,25 @@ Default value is \fBconst\fR.
+ .RE
+ .TP
+ .B prio_args
+-Arguments to pass to to the prio function.  Currently only used with
+-.I weighted, which needs a value of the form
++Arguments to pass to to the prio function. This only applies to certain
++prioritizers
++.RS
++.TP 12
++.B weighted
++Needs a value of the form
+ .I "<hbtl|devname> <regex1> <prio1> <regex2> <prio2> ..."
+ .I hbtl
+ regex can be of SCSI H:B:T:L format  Ex: 1:0:.:. , *:0:0:.
+ .I devname
+ regex can be of device name format  Ex: sda , sd.e
+ .TP
++.B alua
++If
++.I exclusive_pref_bit
++is set, paths with the TPGS pref bit set will always be in their own path
++group.
++.RE
++.TP
+ .B features
+ Specify any device-mapper features to be used. Syntax is
+ .I num list

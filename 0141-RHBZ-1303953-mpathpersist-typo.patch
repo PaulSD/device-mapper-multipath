@@ -1,0 +1,17 @@
+---
+ libmpathpersist/mpath_persist.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: multipath-tools-130222/libmpathpersist/mpath_persist.c
+===================================================================
+--- multipath-tools-130222.orig/libmpathpersist/mpath_persist.c
++++ multipath-tools-130222/libmpathpersist/mpath_persist.c
+@@ -822,7 +822,7 @@ int update_map_pr(struct multipath *mpp)
+ 	if (!mpp->reservation_key)
+ 	{
+ 		/* Nothing to do. Assuming pr mgmt feature is disabled*/
+-		condlog(3, "%s: reservation_key not set in multiapth.conf", mpp->alias);
++		condlog(3, "%s: reservation_key not set in multipath.conf", mpp->alias);
+ 		return MPATH_PR_SUCCESS;
+ 	}
+ 

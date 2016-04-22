@@ -1,6 +1,7 @@
 ---
- multipath/mpathconf |   26 ++++++++++++++++++++------
- 1 file changed, 20 insertions(+), 6 deletions(-)
+ multipath/mpathconf   |   26 ++++++++++++++++++++------
+ multipath/mpathconf.8 |   16 +++++++---------
+ 2 files changed, 27 insertions(+), 15 deletions(-)
 
 Index: multipath-tools-130222/multipath/mpathconf
 ===================================================================
@@ -50,3 +51,32 @@ Index: multipath-tools-130222/multipath/mpathconf
  fi
  
  if grep -q "^blacklist[[:space:]]*{" $TMPFILE ; then
+Index: multipath-tools-130222/multipath/mpathconf.8
+===================================================================
+--- multipath-tools-130222.orig/multipath/mpathconf.8
++++ multipath-tools-130222/multipath/mpathconf.8
+@@ -34,17 +34,15 @@ that users can manually edit their confi
+ If
+ .B /etc/multipath.conf
+ already exists, mpathconf will edit it. If it does not exist, mpathconf will
+-use
+-.B /usr/share/doc/device-mapper-multipath-0.4.9/multipath.conf
+-as the starting file. This file has
++create a default file with
+ .B user_friendly_names
+-set. If this file does not exist, mpathconf will create
+-.B /etc/multipath.conf
+-from scratch.  For most users, this means that
+-.B user_friendly_names
+-will be set by default, unless they use the
++and
++.B find_multipaths
++set. To disable these, use the
+ .B --user_friendly_names n
+-command.
++and
++.B --find_multipaths n
++options
+ .SH COMMANDS
+ .TP
+ .B --enable

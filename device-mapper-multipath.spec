@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 81%{?dist}
+Release: 82%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -140,6 +140,33 @@ Patch0129: 0129-RHBZ-1241774-sun-partition-numbering.patch
 Patch0130: 0130-UPBZ-1254292-iscsi-targetname.patch
 Patch0131: 0131-RHBZ-1259523-host_name_len.patch
 Patch0132: 0132-UPBZ-1259831-lock-retry.patch
+Patch0133: 0133-RHBZ-1296979-fix-define.patch
+Patch0134: 0134-RHBZ-1241528-check-mpath-prefix.patch
+Patch0135: 0135-RHBZ-1299600-path-dev-uevents.patch
+Patch0136: 0136-RHBZ-1304687-wait-for-map-add.patch
+Patch0137: 0137-RHBZ-1280524-clear-chkr-msg.patch
+Patch0138: 0138-RHBZ-1288660-fix-mpathconf-allow.patch
+Patch0139: 0139-RHBZ-1273173-queue-no-daemon-doc.patch
+Patch0140: 0140-RHBZ-1299647-fix-help.patch
+Patch0141: 0141-RHBZ-1303953-mpathpersist-typo.patch
+Patch0142: 0142-RHBZ-1283750-kpartx-fix.patch
+Patch0143: 0143-RHBZ-1299648-kpartx-sync.patch
+Patch0144: 0144-RHBZ-1299652-alua-pref-arg.patch
+Patch0145: 0145-UP-resize-help-msg.patch
+Patch0146: 0146-UPBZ-1299651-raw-output.patch
+Patch0147: 0147-RHBZ-1272620-fail-rm-msg.patch
+Patch0148: 0148-RHBZ-1292599-verify-before-remove.patch
+Patch0149: 0149-RHBZ-1292599-restore-removed-parts.patch
+Patch0150: 0150-RHBZ-1253913-fix-startup-msg.patch
+Patch0151: 0151-RHBZ-1297456-weighted-fix.patch
+Patch0152: 0152-RHBZ-1269293-fix-blk-unit-file.patch
+Patch0153: 0153-RH-fix-i686-size-bug.patch
+Patch0154: 0154-UPBZ-1291406-disable-reinstate.patch
+Patch0155: 0155-UPBZ-1300415-PURE-config.patch
+Patch0156: 0156-UPBZ-1313324-dont-fail-discovery.patch
+Patch0157: 0157-RHBZ-1319853-multipath-c-error-msg.patch
+Patch0158: 0158-RHBZ-1318581-timestamp-doc-fix.patch
+Patch0159: 0159-UPBZ-1255885-udev-waits.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -325,6 +352,33 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0130 -p1
 %patch0131 -p1
 %patch0132 -p1
+%patch0133 -p1
+%patch0134 -p1
+%patch0135 -p1
+%patch0136 -p1
+%patch0137 -p1
+%patch0138 -p1
+%patch0139 -p1
+%patch0140 -p1
+%patch0141 -p1
+%patch0142 -p1
+%patch0143 -p1
+%patch0144 -p1
+%patch0145 -p1
+%patch0146 -p1
+%patch0147 -p1
+%patch0148 -p1
+%patch0149 -p1
+%patch0150 -p1
+%patch0151 -p1
+%patch0152 -p1
+%patch0153 -p1
+%patch0154 -p1
+%patch0155 -p1
+%patch0156 -p1
+%patch0157 -p1
+%patch0158 -p1
+%patch0159 -p1
 cp %{SOURCE1} .
 
 %build
@@ -426,6 +480,66 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Apr 21 2016 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-82
+- Modify 0005-RH-add-mpathconf.patch
+  * changed warning message
+- Modify 0102-RHBZ-1160478-mpathconf-template.patch
+  * updated man page
+- Modify 0104-RHBZ-631009-deferred-remove.patch
+  * refactor code and minor fix
+- Refresh 0107-RHBZ-1169935-no-new-devs.patch
+- Refresh 0112-RHBZ-1194917-add-config_dir-option.patch
+- Refresh 0126-RHBZ-1211383-alias-collision.patch
+- Add 0133-RHBZ-1296979-fix-define.patch
+  * look for the correct libudev function to set define
+- Add 0134-RHBZ-1241528-check-mpath-prefix.patch
+  * only touch devices with a "mpath-" dm uuid prefix
+- Add 0135-RHBZ-1299600-path-dev-uevents.patch
+  * trigger path uevent the first time a path is claimed by multipath
+- Add 0136-RHBZ-1304687-wait-for-map-add.patch
+  * wait for the device to finish being added before reloading it.
+- Add 0137-RHBZ-1280524-clear-chkr-msg.patch
+- Add 0138-RHBZ-1288660-fix-mpathconf-allow.patch
+  * don't remove existing lines from blacklist_exceptions section
+- Add 0139-RHBZ-1273173-queue-no-daemon-doc.patch
+- Add 0140-RHBZ-1299647-fix-help.patch
+- Add 0141-RHBZ-1303953-mpathpersist-typo.patch
+- Add 0142-RHBZ-1283750-kpartx-fix.patch
+  * only remove devices if their uuid says that they are the correct
+    partition device
+- Add 0143-RHBZ-1299648-kpartx-sync.patch
+  * default to using udev sync mode
+- Add 0144-RHBZ-1299652-alua-pref-arg.patch
+  * allow "exclusive_pref_bit" argument to alua prioritizer
+- Add 0145-UP-resize-help-msg.patch
+- Add 0146-UPBZ-1299651-raw-output.patch
+  * allow raw format mutipathd show commands, that remove headers and padding
+- Add 0147-RHBZ-1272620-fail-rm-msg.patch
+- Add 0148-RHBZ-1292599-verify-before-remove.patch
+  * verify that all partitions are unused before attempting to remove a device
+- Add 0149-RHBZ-1292599-restore-removed-parts.patch
+  * don't disable kpartx when restoring the first path of a device.
+- Add 0150-RHBZ-1253913-fix-startup-msg.patch
+  * wait for multipathd daemon to write pidfile before returning
+- Add 0151-RHBZ-1297456-weighted-fix.patch
+  * add wwn keyword to weighted prioritizer for persistent naming
+- Add 0152-RHBZ-1269293-fix-blk-unit-file.patch
+  * use "Wants" instead of "Requires"
+- Add 0153-RH-fix-i686-size-bug.patch
+  * use 64-bit keycodes for multipathd client commands
+- Add 0154-UPBZ-1291406-disable-reinstate.patch
+  * don't automatically reinstate ghost paths for implicit alua devices
+- Add 0155-UPBZ-1300415-PURE-config.patch
+  * Add default config for PURE FlashArray
+- Add 0156-UPBZ-1313324-dont-fail-discovery.patch
+  * don't fail discovery because individual paths failed.
+- Add 0157-RHBZ-1319853-multipath-c-error-msg.patch
+  * better error reporting for multipath -c
+- Add 0158-RHBZ-1318581-timestamp-doc-fix.patch
+  * add documentation for -T
+- Add 0159-UPBZ-1255885-udev-waits.patch
+  * make multipath and kpartx wait after for udev after each command
+
 * Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.4.9-81
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
