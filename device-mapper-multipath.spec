@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 82%{?dist}
+Release: 83%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -167,6 +167,19 @@ Patch0156: 0156-UPBZ-1313324-dont-fail-discovery.patch
 Patch0157: 0157-RHBZ-1319853-multipath-c-error-msg.patch
 Patch0158: 0158-RHBZ-1318581-timestamp-doc-fix.patch
 Patch0159: 0159-UPBZ-1255885-udev-waits.patch
+Patch0160: 0160-RH-udev-flags.patch
+Patch0161: 0161-RHBZ-1311659-no-kpartx.patch
+Patch0162: 0162-RHBZ-1333331-huawei-config.patch
+Patch0163: 0163-UPBZ-1333492-resize-map.patch
+Patch0164: 0164-RHBZ-1311463-dos-part-rollover.patch
+Patch0165: 0165-UPBZ-1341748-MSA-2040-conf.patch
+Patch0166: 0166-RHBZ-1323429-dont-allow-new-wwid.patch
+Patch0167: 0167-RHBZ-1335176-fix-show-cmds.patch
+Patch0168: 0168-RHBZ-1347769-shared-lock.patch
+Patch0169: 0169-UPBZ-1353357-json-output.patch
+Patch0170: 0170-UPBZ-1352925-fix-typo.patch
+Patch0171: 0171-UPBZ-1356651-allow-zero-size.patch
+Patch0172: 0172-RHBZ-1350931-no-active-add.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -379,6 +392,19 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0157 -p1
 %patch0158 -p1
 %patch0159 -p1
+%patch0160 -p1
+%patch0161 -p1
+%patch0162 -p1
+%patch0163 -p1
+%patch0164 -p1
+%patch0165 -p1
+%patch0166 -p1
+%patch0167 -p1
+%patch0168 -p1
+%patch0169 -p1
+%patch0170 -p1
+%patch0171 -p1
+%patch0172 -p1
 cp %{SOURCE1} .
 
 %build
@@ -480,6 +506,42 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Fri Jul 22 2016 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-83
+- Modify 0135-RHBZ-1299600-path-dev-uevents.patch
+  * trigger uevents when adding wwids for existing devices during startup
+- Refresh 0136-RHBZ-1304687-wait-for-map-add.patch
+- Refresh 0150-RHBZ-1253913-fix-startup-msg.patch
+- Modify 0159-UPBZ-1255885-udev-waits.patch
+  * fix bug in failure path
+- Add 0160-RH-udev-flags.patch
+- Add 0161-RHBZ-1311659-no-kpartx.patch
+  * skip_kpartx option disables kpartx running on multipath devices
+- Add 0162-RHBZ-1333331-huawei-config.patch
+  * Add default config for Huawei XSG1 array
+- Add 0163-UPBZ-1333492-resize-map.patch
+  * restore old size if resize fails
+- Add 0164-RHBZ-1311463-dos-part-rollover.patch
+  * fix incorrect partition size due to 4k device size rollover
+- Add 0165-UPBZ-1341748-MSA-2040-conf.patch
+  * Add default config for MSA 2040 array
+- Add 0166-RHBZ-1323429-dont-allow-new-wwid.patch
+  * don't allow path wwid to change while it is in use
+- Add 0167-RHBZ-1335176-fix-show-cmds.patch
+  * and new show multipath format wildcard, 'f' to sho number of failures.
+    This will hopefully be useful for tracking what happens to multipath
+    devices for bz #1335176
+- Add 0168-RHBZ-1347769-shared-lock.patch
+  * make multipath lock the path devices with a shared lock
+- Add 0169-UPBZ-1353357-json-output.patch
+  * add mulitpathd json output command
+- Add 0170-UPBZ-1352925-fix-typo.patch
+- Add 0171-UPBZ-1356651-allow-zero-size.patch
+  * Allow zero-sized paths to be added to a multipath device
+- Add 0172-RHBZ-1350931-no-active-add.patch
+  * Allow paths to be added to a new map if no active paths exist. Also
+    fixes 1351430
+
+
 * Thu Apr 21 2016 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-82
 - Modify 0005-RH-add-mpathconf.patch
   * changed warning message

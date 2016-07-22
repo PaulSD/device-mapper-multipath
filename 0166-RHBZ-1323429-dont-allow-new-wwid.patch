@@ -1,0 +1,24 @@
+---
+ libmultipath/dmparser.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+Index: multipath-tools-130222/libmultipath/dmparser.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/dmparser.c
++++ multipath-tools-130222/libmultipath/dmparser.c
+@@ -360,6 +360,15 @@ disassemble_map (vector pathvec, char *
+ 			else if (!strlen(pp->wwid))
+ 				strncpy(pp->wwid, mpp->wwid, WWID_SIZE);
+ 
++			/*
++			 * Something went wrong. Likely the user changed the
++			 * path uid_attribute after creating a device
++			 */
++			else if (strcmp(pp->wwid, mpp->wwid) != 0) {
++				condlog(0, "%s: path wwid appears to have changed. Using old wwid.\n", pp->dev_t);
++				strncpy(pp->wwid, mpp->wwid, WWID_SIZE);
++			}
++
+ 			pgp->id ^= (long)pp;
+ 			pp->pgindex = i + 1;
+ 

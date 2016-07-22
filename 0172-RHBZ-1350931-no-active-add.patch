@@ -1,0 +1,37 @@
+---
+ multipathd/main.c |   15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -530,9 +530,15 @@ ev_add_path (struct path * pp, struct ve
+ 	}
+ 	mpp = find_mp_by_wwid(vecs->mpvec, pp->wwid);
+ 	if (mpp && mpp->wait_for_udev) {
+-		mpp->wait_for_udev = 2;
+-		orphan_path(pp);
+-		return 0;
++		if (pathcount(mpp, PATH_UP) == 0 &&
++		    (pathcount(mpp, PATH_GHOST) == 0 ||
++		     pp->tpgs == TPGS_IMPLICIT))
++			mpp->force_udev_reload = 1;
++		else {
++			mpp->wait_for_udev = 2;
++			orphan_path(pp);
++			return 0;
++		}
+ 	}
+ 
+ 	pp->mpp = mpp;
+@@ -551,7 +557,8 @@ rescan:
+ 
+ 		condlog(4,"%s: adopting all paths for path %s",
+ 			mpp->alias, pp->dev);
+-		mpp->force_udev_reload = !pathcount(mpp, PATH_WILD);
++		if (pathcount(mpp, PATH_WILD) == 0)
++			mpp->force_udev_reload = 1;
+ 		if (adopt_paths(vecs->pathvec, mpp, 1))
+ 			goto fail; /* leave path added to pathvec */
+ 

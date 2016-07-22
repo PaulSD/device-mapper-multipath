@@ -1,0 +1,20 @@
+---
+ libmultipath/devmapper.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/devmapper.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/devmapper.c
++++ multipath-tools-130222/libmultipath/devmapper.c
+@@ -213,8 +213,9 @@ dm_prereq (void)
+ static int
+ dm_simplecmd (int task, const char *name, int no_flush, int need_sync, uint16_t udev_flags, int deferred_remove) {
+ 	int r = 0;
+-	int udev_wait_flag = (need_sync && (task == DM_DEVICE_RESUME ||
+-					    task == DM_DEVICE_REMOVE));
++	int udev_wait_flag = ((need_sync && (task == DM_DEVICE_RESUME ||
++					    task == DM_DEVICE_REMOVE)) ||
++			       udev_flags);
+ 	uint32_t cookie = 0;
+ 	struct dm_task *dmt;
+ 

@@ -1,8 +1,10 @@
 ---
  libmultipath/configure.c |   30 ++++++++++++++++++++++++++++--
+ libmultipath/configure.h |    1 +
  libmultipath/wwids.c     |    4 ++--
  multipath/main.c         |    2 +-
- 3 files changed, 31 insertions(+), 5 deletions(-)
+ multipathd/main.c        |    3 ++-
+ 5 files changed, 34 insertions(+), 6 deletions(-)
 
 Index: multipath-tools-130222/libmultipath/configure.c
 ===================================================================
@@ -20,7 +22,7 @@ Index: multipath-tools-130222/libmultipath/configure.c
  	return 1;
  }
  
-+static void
++void
 +trigger_uevents (struct multipath *mpp)
 +{
 +	struct pathgroup * pgp;
@@ -94,3 +96,26 @@ Index: multipath-tools-130222/multipath/main.c
  				printf("wwid '%s' added\n", refwwid);
  			else
  				printf("failed adding '%s' to wwids file\n",
+Index: multipath-tools-130222/libmultipath/configure.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.h
++++ multipath-tools-130222/libmultipath/configure.h
+@@ -31,3 +31,4 @@ int coalesce_paths (struct vectors *vecs
+ int get_refwwid (char * dev, enum devtypes dev_type, vector pathvec, char **wwid);
+ int reload_map(struct vectors *vecs, struct multipath *mpp, int refresh);
+ int sysfs_get_host_adapter_name(struct path *pp, char *adapter_name);
++void trigger_uevents (struct multipath *mpp);
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -1435,7 +1435,8 @@ configure (struct vectors * vecs, int st
+ 
+ 	sync_maps_state(mpvec);
+ 	vector_foreach_slot(mpvec, mpp, i){
+-		remember_wwid(mpp->wwid);
++		if (remember_wwid(mpp->wwid) > 0)
++			trigger_uevents(mpp);
+ 		update_map_pr(mpp);
+ 	}
+ 

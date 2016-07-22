@@ -1,0 +1,26 @@
+---
+ multipath/main.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+Index: multipath-tools-130222/multipath/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipath/main.c
++++ multipath-tools-130222/multipath/main.c
+@@ -286,7 +286,7 @@ configure (void)
+ 			if (failed == 2 && conf->cmd == CMD_VALID_PATH)
+ 				printf("%s is not a valid multipath device path\n", conf->dev);
+ 			else
+-				condlog(3, "scope is nul");
++				condlog(3, "scope is null");
+ 			goto out;
+ 		}
+ 		if (conf->cmd == CMD_REMOVE_WWID) {
+@@ -358,7 +358,7 @@ configure (void)
+ 
+ 
+ 	if (conf->cmd == CMD_VALID_PATH) {
+-		/* This only happens if find_multipaths is and
++		/* This only happens if find_multipaths and
+  		 * ignore_wwids is set.
+ 		 * If there is currently a multipath device matching
+  		 * the refwwid, or there is more than one path matching

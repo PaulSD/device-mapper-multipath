@@ -332,7 +332,7 @@ Index: multipath-tools-130222/multipathd/main.c
  		}
  		if (count)
  			count--;
-@@ -1464,6 +1555,22 @@ configure (struct vectors * vecs, int st
+@@ -1465,6 +1556,22 @@ configure (struct vectors * vecs, int st
  }
  
  int
@@ -355,7 +355,7 @@ Index: multipath-tools-130222/multipathd/main.c
  reconfigure (struct vectors * vecs)
  {
  	struct config * old = conf;
-@@ -1543,12 +1650,18 @@ void
+@@ -1544,12 +1651,18 @@ void
  handle_signals(void)
  {
  	if (reconfig_sig && running_state == DAEMON_RUNNING) {

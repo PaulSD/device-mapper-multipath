@@ -1,0 +1,17 @@
+---
+ libmultipath/configure.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: multipath-tools-130222/libmultipath/configure.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.c
++++ multipath-tools-130222/libmultipath/configure.c
+@@ -552,7 +552,7 @@ lock_multipath (struct multipath * mpp,
+ 		if (!pgp->paths)
+ 			continue;
+ 		vector_foreach_slot(pgp->paths, pp, j) {
+-			if (lock && flock(pp->fd, LOCK_EX | LOCK_NB) &&
++			if (lock && flock(pp->fd, LOCK_SH | LOCK_NB) &&
+ 			    errno == EWOULDBLOCK)
+ 				goto fail;
+ 			else if (!lock)

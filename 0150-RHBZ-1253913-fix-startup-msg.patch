@@ -14,7 +14,7 @@ Index: multipath-tools-130222/multipathd/main.c
  
  static sem_t exit_sem;
  /*
-@@ -1704,6 +1705,12 @@ sigusr2 (int sig)
+@@ -1705,6 +1706,12 @@ sigusr2 (int sig)
  }
  
  static void
@@ -27,7 +27,7 @@ Index: multipath-tools-130222/multipathd/main.c
  signal_init(void)
  {
  	sigset_t set;
-@@ -1806,6 +1813,9 @@ child (void * param)
+@@ -1807,6 +1814,9 @@ child (void * param)
  	}
  
  	running_state = DAEMON_START;
@@ -37,7 +37,7 @@ Index: multipath-tools-130222/multipathd/main.c
  
  	condlog(2, "--------start up--------");
  	condlog(2, "read " DEFAULT_CONFIGFILE);
-@@ -1897,8 +1907,6 @@ child (void * param)
+@@ -1898,8 +1908,6 @@ child (void * param)
  	}
  	pthread_attr_destroy(&misc_attr);
  
@@ -46,7 +46,7 @@ Index: multipath-tools-130222/multipathd/main.c
  	update_timestamp(1);
  	/* Ignore errors, we can live without */
  
-@@ -1978,7 +1986,10 @@ daemonize(void)
+@@ -1979,7 +1987,10 @@ daemonize(void)
  {
  	int pid;
  	int dev_null_fd;
@@ -57,7 +57,7 @@ Index: multipath-tools-130222/multipathd/main.c
  	if( (pid = fork()) < 0){
  		fprintf(stderr, "Failed first fork : %s\n", strerror(errno));
  		return -1;
-@@ -1986,10 +1997,13 @@ daemonize(void)
+@@ -1987,10 +1998,13 @@ daemonize(void)
  	else if (pid != 0)
  		return pid;
  
@@ -72,7 +72,7 @@ Index: multipath-tools-130222/multipathd/main.c
  	else if (pid != 0)
  		_exit(0);
  
-@@ -2000,30 +2014,34 @@ daemonize(void)
+@@ -2001,30 +2015,34 @@ daemonize(void)
  	if (dev_null_fd < 0){
  		fprintf(stderr, "cannot open /dev/null for input & output : %s\n",
  			strerror(errno));
@@ -111,7 +111,7 @@ Index: multipath-tools-130222/multipathd/main.c
  }
  
  int
-@@ -2102,10 +2120,12 @@ main (int argc, char *argv[])
+@@ -2103,10 +2121,12 @@ main (int argc, char *argv[])
  	if (err < 0)
  		/* error */
  		exit(1);

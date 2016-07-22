@@ -1,0 +1,24 @@
+---
+ multipathd/cli_handlers.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+Index: multipath-tools-130222/multipathd/cli_handlers.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/cli_handlers.c
++++ multipath-tools-130222/multipathd/cli_handlers.c
+@@ -571,6 +571,7 @@ int resize_map(struct multipath *mpp, un
+ 	       struct vectors * vecs)
+ {
+ 	char params[PARAMS_SIZE] = {0};
++	unsigned long long orig_size = mpp->size;
+ 
+ 	mpp->size = size;
+ 	update_mpp_paths(mpp, vecs->pathvec);
+@@ -579,6 +580,7 @@ int resize_map(struct multipath *mpp, un
+ 	if (domap(mpp, params) <= 0) {
+ 		condlog(0, "%s: failed to resize map : %s", mpp->alias,
+ 			strerror(errno));
++		mpp->size = orig_size;
+ 		return 1;
+ 	}
+ 	return 0;
