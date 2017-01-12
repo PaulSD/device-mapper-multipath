@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 83%{?dist}
+Release: 84%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -506,6 +506,9 @@ fi
 %{_mandir}/man8/kpartx.8.gz
 
 %changelog
+* Thu Jan 12 2017 Igor Gnatenko <ignatenko@redhat.com> - 0.4.9-84
+- Rebuild for readline 7.x
+
 * Fri Jul 22 2016 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-83
 - Modify 0135-RHBZ-1299600-path-dev-uevents.patch
   * trigger uevents when adding wwids for existing devices during startup
