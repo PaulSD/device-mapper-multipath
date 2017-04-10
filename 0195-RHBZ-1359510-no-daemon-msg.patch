@@ -1,0 +1,111 @@
+---
+ libmultipath/configure.c |   21 ++++++++++++++++++++-
+ libmultipath/configure.h |    1 +
+ multipath/main.c         |   21 +++++++++++++++++++++
+ 3 files changed, 42 insertions(+), 1 deletion(-)
+
+Index: multipath-tools-130222/libmultipath/configure.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.c
++++ multipath-tools-130222/libmultipath/configure.c
+@@ -743,7 +743,8 @@ deadmap (struct multipath * mpp)
+ 	return 1; /* dead */
+ }
+ 
+-int check_daemon(void)
++extern int
++check_daemon(void)
+ {
+ 	int fd;
+ 	char *reply;
+@@ -776,6 +777,7 @@ coalesce_paths (struct vectors * vecs, v
+ {
+ 	int r = 1;
+ 	int k, i;
++	int map_processed = 0;
+ 	char empty_buff[WWID_SIZE];
+ 	char params[PARAMS_SIZE];
+ 	struct multipath * mpp;
+@@ -936,6 +938,13 @@ coalesce_paths (struct vectors * vecs, v
+ 			else
+ 				remove_map(mpp, vecs, 0);
+ 		}
++
++		/* By now at least one multipath device map is processed,
++		 * so set map_processed = 1
++		 */
++		if (!map_processed)
++			map_processed = 1;
++
+ 	}
+ 	/*
+ 	 * Flush maps with only dead paths (ie not in sysfs)
+@@ -963,6 +972,16 @@ coalesce_paths (struct vectors * vecs, v
+ 				condlog(2, "%s: remove (dead)", alias);
+ 		}
+ 	}
++
++	/* If there is at least one multipath device map processed then
++	 * check if 'multipathd' service is running or not?
++	 */
++	if (map_processed)  {
++		if (!conf->daemon && !check_daemon())
++			condlog(0, "'multipathd' service is currently not "
++				"running, IO failover/failback will not work");
++	}
++
+ 	return 0;
+ }
+ 
+Index: multipath-tools-130222/libmultipath/configure.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.h
++++ multipath-tools-130222/libmultipath/configure.h
+@@ -27,6 +27,7 @@ enum actions {
+ int setup_map (struct multipath * mpp, char * params, int params_size );
+ int domap (struct multipath * mpp, char * params);
+ int reinstate_paths (struct multipath *mpp);
++int check_daemon(void);
+ int coalesce_paths (struct vectors *vecs, vector curmp, char * refwwid, int force_reload);
+ int get_refwwid (char * dev, enum devtypes dev_type, vector pathvec, char **wwid);
+ int reload_map(struct vectors *vecs, struct multipath *mpp, int refresh);
+Index: multipath-tools-130222/multipath/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipath/main.c
++++ multipath-tools-130222/multipath/main.c
+@@ -178,6 +178,7 @@ static int
+ get_dm_mpvec (vector curmp, vector pathvec, char * refwwid)
+ {
+ 	int i;
++	int maps_present = 0;
+ 	struct multipath * mpp;
+ 	char params[PARAMS_SIZE], status[PARAMS_SIZE];
+ 
+@@ -226,7 +227,27 @@ get_dm_mpvec (vector curmp, vector pathv
+ 
+ 		if (conf->cmd == CMD_CREATE)
+ 			reinstate_paths(mpp);
++
++		/* At this place we have found at least one multipath
++		 * device map, so set maps_present = 1
++		 */
++		if (!maps_present)
++			maps_present = 1;
++
+ 	}
++
++	/* If there is at least one multipath device map present then
++	 * check if 'multipathd' service is running or not?
++	 */
++	if (maps_present) {
++		if (!conf->daemon && !check_daemon()) {
++			condlog(0, "multipath device maps are present, but "
++				"'multipathd' service is not running");
++			condlog(0, "IO failover/failback will not work without "
++				"'multipathd' service running");
++		}
++	}
++
+ 	return 0;
+ }
+ 

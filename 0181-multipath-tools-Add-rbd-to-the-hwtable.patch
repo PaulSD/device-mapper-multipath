@@ -1,0 +1,51 @@
+From b25186a60347e2a0f2e53a10c05d9ad52a88c890 Mon Sep 17 00:00:00 2001
+From: Mike Christie <mchristi@redhat.com>
+Date: Tue, 9 Aug 2016 13:53:21 -0500
+Subject: [PATCH 05/11] multipath-tools: Add rbd to the hwtable
+
+For BZ 1348372 from upstream commit:
+
+commit 61fe9e521965ff70db6a65370b394d769077d54c
+Author: Mike Christie <mchristi@redhat.com>
+Date:   Mon Aug 8 07:01:50 2016 -0500
+
+    multipath-tools: Add rbd to the hwtable
+
+    Add rbd to hwtable. These defaults are for the HA type of setup
+    supported by the checker. We do no support features like multibus
+    at the dm-multipath level yet
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
+---
+ libmultipath/hwtable.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index 61d1033..d278c04 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -1206,6 +1206,21 @@ static struct hwentry default_hw[] = {
+ 		.pgfailback    = -FAILBACK_IMMEDIATE,
+ 		.checker_name  = TUR,
+ 	},
++	{
++	/*
++	 * Red Hat
++	 *
++	 * Maintainer: Mike Christie
++	 * Mail: mchristi@redhat.com
++	 */
++		.vendor        = "Ceph",
++		.product       = "RBD",
++		.pgpolicy      = FAILOVER,
++		.no_path_retry = NO_PATH_RETRY_FAIL,
++		.checker_name  = RBD,
++		.deferred_remove = DEFERRED_REMOVE_ON,
++	},
++
+ 	/*
+ 	 * EOL
+ 	 */
+-- 
+1.8.3.1
+

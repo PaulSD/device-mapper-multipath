@@ -1,0 +1,32 @@
+From c9a788f437f2729f943cd03c43e84b65d74eb015 Mon Sep 17 00:00:00 2001
+From: Mike Christie <mchristi@redhat.com>
+Date: Wed, 31 Aug 2016 15:22:09 -0500
+Subject: [PATCH 09/11] rbd: check for nonshared clients
+
+The rbd checker only supports nonshared clients so add a check
+during init time.
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
+---
+ libmultipath/checkers/rbd.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/libmultipath/checkers/rbd.c b/libmultipath/checkers/rbd.c
+index 76f4005..a6f3405 100644
+--- a/libmultipath/checkers/rbd.c
++++ b/libmultipath/checkers/rbd.c
+@@ -123,6 +123,11 @@ int libcheck_init(struct checker * c)
+ 	if (!config_info)
+ 		goto free_addr;
+ 
++	if (!strstr(config_info, "noshare")) {
++		condlog(3, "Only nonshared clients supported.");
++		goto free_addr;
++	}
++
+ 	ct->config_info = strdup(config_info);
+ 	if (!ct->config_info)
+ 		goto free_addr;
+-- 
+1.8.3.1
+

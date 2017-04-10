@@ -1,0 +1,474 @@
+---
+ libmultipath/config.c      |    3 +
+ libmultipath/config.h      |    3 +
+ libmultipath/configure.c   |    1 
+ libmultipath/defaults.h    |    1 
+ libmultipath/devmapper.c   |    4 +-
+ libmultipath/dict.c        |   87 +++++++++++++++++++++++++++++++++++++++++++++
+ libmultipath/discovery.c   |   60 +++++++++++++++++++++++++++++++
+ libmultipath/discovery.h   |    1 
+ libmultipath/propsel.c     |   25 ++++++++++++
+ libmultipath/propsel.h     |    1 
+ libmultipath/structs.h     |    7 +++
+ multipath/multipath.conf.5 |    8 ++++
+ 12 files changed, 200 insertions(+), 1 deletion(-)
+
+Index: multipath-tools-130222/libmultipath/config.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.c
++++ multipath-tools-130222/libmultipath/config.c
+@@ -344,6 +344,7 @@ merge_hwe (struct hwentry * dst, struct
+ 	merge_num(delay_watch_checks);
+ 	merge_num(delay_wait_checks);
+ 	merge_num(skip_kpartx);
++	merge_num(max_sectors_kb);
+ 
+ 	/*
+ 	 * Make sure features is consistent with
+@@ -405,6 +406,7 @@ overwrite_hwe (struct hwentry * dst, str
+ 	overwrite_num(delay_watch_checks);
+ 	overwrite_num(delay_wait_checks);
+ 	overwrite_num(skip_kpartx);
++	overwrite_num(max_sectors_kb);
+ 
+ 	/*
+ 	 * Make sure features is consistent with
+@@ -682,6 +684,7 @@ load_config (char * file, struct udev *u
+ 	conf->skip_kpartx = DEFAULT_SKIP_KPARTX;
+ 	conf->remove_retries = 0;
+ 	conf->disable_changed_wwids = 0;
++	conf->max_sectors_kb = DEFAULT_MAX_SECTORS_KB;
+ 
+ 	/*
+ 	 * preload default hwtable
+Index: multipath-tools-130222/libmultipath/config.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.h
++++ multipath-tools-130222/libmultipath/config.h
+@@ -65,6 +65,7 @@ struct hwentry {
+ 	int delay_watch_checks;
+ 	int delay_wait_checks;
+ 	int skip_kpartx;
++	int max_sectors_kb;
+ 	char * bl_product;
+ };
+ 
+@@ -92,6 +93,7 @@ struct mpentry {
+ 	int delay_watch_checks;
+ 	int delay_wait_checks;
+ 	int skip_kpartx;
++	int max_sectors_kb;
+ 	uid_t uid;
+ 	gid_t gid;
+ 	mode_t mode;
+@@ -148,6 +150,7 @@ struct config {
+ 	int skip_kpartx;
+ 	int remove_retries;
+ 	int disable_changed_wwids;
++	int max_sectors_kb;
+ 	unsigned int version[3];
+ 
+ 	char * dev;
+Index: multipath-tools-130222/libmultipath/configure.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.c
++++ multipath-tools-130222/libmultipath/configure.c
+@@ -295,6 +295,7 @@ setup_map (struct multipath * mpp, char
+ 	select_delay_watch_checks(mpp);
+ 	select_delay_wait_checks(mpp);
+ 	select_skip_kpartx(mpp);
++	select_max_sectors_kb(mpp);
+ 
+ 	sysfs_set_scsi_tmo(mpp);
+ 	/*
+Index: multipath-tools-130222/libmultipath/defaults.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/defaults.h
++++ multipath-tools-130222/libmultipath/defaults.h
+@@ -25,6 +25,7 @@
+ #define DEFAULT_RETRIGGER_TRIES 3
+ #define DEFAULT_UEV_WAIT_TIMEOUT 30
+ #define DEFAULT_SKIP_KPARTX SKIP_KPARTX_OFF
++#define DEFAULT_MAX_SECTORS_KB	MAX_SECTORS_KB_UNDEF
+ 
+ #define DEFAULT_CHECKINT	5
+ #define MAX_CHECKINT(a)		(a << 2)
+Index: multipath-tools-130222/libmultipath/dict.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/dict.c
++++ multipath-tools-130222/libmultipath/dict.c
+@@ -976,6 +976,22 @@ def_disable_changed_wwids_handler(vector
+ 	return 0;
+ }
+ 
++static int
++def_max_sectors_kb_handler(vector strvec)
++{
++	char * buff;
++
++	buff = set_value(strvec);
++	if (!buff)
++		return 1;
++
++	if ((conf->max_sectors_kb = atoi(buff)) < MAX_SECTORS_KB_MIN)
++		conf->max_sectors_kb = MAX_SECTORS_KB_UNDEF;
++
++	FREE(buff);
++	return 0;
++}
++
+ /*
+  * blacklist block handlers
+  */
+@@ -1765,6 +1781,26 @@ hw_delay_wait_checks_handler(vector strv
+ 	return 0;
+ }
+ 
++static int
++hw_max_sectors_kb_handler(vector strvec)
++{
++	struct hwentry *hwe = VECTOR_LAST_SLOT(conf->hwtable);
++	char * buff;
++
++	if (!hwe)
++		return 1;
++
++	buff = set_value(strvec);
++	if (!buff)
++		return 1;
++
++	if ((hwe->max_sectors_kb = atoi(buff)) < MAX_SECTORS_KB_MIN)
++		hwe->max_sectors_kb = MAX_SECTORS_KB_UNDEF;
++
++	FREE(buff);
++	return 0;
++}
++
+ /*
+  * multipaths block handlers
+  */
+@@ -2316,6 +2352,26 @@ mp_delay_wait_checks_handler(vector strv
+ 	return 0;
+ }
+ 
++static int
++mp_max_sectors_kb_handler(vector strvec)
++{
++	struct mpentry *mpe = VECTOR_LAST_SLOT(conf->mptable);
++	char * buff;
++
++	if (!mpe)
++		return 1;
++
++	buff = set_value(strvec);
++	if (!buff)
++		return 1;
++
++	if ((mpe->max_sectors_kb = atoi(buff)) < MAX_SECTORS_KB_MIN)
++		mpe->max_sectors_kb = MAX_SECTORS_KB_UNDEF;
++
++	FREE(buff);
++	return 0;
++}
++
+ /*
+  * config file keywords printing
+  */
+@@ -2615,6 +2671,16 @@ snprint_mp_delay_wait_checks(char * buff
+ }
+ 
+ static int
++snprint_mp_max_sectors_kb(char * buff, int len, void * data)
++{
++	struct mpentry * mpe = (struct mpentry *)data;
++
++	if (mpe->max_sectors_kb == MAX_SECTORS_KB_UNDEF)
++		return 0;
++	return snprintf(buff, len, "%d", mpe->max_sectors_kb);
++}
++
++static int
+ snprint_hw_fast_io_fail(char * buff, int len, void * data)
+ {
+ 	struct hwentry * hwe = (struct hwentry *)data;
+@@ -2993,6 +3059,16 @@ snprint_detect_prio(char * buff, int len
+ }
+ 
+ static int
++snprint_hw_max_sectors_kb(char * buff, int len, void * data)
++{
++	struct hwentry * hwe = (struct hwentry *)data;
++
++	if (hwe->max_sectors_kb == MAX_SECTORS_KB_UNDEF)
++		return 0;
++	return snprintf(buff, len, "%d", hwe->max_sectors_kb);
++}
++
++static int
+ snprint_def_polling_interval (char * buff, int len, void * data)
+ {
+ 	return snprintf(buff, len, "%i", conf->checkint);
+@@ -3461,6 +3537,14 @@ snprint_def_disable_changed_wwids(char *
+ }
+ 
+ static int
++snprint_def_max_sectors_kb(char * buff, int len, void * data)
++{
++	if (conf->max_sectors_kb == MAX_SECTORS_KB_UNDEF)
++		return 0;
++	return snprintf(buff, len, "%d", conf->max_sectors_kb);
++}
++
++static int
+ snprint_ble_simple (char * buff, int len, void * data)
+ {
+ 	struct blentry * ble = (struct blentry *)data;
+@@ -3541,6 +3625,7 @@ init_keywords(void)
+ 	install_keyword("new_bindings_in_boot", &def_new_bindings_in_boot_handler, &snprint_def_new_bindings_in_boot);
+ 	install_keyword("remove_retries", &def_remove_retries_handler, &snprint_def_remove_retries);
+ 	install_keyword("disable_changed_wwids", &def_disable_changed_wwids_handler, &snprint_def_disable_changed_wwids);
++	install_keyword("max_sectors_kb", &def_max_sectors_kb_handler, &snprint_def_max_sectors_kb);
+ 	__deprecated install_keyword("default_selector", &def_selector_handler, NULL);
+ 	__deprecated install_keyword("default_path_grouping_policy", &def_pgpolicy_handler, NULL);
+ 	__deprecated install_keyword("default_uid_attribute", &def_uid_attribute_handler, NULL);
+@@ -3609,6 +3694,7 @@ init_keywords(void)
+ 	install_keyword("delay_watch_checks", &hw_delay_watch_checks_handler, &snprint_hw_delay_watch_checks);
+ 	install_keyword("delay_wait_checks", &hw_delay_wait_checks_handler, &snprint_hw_delay_wait_checks);
+ 	install_keyword("skip_kpartx", &hw_skip_kpartx_handler, &snprint_hw_skip_kpartx);
++	install_keyword("max_sectors_kb", &hw_max_sectors_kb_handler, &snprint_hw_max_sectors_kb);
+ 	install_sublevel_end();
+ 
+ 	install_keyword_root("multipaths", &multipaths_handler);
+@@ -3637,5 +3723,6 @@ init_keywords(void)
+ 	install_keyword("delay_watch_checks", &mp_delay_watch_checks_handler, &snprint_mp_delay_watch_checks);
+ 	install_keyword("delay_wait_checks", &mp_delay_wait_checks_handler, &snprint_mp_delay_wait_checks);
+ 	install_keyword("skip_kpartx", &mp_skip_kpartx_handler, &snprint_mp_skip_kpartx);
++	install_keyword("max_sectors_kb", &mp_max_sectors_kb_handler, &snprint_mp_max_sectors_kb);
+ 	install_sublevel_end();
+ }
+Index: multipath-tools-130222/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.c
++++ multipath-tools-130222/libmultipath/discovery.c
+@@ -12,6 +12,7 @@
+ #include <errno.h>
+ #include <libgen.h>
+ #include <libudev.h>
++#include <libdevmapper.h>
+ 
+ #include "checkers.h"
+ #include "vector.h"
+@@ -27,6 +28,7 @@
+ #include "discovery.h"
+ #include "prio.h"
+ #include "defaults.h"
++#include "devmapper.h"
+ 
+ int
+ store_pathinfo (vector pathvec, vector hwtable, struct udev_device *udevice,
+@@ -166,6 +168,64 @@ declare_sysfs_get_str(rev);
+ declare_sysfs_get_str(dev);
+ 
+ int
++sysfs_set_max_sectors_kb(struct multipath *mpp, int is_reload)
++{
++	struct pathgroup * pgp;
++	struct path *pp;
++	char buff[11];
++	struct udev_device *udevice = NULL;
++	int i, j, len, ret;
++	int max_sectors_kb;
++
++	if (mpp->max_sectors_kb == MAX_SECTORS_KB_UNDEF)
++		return 0;
++	max_sectors_kb = mpp->max_sectors_kb;
++	if (is_reload) {
++		if (!mpp->dmi && dm_get_info(mpp->alias, &mpp->dmi) != 0) {
++			condlog(0, "failed to get dm info on %s to set max_sectors_kb", mpp->alias);
++			return 1;
++		}
++		udevice = udev_device_new_from_devnum(conf->udev, 'b',
++						      makedev(mpp->dmi->major,
++							      mpp->dmi->minor));
++		if (!udevice) {
++			condlog(0, "failed to get udev device to set max_sectors_kb for %s", mpp->alias);
++			return 1;
++		}
++		if (sysfs_attr_get_value(udevice, "queue/max_sectors_kb",
++					 buff, sizeof(buff)) <= 0) {
++			condlog(0, "failed to get current max_sectors_kb from %s", mpp->alias);
++			goto fail_reload;
++		}
++		if (sscanf(buff, "%u\n", &max_sectors_kb) != 1) {
++			condlog(0, "can't parse current max_sectors_kb from %s",
++				mpp->alias);
++			goto fail_reload;
++		}
++		udev_device_unref(udevice);
++	}
++	snprintf(buff, 11, "%d", max_sectors_kb);
++	len = strlen(buff);
++
++	vector_foreach_slot (mpp->pg, pgp, i) {
++		vector_foreach_slot (pgp->paths, pp, j) {
++			ret = sysfs_attr_set_value(pp->udev,
++						   "queue/max_sectors_kb",
++					  	   buff, len);
++			if (ret < 0) {
++				condlog(0, "failed setting max_sectors_kb on %s : %s", pp->dev, strerror(-ret));
++				return 1;
++			}
++		}
++	}
++	return 0;
++
++fail_reload:
++	udev_device_unref(udevice);
++	return 1;
++}
++
++int
+ sysfs_get_timeout(struct path *pp, unsigned int *timeout)
+ {
+ 	const char *attr = NULL;
+Index: multipath-tools-130222/libmultipath/discovery.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.h
++++ multipath-tools-130222/libmultipath/discovery.h
+@@ -41,6 +41,7 @@ int store_pathinfo (vector pathvec, vect
+ 		    struct udev_device *udevice, int flag,
+ 		    struct path **pp_ptr);
+ int sysfs_set_scsi_tmo (struct multipath *mpp);
++int sysfs_set_max_sectors_kb(struct multipath *mpp, int is_reload);
+ int sysfs_get_timeout(struct path *pp, unsigned int *timeout);
+ int sysfs_get_host_pci_name(struct path *pp, char *pci_name);
+ int sysfs_get_iscsi_ip_address(struct path *pp, char *ip_address);
+Index: multipath-tools-130222/libmultipath/propsel.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/propsel.c
++++ multipath-tools-130222/libmultipath/propsel.c
+@@ -880,3 +880,28 @@ select_skip_kpartx (struct multipath * m
+ 	condlog(3, "skip_kpartx = DISABLED (internal default)");
+ 	return 0;
+ }
++
++extern int
++select_max_sectors_kb (struct multipath * mp)
++{
++	if (mp->mpe && mp->mpe->max_sectors_kb != MAX_SECTORS_KB_UNDEF) {
++		mp->max_sectors_kb = mp->mpe->max_sectors_kb;
++		condlog(3, "max_sectors_kb = %i (multipath setting)",
++				mp->max_sectors_kb);
++		return 0;
++	}
++	if (mp->hwe && mp->hwe->max_sectors_kb != MAX_SECTORS_KB_UNDEF) {
++		mp->max_sectors_kb = mp->hwe->max_sectors_kb;
++		condlog(3, "max_sectors_kb = %i (controler setting)",
++				mp->max_sectors_kb);
++		return 0;
++	}
++	if (conf->max_sectors_kb != MAX_SECTORS_KB_UNDEF) {
++		mp->max_sectors_kb = conf->max_sectors_kb;
++		condlog(3, "max_sectors_kb = %i (config file default)",
++				mp->max_sectors_kb);
++		return 0;
++	}
++	mp->max_sectors_kb = MAX_SECTORS_KB_UNDEF;
++	return 0;
++}
+Index: multipath-tools-130222/libmultipath/propsel.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/propsel.h
++++ multipath-tools-130222/libmultipath/propsel.h
+@@ -24,3 +24,4 @@ int select_deferred_remove(struct multip
+ int select_delay_watch_checks (struct multipath * mp);
+ int select_delay_wait_checks (struct multipath * mp);
+ int select_skip_kpartx (struct multipath * mp);
++int select_max_sectors_kb (struct multipath * mp);
+Index: multipath-tools-130222/libmultipath/structs.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/structs.h
++++ multipath-tools-130222/libmultipath/structs.h
+@@ -128,6 +128,12 @@ enum skip_kpartx_states {
+ 	SKIP_KPARTX_ON,
+ };
+ 
++
++enum max_sectors_kb_states {
++	MAX_SECTORS_KB_UNDEF = 0,
++	MAX_SECTORS_KB_MIN = 4,  /* can't be smaller than page size */
++};
++
+ enum scsi_protocol {
+ 	SCSI_PROTOCOL_FCP = 0,	/* Fibre Channel */
+ 	SCSI_PROTOCOL_SPI = 1,	/* parallel SCSI */
+@@ -245,6 +251,7 @@ struct multipath {
+ 	int delay_wait_checks;
+ 	int force_udev_reload;
+ 	int skip_kpartx;
++	int max_sectors_kb;
+ 	unsigned int dev_loss;
+ 	uid_t uid;
+ 	gid_t gid;
+Index: multipath-tools-130222/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools-130222.orig/multipath/multipath.conf.5
++++ multipath-tools-130222/multipath/multipath.conf.5
+@@ -561,6 +561,10 @@ default is
+ This sets how may times multipath will retry removing a device that is in-use.
+ Between each attempt, multipath will sleep 1 second. The default is
+ .I 0
++.TP
++.B max_sectors_kb
++Sets the max_sectors_kb device parameter on all path devices and the multipath
++device to the specified value. Default is device dependent.
+ .
+ .SH "blacklist section"
+ The
+@@ -672,6 +676,8 @@ section:
+ .B delay_wait_checks
+ .TP
+ .B skip_kpartx
++.TP
++.B max_sectors_kb
+ .RE
+ .PD
+ .LP
+@@ -772,6 +778,8 @@ section:
+ .B delay_wait_checks
+ .TP
+ .B skip_kpartx
++.TP
++.B max_sectors_kb
+ .RE
+ .PD
+ .LP
+Index: multipath-tools-130222/libmultipath/devmapper.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/devmapper.c
++++ multipath-tools-130222/libmultipath/devmapper.c
+@@ -21,7 +21,7 @@
+ #include "devmapper.h"
+ #include "config.h"
+ #include "sysfs.h"
+-
++#include "discovery.h"
+ #include "log_pthread.h"
+ #include <sys/types.h>
+ #include <time.h>
+@@ -330,6 +330,7 @@ extern int
+ dm_addmap_create (struct multipath *mpp, char * params) {
+ 	int ro;
+ 
++	sysfs_set_max_sectors_kb(mpp, 0);
+ 	for (ro = 0; ro <= 1; ro++) {
+ 		int err;
+ 
+@@ -356,6 +357,7 @@ dm_addmap_create (struct multipath *mpp,
+ 
+ extern int
+ dm_addmap_reload (struct multipath *mpp, char *params) {
++	sysfs_set_max_sectors_kb(mpp, 1);
+ 	if (dm_addmap(DM_DEVICE_RELOAD, TGT_MPATH, mpp, params, 0, ADDMAP_RW, SKIP_KPARTX_OFF))
+ 		return 1;
+ 	if (errno != EROFS)

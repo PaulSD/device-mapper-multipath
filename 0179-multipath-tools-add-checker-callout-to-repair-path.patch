@@ -1,0 +1,250 @@
+From 1073621a7a63ca4e9a00baedd8edc51e5381eb95 Mon Sep 17 00:00:00 2001
+From: Mike Christie <mchristi@redhat.com>
+Date: Tue, 9 Aug 2016 13:46:11 -0500
+Subject: [PATCH 03/11] multipath-tools: add checker callout to repair path
+
+For BZ 1348372 from upstream commit:
+
+commit 015f87b16a7797a17afd514aec46e65c2a1a2f73
+Author: Mike Christie <mchristi@redhat.com>
+Date:   Mon Aug 8 07:01:48 2016 -0500
+
+    multipath-tools: add checker callout to repair path
+
+    This patch adds a callback which can be used to repair a path
+    if check() has determined it is in the PATH_DOWN state.
+
+    The next patch that adds rbd checker support which will use this to
+    handle the case where a rbd device is blacklisted.
+
+--------
+
+Porting notes:
+checkerloop difference due to different path tracking.
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
+---
+ libmultipath/checkers.c              | 23 +++++++++++++++++++++++
+ libmultipath/checkers.h              |  4 ++++
+ libmultipath/checkers/cciss_tur.c    |  5 +++++
+ libmultipath/checkers/directio.c     |  5 +++++
+ libmultipath/checkers/emc_clariion.c |  5 +++++
+ libmultipath/checkers/hp_sw.c        |  5 +++++
+ libmultipath/checkers/rdac.c         |  5 +++++
+ libmultipath/checkers/readsector0.c  |  5 +++++
+ libmultipath/checkers/tur.c          |  5 +++++
+ multipathd/main.c                    |  9 +++++++++
+ 10 files changed, 71 insertions(+)
+
+diff --git a/libmultipath/checkers.c b/libmultipath/checkers.c
+index 7f9db2d..fa7d8b7 100644
+--- a/libmultipath/checkers.c
++++ b/libmultipath/checkers.c
+@@ -137,6 +137,14 @@ struct checker * add_checker (char * name)
+ 	if (!c->free)
+ 		goto out;
+ 
++	c->repair = (void (*)(struct checker *)) dlsym(c->handle,
++						       "libcheck_repair");
++	errstr = dlerror();
++	if (errstr != NULL)
++		condlog(0, "A dynamic linking error occurred: (%s)", errstr);
++	if (!c->repair)
++		goto out;
++
+ 	c->fd = 0;
+ 	c->sync = 1;
+ 	list_add(&c->node, &checkers);
+@@ -202,6 +210,20 @@ void checker_put (struct checker * dst)
+ 	free_checker(src);
+ }
+ 
++void checker_repair (struct checker * c)
++{
++	if (!c)
++		return;
++
++	c->message[0] = '\0';
++	if (c->disable) {
++		MSG(c, "checker disabled");
++		return;
++	}
++
++	c->repair(c);
++}
++
+ int checker_check (struct checker * c)
+ {
+ 	int r;
+@@ -266,6 +288,7 @@ void checker_get (struct checker * dst, char * name)
+ 	dst->sync = src->sync;
+ 	strncpy(dst->name, src->name, CHECKER_NAME_LEN);
+ 	strncpy(dst->message, src->message, CHECKER_MSG_LEN);
++	dst->repair = src->repair;
+ 	dst->check = src->check;
+ 	dst->init = src->init;
+ 	dst->free = src->free;
+diff --git a/libmultipath/checkers.h b/libmultipath/checkers.h
+index 735bb25..ad3b9e4 100644
+--- a/libmultipath/checkers.h
++++ b/libmultipath/checkers.h
+@@ -106,6 +106,9 @@ struct checker {
+ 						multipath-wide. Use MALLOC if
+ 						you want to stuff data in. */
+ 	int (*check)(struct checker *);
++	void (*repair)(struct checker *);     /* called if check returns
++					        PATH_DOWN to bring path into
++						usable state */
+ 	int (*init)(struct checker *);       /* to allocate the context */
+ 	void (*free)(struct checker *);      /* to free the context */
+ };
+@@ -125,6 +128,7 @@ void checker_set_async (struct checker *);
+ void checker_set_fd (struct checker *, int);
+ void checker_enable (struct checker *);
+ void checker_disable (struct checker *);
++void checker_repair (struct checker *);
+ int checker_check (struct checker *);
+ int checker_selected (struct checker *);
+ char * checker_name (struct checker *);
+diff --git a/libmultipath/checkers/cciss_tur.c b/libmultipath/checkers/cciss_tur.c
+index 4c26901..7e4eb81 100644
+--- a/libmultipath/checkers/cciss_tur.c
++++ b/libmultipath/checkers/cciss_tur.c
+@@ -63,6 +63,11 @@ void libcheck_free (struct checker * c)
+ 	return;
+ }
+ 
++void libcheck_repair (struct checker * c)
++{
++	return;
++}
++
+ extern int
+ libcheck_check (struct checker * c)
+ {
+diff --git a/libmultipath/checkers/directio.c b/libmultipath/checkers/directio.c
+index 46fe6a7..1a997ed 100644
+--- a/libmultipath/checkers/directio.c
++++ b/libmultipath/checkers/directio.c
+@@ -116,6 +116,11 @@ void libcheck_free (struct checker * c)
+ 	free(ct);
+ }
+ 
++void libcheck_repair (struct checker * c)
++{
++	return;
++}
++
+ static int
+ check_state(int fd, struct directio_context *ct, int sync, int timeout_secs)
+ {
+diff --git a/libmultipath/checkers/emc_clariion.c b/libmultipath/checkers/emc_clariion.c
+index b42d267..43b5025 100644
+--- a/libmultipath/checkers/emc_clariion.c
++++ b/libmultipath/checkers/emc_clariion.c
+@@ -90,6 +90,11 @@ void libcheck_free (struct checker * c)
+ 	free(c->context);
+ }
+ 
++void libcheck_repair (struct checker * c)
++{
++	return;
++}
++
+ int libcheck_check (struct checker * c)
+ {
+ 	unsigned char sense_buffer[128] = { 0, };
+diff --git a/libmultipath/checkers/hp_sw.c b/libmultipath/checkers/hp_sw.c
+index b50ac0c..857ac5e 100644
+--- a/libmultipath/checkers/hp_sw.c
++++ b/libmultipath/checkers/hp_sw.c
+@@ -44,6 +44,11 @@ void libcheck_free (struct checker * c)
+ 	return;
+ }
+ 
++void libcheck_repair (struct checker * c)
++{
++	return;
++}
++
+ static int
+ do_inq(int sg_fd, int cmddt, int evpd, unsigned int pg_op,
+        void *resp, int mx_resp_len, int noisy, unsigned int timeout)
+diff --git a/libmultipath/checkers/rdac.c b/libmultipath/checkers/rdac.c
+index f0e0af3..5469e61 100644
+--- a/libmultipath/checkers/rdac.c
++++ b/libmultipath/checkers/rdac.c
+@@ -139,6 +139,11 @@ void libcheck_free (struct checker * c)
+ 	return;
+ }
+ 
++void libcheck_repair (struct checker * c)
++{
++	return;
++}
++
+ static int
+ do_inq(int sg_fd, unsigned int pg_op, void *resp, int mx_resp_len,
+        unsigned int timeout)
+diff --git a/libmultipath/checkers/readsector0.c b/libmultipath/checkers/readsector0.c
+index 0550fb6..b3ed1f3 100644
+--- a/libmultipath/checkers/readsector0.c
++++ b/libmultipath/checkers/readsector0.c
+@@ -23,6 +23,11 @@ void libcheck_free (struct checker * c)
+ 	return;
+ }
+ 
++void libcheck_repair (struct checker * c)
++{
++	return;
++}
++
+ int libcheck_check (struct checker * c)
+ {
+ 	unsigned char buf[4096];
+diff --git a/libmultipath/checkers/tur.c b/libmultipath/checkers/tur.c
+index 1e5b039..91f1458 100644
+--- a/libmultipath/checkers/tur.c
++++ b/libmultipath/checkers/tur.c
+@@ -187,6 +187,11 @@ void libcheck_free (struct checker * c)
+ 	return;
+ }
+ 
++void libcheck_repair (struct checker * c)
++{
++	return;
++}
++
+ #define TUR_MSG(msg, fmt, args...) snprintf(msg, CHECKER_MSG_LEN, fmt, ##args);
+ 
+ int
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 8808c88..d26fd22 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -1455,6 +1455,14 @@ check_path (struct vectors * vecs, struct path * pp)
+ 	}
+ }
+ 
++void repair_path(struct vectors * vecs, struct path * pp)
++{
++	if (pp->state != PATH_DOWN)
++		return;
++
++	checker_repair(&pp->checker);
++}
++
+ static void *
+ checkerloop (void *ap)
+ {
+@@ -1483,6 +1491,7 @@ checkerloop (void *ap)
+ 		if (vecs->pathvec) {
+ 			vector_foreach_slot (vecs->pathvec, pp, i) {
+ 				check_path(vecs, pp);
++				repair_path(vecs, pp);
+ 			}
+ 		}
+ 		if (vecs->mpvec) {
+-- 
+1.8.3.1
+

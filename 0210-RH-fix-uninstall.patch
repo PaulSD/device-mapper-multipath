@@ -1,0 +1,25 @@
+---
+ libmpathpersist/Makefile |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+Index: multipath-tools-130222/libmpathpersist/Makefile
+===================================================================
+--- multipath-tools-130222.orig/libmpathpersist/Makefile
++++ multipath-tools-130222/libmpathpersist/Makefile
+@@ -33,12 +33,14 @@ install: $(LIBS)
+ 	ln -sf $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 	install -m 644 mpath_persistent_reserve_in.3.gz $(DESTDIR)$(man3dir)	
+ 	install -m 644 mpath_persistent_reserve_out.3.gz $(DESTDIR)$(man3dir)	
++	$(INSTALL_PROGRAM) -m 644 mpath_persist.h $(DESTDIR)$(includedir)
+ 
+ uninstall:
+ 	rm -f $(DESTDIR)$(syslibdir)/$(LIBS)
+ 	rm -f $(DESTDIR)$(syslibdir)/$(DEVLIB)
+-	rm $(DESTDIR)$(mandir)/mpath_persistent_reserve_in.3.gz	
+-	rm $(DESTDIR)$(mandir)/mpath_persistent_reserve_out.3.gz	
++	rm $(DESTDIR)$(man3dir)/mpath_persistent_reserve_in.3.gz
++	rm $(DESTDIR)$(man3dir)/mpath_persistent_reserve_out.3.gz
++	rm -f $(DESTDIR)$(includedir)/mpath_persist.h
+ 
+ clean:
+ 	rm -f core *.a *.o 

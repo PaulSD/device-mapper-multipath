@@ -1,0 +1,91 @@
+From 2926316c8492a1d18c7bbdac0fac75c38ce16152 Mon Sep 17 00:00:00 2001
+From: Mike Christie <mchristi@redhat.com>
+Date: Tue, 16 Aug 2016 11:47:16 -0500
+Subject: [PATCH 07/11] multipathd: Don't call repair on blacklisted path
+
+For BZ 1348372 from upstream commit:
+
+Author: Mike Christie <mchristi@redhat.com>
+Date:   Mon Aug 15 12:13:46 2016 -0500
+
+    multipathd: Don't call repair on blacklisted paths
+
+    This fixes a regression added in
+    015f87b16a7797a17afd514aec46e65c2a1a2f73
+
+    If a path is blacklisted the checkerloop will free the path so
+    don't call repair on it.
+
+    This moves the repair call down into check_path, because I think
+    we also do not need to call it for other cases where we cannot get
+    the uuid info or being orphaned.
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
+---
+ multipathd/main.c | 22 ++++++++++++----------
+ 1 file changed, 12 insertions(+), 10 deletions(-)
+
+diff --git a/multipathd/main.c b/multipathd/main.c
+index d26fd22..4638c8b 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -1238,6 +1238,16 @@ int update_path_groups(struct multipath *mpp, struct vectors *vecs, int refresh)
+ 	return 0;
+ }
+ 
++void repair_path(struct path * pp)
++{
++	if (pp->state != PATH_DOWN)
++		return;
++
++	checker_repair(&pp->checker);
++	if (strlen(checker_message(&pp->checker)))
++		LOG_MSG(1, checker_message(&pp->checker));
++}
++
+ void
+ check_path (struct vectors * vecs, struct path * pp)
+ {
+@@ -1352,6 +1362,7 @@ check_path (struct vectors * vecs, struct path * pp)
+ 			pp->mpp->failback_tick = 0;
+ 
+ 			pp->mpp->stat_path_failures++;
++			repair_path(pp);
+ 			return;
+ 		}
+ 
+@@ -1431,7 +1442,7 @@ check_path (struct vectors * vecs, struct path * pp)
+ 	}
+ 
+ 	pp->state = newstate;
+-
++	repair_path(pp);
+ 
+ 	if (pp->mpp->wait_for_udev)
+ 		return;
+@@ -1455,14 +1466,6 @@ check_path (struct vectors * vecs, struct path * pp)
+ 	}
+ }
+ 
+-void repair_path(struct vectors * vecs, struct path * pp)
+-{
+-	if (pp->state != PATH_DOWN)
+-		return;
+-
+-	checker_repair(&pp->checker);
+-}
+-
+ static void *
+ checkerloop (void *ap)
+ {
+@@ -1491,7 +1494,6 @@ checkerloop (void *ap)
+ 		if (vecs->pathvec) {
+ 			vector_foreach_slot (vecs->pathvec, pp, i) {
+ 				check_path(vecs, pp);
+-				repair_path(vecs, pp);
+ 			}
+ 		}
+ 		if (vecs->mpvec) {
+-- 
+1.8.3.1
+

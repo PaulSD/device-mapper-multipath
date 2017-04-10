@@ -1,0 +1,38 @@
+From e2b87038125c79089e0bd4c6fd905667c5108740 Mon Sep 17 00:00:00 2001
+From: Mike Christie <mchristi@redhat.com>
+Date: Tue, 9 Aug 2016 13:36:04 -0500
+Subject: [PATCH 01/11] libmultipath: correctly initialize pp->sg_id
+
+For BZ 1348372 from upstream:
+
+commit b4d9ca8dc8bbfbd3782bf4cf2cb1a440685ccd07
+Author: Hannes Reinecke <hare@suse.de>
+Date:   Wed Nov 11 13:38:57 2015 +0100
+
+    libmultipath: correctly initialize pp->sg_id
+
+    The default SCSI protocol is 'SCSI_PROTOCOL_UNSPEC';
+    '0' is SCSI_PROTOCOL_FCP.
+
+    Signed-off-by: Hannes Reinecke <hare@suse.de>
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
+---
+ libmultipath/structs.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libmultipath/structs.c b/libmultipath/structs.c
+index 30d247d..26a6a3b 100644
+--- a/libmultipath/structs.c
++++ b/libmultipath/structs.c
+@@ -94,6 +94,7 @@ alloc_path (void)
+ 		pp->sg_id.channel = -1;
+ 		pp->sg_id.scsi_id = -1;
+ 		pp->sg_id.lun = -1;
++		pp->sg_id.proto_id = SCSI_PROTOCOL_UNSPEC;
+ 		pp->fd = -1;
+ 		pp->priority = PRIO_UNDEF;
+ 	}
+-- 
+1.8.3.1
+

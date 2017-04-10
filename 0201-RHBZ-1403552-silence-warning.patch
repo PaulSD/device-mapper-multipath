@@ -1,0 +1,59 @@
+---
+ libmultipath/discovery.c |   15 +++++++++++----
+ multipathd/main.c        |   10 ++++++++++
+ 2 files changed, 21 insertions(+), 4 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.c
++++ multipath-tools-130222/libmultipath/discovery.c
+@@ -84,10 +84,6 @@ path_discover (vector pathvec, struct co
+ 	if (!devname)
+ 		return PATHINFO_FAILED;
+ 
+-	if (filter_devnode(conf->blist_devnode, conf->elist_devnode,
+-			   (char *)devname) > 0)
+-		return PATHINFO_SKIPPED;
+-
+ 	pp = find_path_by_dev(pathvec, (char *)devname);
+ 	if (!pp) {
+ 		return store_pathinfo(pathvec, conf->hwtable,
+@@ -1286,6 +1282,17 @@ pathinfo (struct path *pp, vector hwtabl
+ 	if (!pp)
+ 		return PATHINFO_FAILED;
+ 
++	/*
++	 * For behavior backward-compatibility with multipathd,
++	 * the blacklisting by filter_devnode() is not
++	 * limited by DI_BLACKLIST and occurs before this debug
++	 * message with the mask value.
++	 */
++	if (filter_devnode(conf->blist_devnode,
++			   conf->elist_devnode,
++			   pp->dev) > 0)
++		return PATHINFO_SKIPPED;
++
+ 	condlog(3, "%s: mask = 0x%x", pp->dev, mask);
+ 
+ 	/*
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -776,6 +776,16 @@ uev_update_path (struct uevent *uev, str
+ 
+ 	pp = find_path_by_dev(vecs->pathvec, uev->kernel);
+ 	if (!pp) {
++		/* If the path is blacklisted, print a debug/non-default verbosity message. */
++		if (uev->udev) {
++			int flag = DI_SYSFS | DI_WWID;
++
++			if (store_pathinfo(NULL, conf->hwtable, uev->udev, flag, NULL) == PATHINFO_SKIPPED) {
++				condlog(3, "%s: spurious uevent, path is blacklisted", uev->kernel);
++				return 0;
++			}
++		}
++
+ 		condlog(0, "%s: spurious uevent, path not found",
+ 			uev->kernel);
+ 		return 1;

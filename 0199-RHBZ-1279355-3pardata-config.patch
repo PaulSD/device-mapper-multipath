@@ -1,0 +1,17 @@
+---
+ libmultipath/hwtable.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: multipath-tools-130222/libmultipath/hwtable.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/hwtable.c
++++ multipath-tools-130222/libmultipath/hwtable.c
+@@ -69,7 +69,7 @@ static struct hwentry default_hw[] = {
+ 		.pgpolicy      = MULTIBUS,
+ 		.pgfailback    = FAILBACK_UNDEF,
+ 		.rr_weight     = RR_WEIGHT_NONE,
+-		.no_path_retry = NO_PATH_RETRY_UNDEF,
++		.no_path_retry = 12,
+ 		.checker_name  = DEFAULT_CHECKER,
+ 		.prio_name     = DEFAULT_PRIO,
+ 		.prio_args     = NULL,

@@ -1,0 +1,208 @@
+---
+ libmultipath/configure.c |    8 +++--
+ multipathd/main.c        |   68 +++++++++++++++++++++++++++++++++++++----------
+ 2 files changed, 59 insertions(+), 17 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/configure.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.c
++++ multipath-tools-130222/libmultipath/configure.c
+@@ -829,8 +829,10 @@ coalesce_paths (struct vectors * vecs, v
+ 		 * at this point, we know we really got a new mp
+ 		 */
+ 		mpp = add_map_with_path(vecs, pp1, 0);
+-		if (!mpp)
+-			return 1;
++		if (!mpp) {
++			orphan_path(pp1);
++			continue;
++		}
+ 
+ 		if (pp1->priority == PRIO_UNDEF)
+ 			mpp->action = ACT_REJECT;
+@@ -879,7 +881,7 @@ coalesce_paths (struct vectors * vecs, v
+ 			condlog(3, "%s: domap (%u) failure "
+ 				   "for create/reload map",
+ 				mpp->alias, r);
+-			if (r == DOMAP_FAIL) {
++			if (r == DOMAP_FAIL || conf->daemon) {
+ 				condlog(2, "%s: %s map",
+ 					mpp->alias, (mpp->action == ACT_CREATE)?
+ 					"ignoring" : "removing");
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -821,7 +821,7 @@ map_discovery (struct vectors * vecs)
+ 
+ 	vector_foreach_slot (vecs->mpvec, mpp, i)
+ 		if (setup_multipath(vecs, mpp))
+-			return 1;
++			i--;
+ 
+ 	return 0;
+ }
+@@ -1523,21 +1523,29 @@ configure (struct vectors * vecs, int st
+ 	vector mpvec;
+ 	int i, ret;
+ 
+-	if (!vecs->pathvec && !(vecs->pathvec = vector_alloc()))
++	if (!vecs->pathvec && !(vecs->pathvec = vector_alloc())) {
++		condlog(0, "couldn't allocate path vec in configure");
+ 		return 1;
++	}
+ 
+-	if (!vecs->mpvec && !(vecs->mpvec = vector_alloc()))
++	if (!vecs->mpvec && !(vecs->mpvec = vector_alloc())) {
++		condlog(0, "couldn't allocate multipath vec in configure");
+ 		return 1;
++	}
+ 
+-	if (!(mpvec = vector_alloc()))
++	if (!(mpvec = vector_alloc())) {
++		condlog(0, "couldn't allocate new maps vec in configure");
+ 		return 1;
++	}
+ 
+ 	/*
+ 	 * probe for current path (from sysfs) and map (from dm) sets
+ 	 */
+ 	ret = path_discovery(vecs->pathvec, conf, DI_ALL);
+-	if (ret < 0)
++	if (ret < 0) {
++		condlog(0, "configure failed at path discovery");
+ 		return 1;
++	}
+ 
+ 	vector_foreach_slot (vecs->pathvec, pp, i){
+ 		if (filter_path(conf, pp) > 0){
+@@ -1548,21 +1556,27 @@ configure (struct vectors * vecs, int st
+ 		else
+ 			pp->checkint = conf->checkint;
+ 	}
+-	if (map_discovery(vecs))
++	if (map_discovery(vecs)) {
++		condlog(0, "configure failed at map discovery");
+ 		return 1;
++	}
+ 
+ 	/*
+ 	 * create new set of maps & push changed ones into dm
+ 	 */
+-	if (coalesce_paths(vecs, mpvec, NULL, 1))
++	if (coalesce_paths(vecs, mpvec, NULL, 1)) {
++		condlog(0, "configure failed while coalescing paths");
+ 		return 1;
++	}
+ 
+ 	/*
+ 	 * may need to remove some maps which are no longer relevant
+ 	 * e.g., due to blacklist changes in conf file
+ 	 */
+-	if (coalesce_maps(vecs, mpvec))
++	if (coalesce_maps(vecs, mpvec)) {
++		condlog(0, "configure failed while coalescing maps");
+ 		return 1;
++	}
+ 
+ 	dm_lib_release();
+ 
+@@ -1588,11 +1602,15 @@ configure (struct vectors * vecs, int st
+ 	 * start dm event waiter threads for these new maps
+ 	 */
+ 	vector_foreach_slot(vecs->mpvec, mpp, i) {
+-		if (setup_multipath(vecs, mpp))
+-			return 1;
++		if (setup_multipath(vecs, mpp)) {
++			i--;
++			continue;
++		}
+ 		if (start_waiters)
+-			if (start_waiter_thread(mpp, vecs))
+-				return 1;
++			if (start_waiter_thread(mpp, vecs)) {
++				remove_map(mpp, vecs, 1);
++				i--;
++			}
+ 	}
+ 	return 0;
+ }
+@@ -1857,15 +1875,23 @@ child (void * param)
+ 	condlog(2, "--------start up--------");
+ 	condlog(2, "read " DEFAULT_CONFIGFILE);
+ 
+-	if (load_config(DEFAULT_CONFIGFILE, udev))
++	if (load_config(DEFAULT_CONFIGFILE, udev)) {
++		condlog(0, "failed to load config");
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
++	}
+ 
+ 	if (init_checkers()) {
+ 		condlog(0, "failed to initialize checkers");
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
+ 	}
+ 	if (init_prio()) {
+ 		condlog(0, "failed to initialize prioritizers");
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
+ 	}
+ 
+@@ -1898,8 +1924,12 @@ child (void * param)
+ 	}
+ 
+ 	vecs = gvecs = init_vecs();
+-	if (!vecs)
++	if (!vecs) {
++		condlog(0, "failed to create vecs");
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
++	}
+ 
+ 	setscheduler();
+ 	set_oom_adj();
+@@ -1911,11 +1941,15 @@ child (void * param)
+ 	 */
+ 	if ((rc = pthread_create(&uevent_thr, &uevent_attr, ueventloop, udev))) {
+ 		condlog(0, "failed to create uevent thread: %d", rc);
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
+ 	}
+ 	pthread_attr_destroy(&uevent_attr);
+ 	if ((rc = pthread_create(&uxlsnr_thr, &misc_attr, uxlsnrloop, vecs))) {
+ 		condlog(0, "failed to create cli listener: %d", rc);
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
+ 	}
+ 	/*
+@@ -1927,6 +1961,8 @@ child (void * param)
+ 	if (configure(vecs, 1)) {
+ 		unlock(vecs->lock);
+ 		condlog(0, "failure during configuration");
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
+ 	}
+ 	unlock(vecs->lock);
+@@ -1936,10 +1972,14 @@ child (void * param)
+ 	 */
+ 	if ((rc = pthread_create(&check_thr, &misc_attr, checkerloop, vecs))) {
+ 		condlog(0,"failed to create checker loop thread: %d", rc);
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
+ 	}
+ 	if ((rc = pthread_create(&uevq_thr, &misc_attr, uevqloop, vecs))) {
+ 		condlog(0, "failed to create uevent dispatcher: %d", rc);
++		if (logsink)
++			log_thread_stop();
+ 		exit(1);
+ 	}
+ 	pthread_attr_destroy(&misc_attr);

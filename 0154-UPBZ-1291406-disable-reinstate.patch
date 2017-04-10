@@ -88,7 +88,7 @@ Index: multipath-tools-130222/multipathd/main.c
  
  /*
   * libcheckers
-@@ -1235,6 +1236,7 @@ check_path (struct vectors * vecs, struc
+@@ -1248,6 +1249,7 @@ check_path (struct vectors * vecs, struc
  	int newstate;
  	int new_path_up = 0;
  	int chkr_new_path_up = 0;
@@ -96,7 +96,7 @@ Index: multipath-tools-130222/multipathd/main.c
  	int oldchkrstate = pp->chkrstate;
  
  	if (!pp->mpp && (pp->missing_udev_info != INFO_MISSING ||
-@@ -1299,6 +1301,16 @@ check_path (struct vectors * vecs, struc
+@@ -1312,6 +1314,16 @@ check_path (struct vectors * vecs, struc
  			pp->wait_checks = 0;
  	}
  
@@ -113,7 +113,7 @@ Index: multipath-tools-130222/multipathd/main.c
  	pp->chkrstate = newstate;
  	if (newstate != pp->state) {
  		int oldstate = pp->state;
-@@ -1354,15 +1366,17 @@ check_path (struct vectors * vecs, struc
+@@ -1367,15 +1379,17 @@ check_path (struct vectors * vecs, struc
  		/*
  		 * reinstate this path
  		 */
@@ -140,7 +140,7 @@ Index: multipath-tools-130222/multipathd/main.c
  		}
  		new_path_up = 1;
  
-@@ -1377,8 +1391,9 @@ check_path (struct vectors * vecs, struc
+@@ -1390,8 +1404,9 @@ check_path (struct vectors * vecs, struc
  			enable_group(pp);
  	}
  	else if (newstate == PATH_UP || newstate == PATH_GHOST) {

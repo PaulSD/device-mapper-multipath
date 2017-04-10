@@ -1,0 +1,840 @@
+From c146b5840bbd7ad89c8a8de6192590ad0595a977 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 7 Apr 2016 18:19:58 -0500
+Subject: [PATCH] Add libmpathcmd library and use it internally
+
+Other programs would like to communicate with multipathd to issue
+command or check status.  Instead of having them exec multipathd,
+I've pulled the code that sends commands and receives replies from
+multipathd into its own library.  I've made the multipath tools use
+this library internally as well.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile                         |    1 
+ Makefile.inc                     |    2 
+ libmpathcmd/Makefile             |   32 +++++++
+ libmpathcmd/mpath_cmd.c          |  178 +++++++++++++++++++++++++++++++++++++++
+ libmpathcmd/mpath_cmd.h          |  125 +++++++++++++++++++++++++++
+ libmpathpersist/Makefile         |    5 -
+ libmpathpersist/mpath_updatepr.c |   30 +++---
+ libmultipath/Makefile            |    4 
+ libmultipath/config.c            |    1 
+ libmultipath/configure.c         |   10 +-
+ libmultipath/uxsock.c            |   88 +++----------------
+ libmultipath/uxsock.h            |    6 -
+ mpathpersist/Makefile            |    2 
+ multipath/Makefile               |    5 -
+ multipathd/Makefile              |    4 
+ multipathd/uxclnt.c              |   13 +-
+ multipathd/uxlsnr.c              |    9 -
+ 17 files changed, 401 insertions(+), 114 deletions(-)
+ create mode 100644 libmpathcmd/Makefile
+ create mode 100644 libmpathcmd/mpath_cmd.c
+ create mode 100644 libmpathcmd/mpath_cmd.h
+
+Index: multipath-tools-130222/Makefile
+===================================================================
+--- multipath-tools-130222.orig/Makefile
++++ multipath-tools-130222/Makefile
+@@ -20,6 +20,7 @@ export KRNLSRC
+ export KRNLOBJ
+ 
+ BUILDDIRS = \
++	libmpathcmd \
+ 	libmultipath \
+ 	libmultipath/prioritizers \
+ 	libmultipath/checkers \
+Index: multipath-tools-130222/Makefile.inc
+===================================================================
+--- multipath-tools-130222.orig/Makefile.inc
++++ multipath-tools-130222/Makefile.inc
+@@ -34,6 +34,8 @@ syslibdir   = $(prefix)/usr/$(LIB)
+ libdir	    = $(prefix)/usr/$(LIB)/multipath
+ unitdir     = $(prefix)/lib/systemd/system
+ mpathpersistdir = $(TOPDIR)/libmpathpersist
++includedir  = $(prefix)/usr/include
++mpathcmddir = $(TOPDIR)/libmpathcmd
+ 
+ GZIP        = /bin/gzip -9 -c
+ INSTALL_PROGRAM = install
+Index: multipath-tools-130222/libmpathcmd/Makefile
+===================================================================
+--- /dev/null
++++ multipath-tools-130222/libmpathcmd/Makefile
+@@ -0,0 +1,32 @@
++# Makefile
++#
++include ../Makefile.inc
++
++SONAME=0
++DEVLIB = libmpathcmd.so
++LIBS = $(DEVLIB).$(SONAME)
++
++CFLAGS += -fPIC
++
++OBJS = mpath_cmd.o
++
++all: $(LIBS)
++
++$(LIBS): $(OBJS)
++	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ $(CFLAGS) -o $@ $(OBJS) $(LIBDEPS)
++	ln -sf $@ $(DEVLIB)
++
++install: $(LIBS)
++	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
++	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
++	ln -sf $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(INSTALL_PROGRAM) -d $(DESTDIR)$(includedir)
++	$(INSTALL_PROGRAM) -m 644 mpath_cmd.h $(DESTDIR)$(includedir)
++
++uninstall:
++	rm -f $(DESTDIR)$(syslibdir)/$(LIBS)
++	rm -f $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	rm -f $(DESTDIR)$(includedir)/mpath_cmd.h
++
++clean:
++	rm -f core *.a *.o *.gz *.so *.so.*
+Index: multipath-tools-130222/libmpathcmd/mpath_cmd.c
+===================================================================
+--- /dev/null
++++ multipath-tools-130222/libmpathcmd/mpath_cmd.c
+@@ -0,0 +1,178 @@
++#include <stdlib.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <sys/types.h>
++#include <sys/socket.h>
++#include <sys/un.h>
++#include <poll.h>
++#include <string.h>
++#include <errno.h>
++
++#include "mpath_cmd.h"
++
++/*
++ * keep reading until its all read
++ */
++static ssize_t read_all(int fd, void *buf, size_t len, unsigned int timeout)
++{
++	size_t total = 0;
++	ssize_t n;
++	int ret;
++	struct pollfd pfd;
++
++	while (len) {
++		pfd.fd = fd;
++		pfd.events = POLLIN;
++		ret = poll(&pfd, 1, timeout);
++		if (!ret) {
++			errno = ETIMEDOUT;
++			return -1;
++		} else if (ret < 0) {
++			if (errno == EINTR)
++				continue;
++			return -1;
++		} else if (!(pfd.revents & POLLIN))
++			continue;
++		n = read(fd, buf, len);
++		if (n < 0) {
++			if ((errno == EINTR) || (errno == EAGAIN))
++				continue;
++			return -1;
++		}
++		if (!n)
++			return total;
++		buf = n + (char *)buf;
++		len -= n;
++		total += n;
++	}
++	return total;
++}
++
++/*
++ * keep writing until it's all sent
++ */
++static size_t write_all(int fd, const void *buf, size_t len)
++{
++	size_t total = 0;
++
++	while (len) {
++		ssize_t n = write(fd, buf, len);
++		if (n < 0) {
++			if ((errno == EINTR) || (errno == EAGAIN))
++				continue;
++			return total;
++		}
++		if (!n)
++			return total;
++		buf = n + (char *)buf;
++		len -= n;
++		total += n;
++	}
++	return total;
++}
++
++/*
++ * connect to a unix domain socket
++ */
++int mpath_connect(void)
++{
++	int fd, len;
++	struct sockaddr_un addr;
++
++	memset(&addr, 0, sizeof(addr));
++	addr.sun_family = AF_LOCAL;
++	addr.sun_path[0] = '\0';
++	len = strlen(DEFAULT_SOCKET) + 1 + sizeof(sa_family_t);
++	strncpy(&addr.sun_path[1], DEFAULT_SOCKET, len);
++
++	fd = socket(AF_LOCAL, SOCK_STREAM, 0);
++	if (fd == -1)
++		return -1;
++
++	if (connect(fd, (struct sockaddr *)&addr, len) == -1) {
++		close(fd);
++		return -1;
++	}
++
++	return fd;
++}
++
++int mpath_disconnect(int fd)
++{
++	return close(fd);
++}
++
++ssize_t mpath_recv_reply_len(int fd, unsigned int timeout)
++{
++	size_t len;
++	ssize_t ret;
++
++	ret = read_all(fd, &len, sizeof(len), timeout);
++	if (ret < 0)
++		return ret;
++	if (ret != sizeof(len)) {
++		errno = EIO;
++		return -1;
++	}
++	return len;
++}
++
++int mpath_recv_reply_data(int fd, char *reply, size_t len,
++			  unsigned int timeout)
++{
++	ssize_t ret;
++
++	ret = read_all(fd, reply, len, timeout);
++	if (ret < 0)
++		return ret;
++	if (ret != len) {
++		errno = EIO;
++		return -1;
++	}
++	reply[len - 1] = '\0';
++	return 0;
++}
++
++int mpath_recv_reply(int fd, char **reply, unsigned int timeout)
++{
++	int err;
++	ssize_t len;
++
++	*reply = NULL;
++	len = mpath_recv_reply_len(fd, timeout);
++	if (len <= 0)
++		return -1;
++	*reply = malloc(len);
++	if (!*reply)
++		return -1;
++	err = mpath_recv_reply_data(fd, *reply, len, timeout);
++	if (err) {
++		free(*reply);
++		*reply = NULL;
++		return -1;
++	}
++	return 0;
++}
++
++int mpath_send_cmd(int fd, const char *cmd)
++{
++	size_t len;
++
++	if (cmd != NULL)
++		len = strlen(cmd) + 1;
++	else
++		len = 0;
++	if (write_all(fd, &len, sizeof(len)) != sizeof(len))
++		return -1;
++	if (len && write_all(fd, cmd, len) != len)
++		return -1;
++	return 0;
++}
++
++int mpath_process_cmd(int fd, const char *cmd, char **reply,
++		      unsigned int timeout)
++{
++	if (mpath_send_cmd(fd, cmd) != 0)
++		return -1;
++	return mpath_recv_reply(fd, reply, timeout);
++}
+Index: multipath-tools-130222/libmpathcmd/mpath_cmd.h
+===================================================================
+--- /dev/null
++++ multipath-tools-130222/libmpathcmd/mpath_cmd.h
+@@ -0,0 +1,125 @@
++/*
++ * Copyright (C) 2015 Red Hat, Inc.
++ *
++ * This file is part of the device-mapper multipath userspace tools.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
++ * USA.
++ */
++
++#ifndef LIB_MPATH_CMD_H
++#define LIB_MPATH_CMD_H
++
++#ifdef __cpluscplus
++extern "C" {
++#endif
++
++#define DEFAULT_SOCKET		"/org/kernel/linux/storage/multipathd"
++#define DEFAULT_REPLY_TIMEOUT	10000
++
++
++/*
++ * DESCRIPTION:
++ * 	Connect to the running multipathd daemon. On systems with the
++ * 	multipathd.socket systemd unit file installed, this command will
++ * 	start multipathd if it is not already running. This function
++ * 	must be run before any of the others in this library
++ *
++ * RETURNS:
++ * 	A file descriptor on success. -1 on failure (with errno set).
++ */
++int mpath_connect(void);
++
++
++/*
++ * DESCRIPTION:
++ * 	Disconnect from the multipathd daemon. This function must be
++ * 	run after after processing all the multipath commands.
++ *
++ * RETURNS:
++ * 	0 on success. -1 on failure (with errno set).
++ */
++int mpath_disconnect(int fd);
++
++
++/*
++ * DESCRIPTION
++ * 	Send multipathd a command and return the reply. This function
++ * 	does the same as calling mpath_send_cmd() and then
++ *	mpath_recv_reply()
++ *
++ * RETURNS:
++ * 	0 on successs, and reply will either be NULL (if there was no
++ * 	reply data), or point to the reply string, which must be freed by
++ * 	the caller. -1 on failure (with errno set).
++ */
++int mpath_process_cmd(int fd, const char *cmd, char **reply,
++		      unsigned int timeout);
++
++
++/*
++ * DESCRIPTION:
++ * 	Send a command to multipathd
++ *
++ * RETURNS:
++ * 	0 on success. -1 on failure (with errno set)
++ */
++int mpath_send_cmd(int fd, const char *cmd);
++
++
++/*
++ * DESCRIPTION:
++ * 	Return a reply from multipathd for a previously sent command.
++ * 	This is equivalent to calling mpath_recv_reply_len(), allocating
++ * 	a buffer of the appropriate size, and then calling
++ *	mpath_recv_reply_data() with that buffer.
++ *
++ * RETURNS:
++ * 	0 on success, and reply will either be NULL (if there was no
++ * 	reply data), or point to the reply string, which must be freed by
++ * 	the caller, -1 on failure (with errno set).
++ */
++int mpath_recv_reply(int fd, char **reply, unsigned int timeout);
++
++
++/*
++ * DESCRIPTION:
++ * 	Return the size of the upcoming reply data from the sent multipath
++ * 	command. This must be called before calling mpath_recv_reply_data().
++ *
++ * RETURNS:
++ * 	The required size of the reply data buffer on success. -1 on
++ * 	failure (with errno set).
++ */
++ssize_t mpath_recv_reply_len(int fd, unsigned int timeout);
++
++
++/*
++ * DESCRIPTION:
++ * 	Return the reply data from the sent multipath command.
++ * 	mpath_recv_reply_len must be called first. reply must point to a
++ * 	buffer of len size.
++ *
++ * RETURNS:
++ * 	0 on success, and reply will contain the reply data string. -1
++ * 	on failure (with errno set).
++ */
++int mpath_recv_reply_data(int fd, char *reply, size_t len,
++			  unsigned int timeout);
++
++#ifdef __cplusplus
++}
++#endif
++#endif /* LIB_MPATH_CMD_H */
+Index: multipath-tools-130222/libmpathpersist/Makefile
+===================================================================
+--- multipath-tools-130222.orig/libmpathpersist/Makefile
++++ multipath-tools-130222/libmpathpersist/Makefile
+@@ -10,8 +10,9 @@ DEVLIB = libmpathpersist.so
+ LIBS = $(DEVLIB).$(SONAME)
+ 
+ 
+-CFLAGS += -fPIC -I$(multipathdir) -I$(mpathpersistdir)
+-LIBDEPS +=  -lpthread -ldevmapper -ldl -L$(multipathdir) -lmultipath
++CFLAGS += -fPIC -I$(multipathdir) -I$(mpathpersistdir) -I$(mpathcmddir)
++LIBDEPS +=  -lpthread -ldevmapper -ldl -L$(multipathdir) -lmultipath \
++	-L$(mpathcmddir) -lmpathcmd
+ 
+ OBJS = mpath_persist.o mpath_updatepr.o mpath_pr_ioctl.o 
+ 
+Index: multipath-tools-130222/libmpathpersist/mpath_updatepr.c
+===================================================================
+--- multipath-tools-130222.orig/libmpathpersist/mpath_updatepr.c
++++ multipath-tools-130222/libmpathpersist/mpath_updatepr.c
+@@ -12,9 +12,9 @@
+ #include <sys/poll.h>
+ #include <errno.h>
+ #include <debug.h>
++#include <mpath_cmd.h>
++#include <uxsock.h>
+ #include "memory.h"
+-#include "../libmultipath/uxsock.h"
+-#include "../libmultipath/defaults.h"
+ 
+ unsigned long mem_allocated;    /* Total memory used in Bytes */
+ 
+@@ -23,10 +23,9 @@ int update_prflag(char * arg1, char * ar
+ 	int fd;
+ 	char str[64];
+ 	char *reply;
+-	size_t len;
+ 	int ret = 0;
+ 
+-	fd = ux_socket_connect(DEFAULT_SOCKET);
++	fd = mpath_connect();
+ 	if (fd == -1) {
+ 		condlog (0, "ux socket connect error");
+ 		return 1 ;
+@@ -34,18 +33,23 @@ int update_prflag(char * arg1, char * ar
+ 
+ 	snprintf(str,sizeof(str),"map %s %s", arg1, arg2);
+ 	condlog (2, "%s: pr flag message=%s", arg1, str);
+-	send_packet(fd, str, strlen(str) + 1);
+-	recv_packet(fd, &reply, &len);
+-
+-	condlog (2, "%s: message=%s reply=%s", arg1, str, reply);
+-	if (!reply || strncmp(reply,"ok", 2) == 0)
+-		ret = -1;
+-	else if (strncmp(reply, "fail", 4) == 0)
++	send_packet(fd, str);
++	ret = recv_packet(fd, &reply);
++	if (ret < 0) {
++		condlog(2, "%s: message=%s recv error=%d", arg1, str, errno);
+ 		ret = -2;
+-	else{
+-		ret = atoi(reply);
++	} else {
++		condlog (2, "%s: message=%s reply=%s", arg1, str, reply);
++		if (!reply || strncmp(reply,"ok", 2) == 0)
++			ret = -1;
++		else if (strncmp(reply, "fail", 4) == 0)
++			ret = -2;
++		else{
++			ret = atoi(reply);
++		}
+ 	}
+ 
+ 	free(reply);
++	mpath_disconnect(fd);
+ 	return ret;
+ }
+Index: multipath-tools-130222/libmultipath/Makefile
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/Makefile
++++ multipath-tools-130222/libmultipath/Makefile
+@@ -7,8 +7,8 @@ include ../Makefile.inc
+ SONAME=0
+ DEVLIB = libmultipath.so
+ LIBS = $(DEVLIB).$(SONAME)
+-LIBDEPS = -lpthread -ldl -ldevmapper -ludev
+-CFLAGS += -fPIC
++LIBDEPS = -lpthread -ldl -ldevmapper -ludev -L$(mpathcmddir) -lmpathcmd
++CFLAGS += -fPIC -I$(mpathcmddir)
+ 
+ OBJS = memory.o parser.o vector.o devmapper.o \
+        hwtable.o blacklist.o util.o dmparser.o config.o \
+Index: multipath-tools-130222/libmultipath/config.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.c
++++ multipath-tools-130222/libmultipath/config.c
+@@ -25,6 +25,7 @@
+ #include "prio.h"
+ #include "devmapper.h"
+ #include "version.h"
++#include "mpath_cmd.h"
+ 
+ static int
+ hwe_strmatch (struct hwentry *hwe1, struct hwentry *hwe2)
+Index: multipath-tools-130222/libmultipath/configure.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.c
++++ multipath-tools-130222/libmultipath/configure.c
+@@ -14,6 +14,7 @@
+ #include <errno.h>
+ #include <libdevmapper.h>
+ #include <libudev.h>
++#include <mpath_cmd.h>
+ 
+ #include "checkers.h"
+ #include "vector.h"
+@@ -752,16 +753,15 @@ check_daemon(void)
+ {
+ 	int fd;
+ 	char *reply;
+-	size_t len;
+ 	int ret = 0;
+ 
+-	fd = ux_socket_connect(DEFAULT_SOCKET);
++	fd = mpath_connect();
+ 	if (fd == -1)
+ 		return 0;
+ 
+-	if (send_packet(fd, "show daemon", 12) != 0)
++	if (send_packet(fd, "show daemon") != 0)
+ 		goto out;
+-	if (recv_packet(fd, &reply, &len) != 0)
++	if (recv_packet(fd, &reply) != 0)
+ 		goto out;
+ 
+ 	if (strstr(reply, "shutdown"))
+@@ -772,7 +772,7 @@ check_daemon(void)
+ out_free:
+ 	FREE(reply);
+ out:
+-	close(fd);
++	mpath_disconnect(fd);
+ 	return ret;
+ }
+ 
+Index: multipath-tools-130222/libmultipath/uxsock.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/uxsock.c
++++ multipath-tools-130222/libmultipath/uxsock.c
+@@ -16,37 +16,10 @@
+ #include <sys/poll.h>
+ #include <signal.h>
+ #include <errno.h>
++#include <mpath_cmd.h>
+ 
+ #include "memory.h"
+ #include "uxsock.h"
+-
+-/*
+- * connect to a unix domain socket
+- */
+-int ux_socket_connect(const char *name)
+-{
+-	int fd, len;
+-	struct sockaddr_un addr;
+-
+-	memset(&addr, 0, sizeof(addr));
+-	addr.sun_family = AF_LOCAL;
+-	addr.sun_path[0] = '\0';
+-	len = strlen(name) + 1 + sizeof(sa_family_t);
+-	strncpy(&addr.sun_path[1], name, len);
+-
+-	fd = socket(AF_LOCAL, SOCK_STREAM, 0);
+-	if (fd == -1) {
+-		return -1;
+-	}
+-
+-	if (connect(fd, (struct sockaddr *)&addr, len) == -1) {
+-		close(fd);
+-		return -1;
+-	}
+-
+-	return fd;
+-}
+-
+ /*
+  * create a unix domain socket and start listening on it
+  * return a file descriptor open on the socket
+@@ -102,32 +75,9 @@ size_t write_all(int fd, const void *buf
+ }
+ 
+ /*
+- * keep reading until its all read
+- */
+-size_t read_all(int fd, void *buf, size_t len)
+-{
+-	size_t total = 0;
+-
+-	while (len) {
+-		ssize_t n = read(fd, buf, len);
+-		if (n < 0) {
+-			if ((errno == EINTR) || (errno == EAGAIN))
+-				continue;
+-			return total;
+-		}
+-		if (!n)
+-			return total;
+-		buf = n + (char *)buf;
+-		len -= n;
+-		total += n;
+-	}
+-	return total;
+-}
+-
+-/*
+  * send a packet in length prefix format
+  */
+-int send_packet(int fd, const char *buf, size_t len)
++int send_packet(int fd, const char *buf)
+ {
+ 	int ret = 0;
+ 	sigset_t set, old;
+@@ -137,10 +87,7 @@ int send_packet(int fd, const char *buf,
+ 	sigaddset(&set, SIGPIPE);
+ 	pthread_sigmask(SIG_BLOCK, &set, &old);
+ 
+-	if (write_all(fd, &len, sizeof(len)) != sizeof(len))
+-		ret = -1;
+-	if (!ret && write_all(fd, buf, len) != len)
+-		ret = -1;
++	ret = mpath_send_cmd(fd, buf);
+ 
+ 	/* And unblock it again */
+ 	pthread_sigmask(SIG_SETMASK, &old, NULL);
+@@ -151,25 +98,24 @@ int send_packet(int fd, const char *buf,
+ /*
+  * receive a packet in length prefix format
+  */
+-int recv_packet(int fd, char **buf, size_t *len)
++int recv_packet(int fd, char **buf)
+ {
+-	if (read_all(fd, len, sizeof(*len)) != sizeof(*len)) {
+-		(*buf) = NULL;
+-		*len = 0;
+-		return -1;
+-	}
+-	if (len == 0) {
+-		(*buf) = NULL;
+-		return 0;
+-	}
+-	(*buf) = MALLOC(*len);
++	int err;
++	ssize_t len;
++	unsigned int timeout = DEFAULT_REPLY_TIMEOUT;
++
++	*buf = NULL;
++	len = mpath_recv_reply_len(fd, timeout);
++	if (len <= 0)
++		return len;
++	(*buf) = MALLOC(len);
+ 	if (!*buf)
+-		return -1;
+-	if (read_all(fd, *buf, *len) != *len) {
++		return -ENOMEM;
++	err = mpath_recv_reply_data(fd, *buf, len, timeout);
++	if (err) {
+ 		FREE(*buf);
+ 		(*buf) = NULL;
+-		*len = 0;
+-		return -1;
++		return err;
+ 	}
+ 	return 0;
+ }
+Index: multipath-tools-130222/libmultipath/uxsock.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/uxsock.h
++++ multipath-tools-130222/libmultipath/uxsock.h
+@@ -1,7 +1,5 @@
+ /* some prototypes */
+-int ux_socket_connect(const char *name);
+ int ux_socket_listen(const char *name);
+-int send_packet(int fd, const char *buf, size_t len);
+-int recv_packet(int fd, char **buf, size_t *len);
++int send_packet(int fd, const char *buf);
++int recv_packet(int fd, char **buf);
+ size_t write_all(int fd, const void *buf, size_t len);
+-size_t read_all(int fd, void *buf, size_t len);
+Index: multipath-tools-130222/mpathpersist/Makefile
+===================================================================
+--- multipath-tools-130222.orig/mpathpersist/Makefile
++++ multipath-tools-130222/mpathpersist/Makefile
+@@ -5,7 +5,7 @@ include ../Makefile.inc
+ OBJS = main.o 
+ 
+ CFLAGS += -I$(multipathdir) -I$(mpathpersistdir) 
+-LDFLAGS += -lpthread -ldevmapper -L$(mpathpersistdir) -lmpathpersist -L$(multipathdir) -lmultipath -ludev
++LDFLAGS += -lpthread -ldevmapper -L$(mpathpersistdir) -lmpathpersist -L$(multipathdir) -L$(mpathcmddir) -lmpathcmd -lmultipath -ludev
+ 
+ EXEC = mpathpersist
+ 
+Index: multipath-tools-130222/multipath/Makefile
+===================================================================
+--- multipath-tools-130222.orig/multipath/Makefile
++++ multipath-tools-130222/multipath/Makefile
+@@ -6,8 +6,9 @@ include ../Makefile.inc
+ 
+ OBJS = main.o
+ 
+-CFLAGS += -fPIC -I$(multipathdir)
+-LDFLAGS += -lpthread -ldevmapper -ldl -L$(multipathdir) -lmultipath -ludev
++CFLAGS += -I$(multipathdir) -I$(mpathcmddir)
++LDFLAGS += -lpthread -ldevmapper -ldl -L$(multipathdir) -lmultipath -ludev \
++	-L$(mpathcmddir) -lmpathcmd
+ 
+ EXEC = multipath
+ 
+Index: multipath-tools-130222/multipathd/Makefile
+===================================================================
+--- multipath-tools-130222.orig/multipathd/Makefile
++++ multipath-tools-130222/multipathd/Makefile
+@@ -5,10 +5,10 @@ include ../Makefile.inc
+ #
+ # basic flags setting
+ #
+-CFLAGS += -fPIE -DPIE -I$(multipathdir) -I$(mpathpersistdir)
++CFLAGS += -fPIE -DPIE -I$(multipathdir) -I$(mpathpersistdir) -I$(mpathcmddir)
+ LDFLAGS += -lpthread -ldevmapper -lreadline -ludev -ldl \
+ 	   -L$(multipathdir) -lmultipath -L$(mpathpersistdir) -lmpathpersist \
+-	   -Wl,-z,now -pie
++	   -L$(mpathcmddir) -lmpathcmd -Wl,-z,now -pie
+ 
+ #
+ # debuging stuff
+Index: multipath-tools-130222/multipathd/uxclnt.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/uxclnt.c
++++ multipath-tools-130222/multipathd/uxclnt.c
+@@ -17,6 +17,7 @@
+ #include <readline/readline.h>
+ #include <readline/history.h>
+ 
++#include <mpath_cmd.h>
+ #include <uxsock.h>
+ #include <memory.h>
+ #include <defaults.h>
+@@ -49,7 +50,6 @@ static void process(int fd)
+ 	rl_readline_name = "multipathd";
+ 	rl_completion_entry_function = key_generator;
+ 	while ((line = readline("multipathd> "))) {
+-		size_t len;
+ 		size_t llen = strlen(line);
+ 
+ 		if (!llen) {
+@@ -61,8 +61,8 @@ static void process(int fd)
+ 		if (!strncmp(line, "quit", 4) && llen == 4)
+ 			break;
+ 
+-		if (send_packet(fd, line, llen + 1) != 0) break;
+-		if (recv_packet(fd, &reply, &len) != 0) break;
++		if (send_packet(fd, line) != 0) break;
++		if (recv_packet(fd, &reply) != 0) break;
+ 
+ 		print_reply(reply);
+ 
+@@ -77,13 +77,12 @@ static void process(int fd)
+ static void process_req(int fd, char * inbuf)
+ {
+ 	char *reply;
+-	size_t len;
+ 
+-	if (send_packet(fd, inbuf, strlen(inbuf) + 1) != 0) {
++	if (send_packet(fd, inbuf) != 0) {
+ 		printf("cannot send packet\n");
+ 		return;
+ 	}
+-	if (recv_packet(fd, &reply, &len) != 0)
++	if (recv_packet(fd, &reply) != 0)
+ 		printf("error receiving packet\n");
+ 	else {
+ 		printf("%s", reply);
+@@ -98,7 +97,7 @@ int uxclnt(char * inbuf)
+ {
+ 	int fd;
+ 
+-	fd = ux_socket_connect(DEFAULT_SOCKET);
++	fd = mpath_connect();
+ 	if (fd == -1) {
+ 		perror("ux_socket_connect");
+ 		exit(1);
+Index: multipath-tools-130222/multipathd/uxlsnr.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/uxlsnr.c
++++ multipath-tools-130222/multipathd/uxlsnr.c
+@@ -29,6 +29,7 @@
+ #include <structs_vec.h>
+ #include <uxsock.h>
+ #include <defaults.h>
++#include <mpath_cmd.h>
+ 
+ #include "main.h"
+ #include "cli.h"
+@@ -108,7 +109,6 @@ void * uxsock_listen(int (*uxsock_trigge
+ 			void * trigger_data)
+ {
+ 	int ux_sock;
+-	size_t len;
+ 	int rlen;
+ 	char *inbuf;
+ 	char *reply;
+@@ -171,16 +171,15 @@ void * uxsock_listen(int (*uxsock_trigge
+ 			struct client *next = c->next;
+ 
+ 			if (polls[i].revents & POLLIN) {
+-				if (recv_packet(c->fd, &inbuf, &len) != 0) {
++				if (recv_packet(c->fd, &inbuf) != 0) {
+ 					dead_client(c);
+ 				} else {
+-					inbuf[len - 1] = 0;
+ 					condlog(4, "Got request [%s]", inbuf);
+ 					uxsock_trigger(inbuf, &reply, &rlen,
+ 						       trigger_data);
+ 					if (reply) {
+-						if (send_packet(c->fd, reply,
+-								rlen) != 0) {
++						if (send_packet(c->fd,
++								reply) != 0) {
+ 							dead_client(c);
+ 						}
+ 						condlog(4, "Reply [%d bytes]",

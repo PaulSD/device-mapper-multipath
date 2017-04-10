@@ -1,0 +1,29 @@
+From d1bda720153b4978121fbae40f82d2f4b9aff997 Mon Sep 17 00:00:00 2001
+From: Mike Christie <mchristi@redhat.com>
+Date: Thu, 25 Aug 2016 01:34:11 -0500
+Subject: [PATCH 08/11] rbd: fix sync repair support
+
+If sync was set we were calling check instead
+of function passed in.
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
+---
+ libmultipath/checkers/rbd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/checkers/rbd.c b/libmultipath/checkers/rbd.c
+index 6f1b53a..76f4005 100644
+--- a/libmultipath/checkers/rbd.c
++++ b/libmultipath/checkers/rbd.c
+@@ -554,7 +554,7 @@ static int rbd_exec_fn(struct checker *c, thread_fn *fn)
+ 	int rbd_status, r;
+ 
+ 	if (c->sync)
+-		return rbd_check(ct, c->message);
++		return fn(ct, c->message);
+ 	/*
+ 	 * Async mode
+ 	 */
+-- 
+1.8.3.1
+

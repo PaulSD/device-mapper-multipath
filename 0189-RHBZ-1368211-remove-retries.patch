@@ -1,0 +1,168 @@
+---
+ libmultipath/config.c      |    1 +
+ libmultipath/config.h      |    1 +
+ libmultipath/devmapper.c   |   35 +++++++++++++++++++----------------
+ libmultipath/dict.c        |   25 +++++++++++++++++++++++++
+ multipath.conf.defaults    |    1 +
+ multipath/multipath.conf.5 |    5 +++++
+ 6 files changed, 52 insertions(+), 16 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/devmapper.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/devmapper.c
++++ multipath-tools-130222/libmultipath/devmapper.c
+@@ -803,10 +803,11 @@ dm_flush_map_nopaths(const char * mapnam
+ extern int
+ dm_suspend_and_flush_map (const char * mapname)
+ {
+-	int s = 0, queue_if_no_path = 0;
++	int need_reset = 0, queue_if_no_path = 0;
+ 	unsigned long long mapsize;
+ 	char params[PARAMS_SIZE] = {0};
+ 	int udev_flags = 0;
++	int retries = conf->remove_retries;
+ 
+ 	if (!dm_is_mpath(mapname))
+ 		return 0; /* nothing to do */
+@@ -821,22 +822,24 @@ dm_suspend_and_flush_map (const char * m
+ 			queue_if_no_path = 1;
+ 	}
+ 
+-	if (queue_if_no_path)
+-		s = dm_queue_if_no_path((char *)mapname, 0);
+-	/* Leave queue_if_no_path alone if unset failed */
+-	if (s)
+-		queue_if_no_path = 0;
+-	else
+-		s = dm_simplecmd_flush(DM_DEVICE_SUSPEND, mapname, 0, 0);
+-
+-	if (!dm_flush_map(mapname)) {
+-		condlog(4, "multipath map %s removed", mapname);
+-		return 0;
+-	}
++	if (queue_if_no_path && dm_queue_if_no_path((char *)mapname, 0) == 0)
++		need_reset = 1;
++
++	do {
++		if (!queue_if_no_path || need_reset)
++			dm_simplecmd_flush(DM_DEVICE_SUSPEND, mapname, 0, 0);
++
++		if (!dm_flush_map(mapname)) {
++			condlog(4, "multipath map %s removed", mapname);
++			return 0;
++		}
++		dm_simplecmd_noflush(DM_DEVICE_RESUME, mapname, udev_flags);
++		if (retries)
++			sleep(1);
++	} while (retries-- > 0);
+ 	condlog(2, "failed to remove multipath map %s", mapname);
+-	dm_simplecmd_noflush(DM_DEVICE_RESUME, mapname, udev_flags);
+-	if (queue_if_no_path)
+-		s = dm_queue_if_no_path((char *)mapname, 1);
++	if (need_reset)
++		dm_queue_if_no_path((char *)mapname, 1);
+ 	return 1;
+ }
+ 
+Index: multipath-tools-130222/libmultipath/config.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.c
++++ multipath-tools-130222/libmultipath/config.c
+@@ -680,6 +680,7 @@ load_config (char * file, struct udev *u
+ 	conf->new_bindings_in_boot = 0;
+ 	conf->uev_wait_timeout = DEFAULT_UEV_WAIT_TIMEOUT;
+ 	conf->skip_kpartx = DEFAULT_SKIP_KPARTX;
++	conf->remove_retries = 0;
+ 
+ 	/*
+ 	 * preload default hwtable
+Index: multipath-tools-130222/libmultipath/config.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.h
++++ multipath-tools-130222/libmultipath/config.h
+@@ -146,6 +146,7 @@ struct config {
+ 	int delayed_reconfig;
+ 	int uev_wait_timeout;
+ 	int skip_kpartx;
++	int remove_retries;
+ 	unsigned int version[3];
+ 
+ 	char * dev;
+Index: multipath-tools-130222/libmultipath/dict.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/dict.c
++++ multipath-tools-130222/libmultipath/dict.c
+@@ -935,6 +935,24 @@ def_new_bindings_in_boot_handler(vector
+ 	return 0;
+ }
+ 
++static int
++def_remove_retries_handler(vector strvec)
++{
++	char *buff;
++
++	buff = set_value(strvec);
++
++	if (!buff)
++		return 1;
++
++	conf->remove_retries = atoi(buff);
++	if (conf->remove_retries < 0)
++		conf->remove_retries = 0;
++	FREE(buff);
++
++	return 0;
++}
++
+ /*
+  * blacklist block handlers
+  */
+@@ -3405,6 +3423,12 @@ snprint_def_new_bindings_in_boot(char *
+ }
+ 
+ static int
++snprint_def_remove_retries (char * buff, int len, void * data)
++{
++	return snprintf(buff, len, "%i", conf->remove_retries);
++}
++
++static int
+ snprint_ble_simple (char * buff, int len, void * data)
+ {
+ 	struct blentry * ble = (struct blentry *)data;
+@@ -3483,6 +3507,7 @@ init_keywords(void)
+ 	install_keyword("retrigger_delay", &def_retrigger_delay_handler, &snprint_def_retrigger_delay);
+ 	install_keyword("missing_uev_wait_timeout", &def_uev_wait_timeout_handler, &snprint_def_uev_wait_timeout);
+ 	install_keyword("new_bindings_in_boot", &def_new_bindings_in_boot_handler, &snprint_def_new_bindings_in_boot);
++	install_keyword("remove_retries", &def_remove_retries_handler, &snprint_def_remove_retries);
+ 	__deprecated install_keyword("default_selector", &def_selector_handler, NULL);
+ 	__deprecated install_keyword("default_path_grouping_policy", &def_pgpolicy_handler, NULL);
+ 	__deprecated install_keyword("default_uid_attribute", &def_uid_attribute_handler, NULL);
+Index: multipath-tools-130222/multipath.conf.defaults
+===================================================================
+--- multipath-tools-130222.orig/multipath.conf.defaults
++++ multipath-tools-130222/multipath.conf.defaults
+@@ -41,6 +41,7 @@
+ #	retrigger_delay 10
+ #	missing_uev_wait_timeout 30
+ #	new_bindings_in_boot no
++#	remove_retries 0
+ #}
+ #blacklist {
+ #	devnode "^(ram|raw|loop|fd|md|dm-|sr|scd|st)[0-9]*"
+Index: multipath-tools-130222/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools-130222.orig/multipath/multipath.conf.5
++++ multipath-tools-130222/multipath/multipath.conf.5
+@@ -556,6 +556,11 @@ user_friendly_names.  When multipathd is
+ regular filesystem, the device will be renamed to a user_friendly_name. The
+ default is
+ .I no
++.TP
++.B remove_retries
++This sets how may times multipath will retry removing a device that is in-use.
++Between each attempt, multipath will sleep 1 second. The default is
++.I 0
+ .
+ .SH "blacklist section"
+ The

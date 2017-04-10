@@ -6,7 +6,7 @@ Index: multipath-tools-130222/multipathd/main.c
 ===================================================================
 --- multipath-tools-130222.orig/multipathd/main.c
 +++ multipath-tools-130222/multipathd/main.c
-@@ -1257,6 +1257,8 @@ check_path (struct vectors * vecs, struc
+@@ -1270,6 +1270,8 @@ check_path (struct vectors * vecs, struc
  	newstate = path_offline(pp);
  	if (newstate == PATH_UP)
  		newstate = get_state(pp, 1);

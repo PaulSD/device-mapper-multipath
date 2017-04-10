@@ -1,0 +1,38 @@
+---
+ libmultipath/configure.c |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/configure.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/configure.c
++++ multipath-tools-130222/libmultipath/configure.c
+@@ -257,7 +257,7 @@ extern int
+ setup_map (struct multipath * mpp, char * params, int params_size)
+ {
+ 	struct pathgroup * pgp;
+-	int i;
++	int i, old_nr_active;
+ 
+ 	/*
+ 	 * don't bother if devmap size is unknown
+@@ -311,8 +311,12 @@ setup_map (struct multipath * mpp, char
+ 	if (mpp->pgpolicyfn && mpp->pgpolicyfn(mpp))
+ 		return 1;
+ 
++	old_nr_active = mpp->nr_active;
+ 	mpp->nr_active = pathcount(mpp, PATH_UP) + pathcount(mpp, PATH_GHOST);
+ 
++	if (mpp->nr_active && !old_nr_active)
++		mpp->force_udev_reload = 1;
++
+ 	/*
+ 	 * ponders each path group and determine highest prio pg
+ 	 * to switch over (default to first)
+@@ -445,7 +449,6 @@ select_action (struct multipath * mpp, v
+ 			mpp->alias);
+ 		return;
+ 	}
+-	mpp->force_udev_reload = !pathcount(mpp, PATH_WILD);
+ 	if (cmpp->size != mpp->size) {
+ 		mpp->force_udev_reload = 1;
+ 		mpp->action = ACT_RESIZE;

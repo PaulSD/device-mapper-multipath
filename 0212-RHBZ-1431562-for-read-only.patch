@@ -1,0 +1,56 @@
+---
+ libmultipath/devmapper.c |   10 ++++++----
+ libmultipath/structs.h   |    1 +
+ multipathd/main.c        |    5 +++--
+ 3 files changed, 10 insertions(+), 6 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/devmapper.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/devmapper.c
++++ multipath-tools-130222/libmultipath/devmapper.c
+@@ -358,10 +358,12 @@ dm_addmap_create (struct multipath *mpp,
+ extern int
+ dm_addmap_reload (struct multipath *mpp, char *params) {
+ 	sysfs_set_max_sectors_kb(mpp, 1);
+-	if (dm_addmap(DM_DEVICE_RELOAD, TGT_MPATH, mpp, params, 0, ADDMAP_RW, SKIP_KPARTX_OFF))
+-		return 1;
+-	if (errno != EROFS)
+-		return 0;
++	if (!mpp->force_readonly) {
++		if (dm_addmap(DM_DEVICE_RELOAD, TGT_MPATH, mpp, params, 0, ADDMAP_RW, SKIP_KPARTX_OFF))
++			return 1;
++		if (errno != EROFS)
++			return 0;
++	}
+ 	return dm_addmap(DM_DEVICE_RELOAD, TGT_MPATH, mpp, params, 0, ADDMAP_RO, SKIP_KPARTX_OFF);
+ }
+ 
+Index: multipath-tools-130222/libmultipath/structs.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/structs.h
++++ multipath-tools-130222/libmultipath/structs.h
+@@ -259,6 +259,7 @@ struct multipath {
+ 	int force_udev_reload;
+ 	int skip_kpartx;
+ 	int max_sectors_kb;
++	int force_readonly;
+ 	unsigned int dev_loss;
+ 	uid_t uid;
+ 	gid_t gid;
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -831,9 +831,10 @@ uev_update_path (struct uevent *uev, str
+ 				pp->mpp->wait_for_udev = 2;
+ 				return 0;
+ 			}
+-
++			if (ro == 1)
++				pp->mpp->force_readonly = 1;
+ 			retval = reload_map(vecs, pp->mpp, 0);
+-
++			pp->mpp->force_readonly = 0;
+ 			condlog(2, "%s: map %s reloaded (retval %d)",
+ 				uev->kernel, pp->mpp->alias, retval);
+ 		}

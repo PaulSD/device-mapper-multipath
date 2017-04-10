@@ -1,0 +1,219 @@
+From 2fc494b81157059e0be66022f6a2110f1ce179c3 Mon Sep 17 00:00:00 2001
+From: Mike Christie <mchristi@redhat.com>
+Date: Tue, 9 Aug 2016 13:44:10 -0500
+Subject: [PATCH 02/11] libmultipath: add rbd discovery
+
+For BZ 1348372 from upstream commit:
+
+Commit 152f3f803ee922075e8b25027eb9dc5699f1aefa
+Author: Mike Christie <mchristi@redhat.com>
+Date:   Mon Aug 8 07:01:47 2016 -0500
+
+    libmultipath: add rbd discovery
+
+    rbd is a block device interface for Ceph. It does not support
+    any SCSI commands, so this patch adds bus detection and virtual
+    vendor/product pathinfo.
+
+--------
+
+Porting notes:
+
+get_uid() chunk does not match upstream due to rhel not having
+the get uid callout code and sysfs uid detection code.
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
+---
+ libmultipath/checkers.h  |   1 +
+ libmultipath/discovery.c | 116 ++++++++++++++++++++++++++++++++++++++++-------
+ libmultipath/structs.h   |   1 +
+ 3 files changed, 101 insertions(+), 17 deletions(-)
+
+diff --git a/libmultipath/checkers.h b/libmultipath/checkers.h
+index f6fe326..735bb25 100644
+--- a/libmultipath/checkers.h
++++ b/libmultipath/checkers.h
+@@ -75,6 +75,7 @@ enum path_check_state {
+ #define EMC_CLARIION "emc_clariion"
+ #define READSECTOR0  "readsector0"
+ #define CCISS_TUR    "cciss_tur"
++#define RBD          "rbd"
+ 
+ #define DEFAULT_CHECKER DIRECTIO
+ 
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index 7a8282b..1b9f390 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -781,6 +781,21 @@ scsi_sysfs_pathinfo (struct path * pp)
+ }
+ 
+ static int
++rbd_sysfs_pathinfo (struct path * pp)
++{
++	sprintf(pp->vendor_id, "Ceph");
++	sprintf(pp->product_id, "RBD");
++
++	condlog(3, "%s: vendor = %s product = %s", pp->dev, pp->vendor_id,
++		pp->product_id);
++	/*
++	 * set the hwe configlet pointer
++	 */
++	pp->hwe = find_hwe(conf->hwtable, pp->vendor_id, pp->product_id, NULL);
++	return 0;
++}
++
++static int
+ ccw_sysfs_pathinfo (struct path * pp)
+ {
+ 	struct udev_device *parent;
+@@ -974,6 +989,8 @@ sysfs_pathinfo(struct path * pp)
+ 		pp->bus = SYSFS_BUS_CCW;
+ 	if (!strncmp(pp->dev,"sd", 2))
+ 		pp->bus = SYSFS_BUS_SCSI;
++	if (!strncmp(pp->dev,"rbd", 3))
++		pp->bus = SYSFS_BUS_RBD;
+ 
+ 	if (pp->bus == SYSFS_BUS_UNDEF)
+ 		return 0;
+@@ -986,6 +1003,9 @@ sysfs_pathinfo(struct path * pp)
+ 	} else if (pp->bus == SYSFS_BUS_CCISS) {
+ 		if (cciss_sysfs_pathinfo(pp))
+ 			return 1;
++	} else if (pp->bus == SYSFS_BUS_RBD) {
++		if (rbd_sysfs_pathinfo(pp))
++			return 1;
+ 	}
+ 	return 0;
+ }
+@@ -1087,10 +1107,60 @@ get_prio (struct path * pp)
+ }
+ 
+ static int
++get_rbd_uid(struct path * pp)
++{
++	struct udev_device *rbd_bus_dev;
++	int ret, rbd_bus_id;
++	const char *pool, *image, *snap;
++	char sysfs_path[PATH_SIZE];
++	uint64_t snap_id, max_snap_id = -3;
++
++	ret = sscanf(pp->dev, "rbd%d", &rbd_bus_id);
++	if (ret != 1)
++		return -EINVAL;
++
++	snprintf(sysfs_path, sizeof(sysfs_path), "/sys/bus/rbd/devices/%d",
++		 rbd_bus_id);
++	rbd_bus_dev = udev_device_new_from_syspath(conf->udev, sysfs_path);
++	if (!rbd_bus_dev)
++		return -ENODEV;
++
++	ret = -EINVAL;
++	pool = udev_device_get_sysattr_value(rbd_bus_dev, "pool_id");
++	if (!pool)
++		goto free_dev;
++
++	image = udev_device_get_sysattr_value(rbd_bus_dev, "image_id");
++	if (!image)
++		goto free_dev;
++
++	snap = udev_device_get_sysattr_value(rbd_bus_dev, "snap_id");
++	if (!snap)
++		goto free_dev;
++	snap_id = strtoull(snap, NULL, 19);
++	if (snap_id >= max_snap_id)
++		ret = snprintf(pp->wwid, WWID_SIZE, "%s-%s", pool, image);
++	else
++		ret = snprintf(pp->wwid, WWID_SIZE, "%s-%s-%s", pool,
++			       image, snap);
++	if (ret < WWID_SIZE) {
++		ret = 0;
++	} else {
++		condlog(0, "%s: wwid overflow", pp->dev);
++		ret = -EOVERFLOW;
++	}
++
++free_dev:
++	udev_device_unref(rbd_bus_dev);	
++	return ret;
++}
++
++static int
+ get_uid (struct path * pp)
+ {
+ 	char *c;
+ 	const char *value;
++	int ret;
+ 
+ 	if (!pp->uid_attribute)
+ 		select_getuid(pp);
+@@ -1101,25 +1171,37 @@ get_uid (struct path * pp)
+ 	}
+ 
+ 	memset(pp->wwid, 0, WWID_SIZE);
+-	value = udev_device_get_property_value(pp->udev, pp->uid_attribute);
+-	if ((!value || strlen(value) == 0) && conf->cmd == CMD_VALID_PATH)
+-		value = getenv(pp->uid_attribute);
+-	if (value && strlen(value)) {
+-		size_t len = WWID_SIZE;
+-
+-		if (strlen(value) + 1 > WWID_SIZE) {
+-			condlog(0, "%s: wwid overflow", pp->dev);
+-		} else {
+-			len = strlen(value);
++	if (pp->bus == SYSFS_BUS_RBD) {
++		ret = get_rbd_uid(pp);
++		if (ret) {
++			condlog(1, "%s: failed to get sysfs uid: %s",
++				pp->dev, strerror(-ret));
++			pp->missing_udev_info = INFO_MISSING;
++			pp->tick = conf->retrigger_delay;
+ 		}
+-		strncpy(pp->wwid, value, len);
+-		pp->missing_udev_info = INFO_OK;
+-		pp->tick = 0;
+ 	} else {
+-		condlog(3, "%s: no %s attribute", pp->dev,
+-			pp->uid_attribute);
+-		pp->missing_udev_info = INFO_MISSING;
+-		pp->tick = conf->retrigger_delay;
++		value = udev_device_get_property_value(pp->udev,
++						       pp->uid_attribute);
++		if ((!value || strlen(value) == 0) &&
++		     conf->cmd == CMD_VALID_PATH)
++			value = getenv(pp->uid_attribute);
++		if (value && strlen(value)) {
++			size_t len = WWID_SIZE;
++
++			if (strlen(value) + 1 > WWID_SIZE) {
++				condlog(0, "%s: wwid overflow", pp->dev);
++			} else {
++				len = strlen(value);
++			}
++			strncpy(pp->wwid, value, len);
++			pp->missing_udev_info = INFO_OK;
++			pp->tick = 0;
++		} else {
++			condlog(3, "%s: no %s attribute", pp->dev,
++				pp->uid_attribute);
++			pp->missing_udev_info = INFO_MISSING;
++			pp->tick = conf->retrigger_delay;
++		}
+ 	}
+ 
+ 	/* Strip any trailing blanks */
+diff --git a/libmultipath/structs.h b/libmultipath/structs.h
+index b5b4567..e566462 100644
+--- a/libmultipath/structs.h
++++ b/libmultipath/structs.h
+@@ -52,6 +52,7 @@ enum sysfs_buses {
+ 	SYSFS_BUS_IDE,
+ 	SYSFS_BUS_CCW,
+ 	SYSFS_BUS_CCISS,
++	SYSFS_BUS_RBD,
+ };
+ 
+ enum pathstates {
+-- 
+1.8.3.1
+

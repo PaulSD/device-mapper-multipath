@@ -1,0 +1,29 @@
+---
+ libmultipath/print.c |    7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+Index: multipath-tools-130222/libmultipath/print.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/print.c
++++ multipath-tools-130222/libmultipath/print.c
+@@ -386,7 +386,9 @@ snprint_dev_t (char * buff, size_t len,
+ static int
+ snprint_offline (char * buff, size_t len, struct path * pp)
+ {
+-	if (pp->offline)
++	if (!pp || !pp->mpp)
++		return snprintf(buff, len, "unknown");
++	else if (pp->offline)
+ 		return snprintf(buff, len, "offline");
+ 	else
+ 		return snprintf(buff, len, "running");
+@@ -395,6 +397,9 @@ snprint_offline (char * buff, size_t len
+ static int
+ snprint_chk_state (char * buff, size_t len, struct path * pp)
+ {
++	if (!pp || !pp->mpp)
++		return snprintf(buff, len, "undef");
++
+ 	switch (pp->state) {
+ 	case PATH_UP:
+ 		return snprintf(buff, len, "ready");

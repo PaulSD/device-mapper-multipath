@@ -1,0 +1,377 @@
+---
+ libmultipath/config.c      |    4 ++
+ libmultipath/config.h      |    2 +
+ libmultipath/defaults.h    |    1 
+ libmultipath/dict.c        |   74 +++++++++++++++++++++++++++++++++++++++++++++
+ libmultipath/discovery.c   |    1 
+ libmultipath/hwtable.c     |    1 
+ libmultipath/propsel.c     |   65 +++++++++++++++++++++++++++++++--------
+ libmultipath/propsel.h     |    1 
+ libmultipath/structs.h     |    7 ++++
+ multipath/multipath.conf.5 |    9 +++++
+ 10 files changed, 152 insertions(+), 13 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/config.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.c
++++ multipath-tools-130222/libmultipath/config.c
+@@ -340,6 +340,7 @@ merge_hwe (struct hwentry * dst, struct
+ 	merge_num(user_friendly_names);
+ 	merge_num(retain_hwhandler);
+ 	merge_num(detect_prio);
++	merge_num(detect_checker);
+ 	merge_num(deferred_remove);
+ 	merge_num(delay_watch_checks);
+ 	merge_num(delay_wait_checks);
+@@ -402,6 +403,7 @@ overwrite_hwe (struct hwentry * dst, str
+ 	overwrite_num(user_friendly_names);
+ 	overwrite_num(retain_hwhandler);
+ 	overwrite_num(detect_prio);
++	overwrite_num(detect_checker);
+ 	overwrite_num(deferred_remove);
+ 	overwrite_num(delay_watch_checks);
+ 	overwrite_num(delay_wait_checks);
+@@ -476,6 +478,7 @@ store_hwe (vector hwtable, struct hwentr
+ 	hwe->user_friendly_names = dhwe->user_friendly_names;
+ 	hwe->retain_hwhandler = dhwe->retain_hwhandler;
+ 	hwe->detect_prio = dhwe->detect_prio;
++	hwe->detect_checker = dhwe->detect_checker;
+ 
+ 	if (dhwe->bl_product && !(hwe->bl_product = set_param_str(dhwe->bl_product)))
+ 		goto out;
+@@ -672,6 +675,7 @@ load_config (char * file, struct udev *u
+ 	conf->fast_io_fail = DEFAULT_FAST_IO_FAIL;
+ 	conf->retain_hwhandler = DEFAULT_RETAIN_HWHANDLER;
+ 	conf->detect_prio = DEFAULT_DETECT_PRIO;
++	conf->detect_checker = DEFAULT_DETECT_CHECKER;
+ 	conf->deferred_remove = DEFAULT_DEFERRED_REMOVE;
+ 	conf->hw_strmatch = 0;
+ 	conf->force_sync = 0;
+Index: multipath-tools-130222/libmultipath/config.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.h
++++ multipath-tools-130222/libmultipath/config.h
+@@ -61,6 +61,7 @@ struct hwentry {
+ 	int user_friendly_names;
+ 	int retain_hwhandler;
+ 	int detect_prio;
++	int detect_checker;
+ 	int deferred_remove;
+ 	int delay_watch_checks;
+ 	int delay_wait_checks;
+@@ -136,6 +137,7 @@ struct config {
+ 	int reassign_maps;
+ 	int retain_hwhandler;
+ 	int detect_prio;
++	int detect_checker;
+ 	int force_sync;
+ 	int deferred_remove;
+ 	int ignore_new_boot_devs;
+Index: multipath-tools-130222/libmultipath/defaults.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/defaults.h
++++ multipath-tools-130222/libmultipath/defaults.h
+@@ -19,6 +19,7 @@
+ #define DEFAULT_FAST_IO_FAIL	5
+ #define DEFAULT_RETAIN_HWHANDLER RETAIN_HWHANDLER_OFF
+ #define DEFAULT_DETECT_PRIO DETECT_PRIO_OFF
++#define DEFAULT_DETECT_CHECKER DETECT_CHECKER_OFF
+ #define DEFAULT_DEFERRED_REMOVE DEFERRED_REMOVE_OFF
+ #define DEFAULT_DELAY_CHECKS DELAY_CHECKS_OFF
+ #define DEFAULT_RETRIGGER_DELAY 10
+Index: multipath-tools-130222/libmultipath/dict.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/dict.c
++++ multipath-tools-130222/libmultipath/dict.c
+@@ -714,6 +714,29 @@ def_detect_prio_handler(vector strvec)
+ }
+ 
+ static int
++def_detect_checker_handler(vector strvec)
++{
++	char * buff;
++
++	buff = set_value(strvec);
++
++	if (!buff)
++		return 1;
++
++	if ((strlen(buff) == 2 && !strcmp(buff, "no")) ||
++	    (strlen(buff) == 1 && !strcmp(buff, "0")))
++		conf->detect_checker = DETECT_CHECKER_OFF;
++	else if ((strlen(buff) == 3 && !strcmp(buff, "yes")) ||
++		 (strlen(buff) == 1 && !strcmp(buff, "1")))
++		conf->detect_checker = DETECT_CHECKER_ON;
++	else
++		conf->detect_checker = DETECT_CHECKER_UNDEF;
++
++	FREE(buff);
++	return 0;
++}
++
++static int
+ def_hw_strmatch_handler(vector strvec)
+ {
+ 	char *buff;
+@@ -1682,6 +1705,33 @@ hw_detect_prio_handler(vector strvec)
+ }
+ 
+ static int
++hw_detect_checker_handler(vector strvec)
++{
++	struct hwentry *hwe = VECTOR_LAST_SLOT(conf->hwtable);
++	char * buff;
++
++	if (!hwe)
++		return 1;
++
++	buff = set_value(strvec);
++
++	if (!buff)
++		return 1;
++
++	if ((strlen(buff) == 2 && !strcmp(buff, "no")) ||
++	    (strlen(buff) == 1 && !strcmp(buff, "0")))
++		hwe->detect_checker = DETECT_CHECKER_OFF;
++	else if ((strlen(buff) == 3 && !strcmp(buff, "yes")) ||
++		 (strlen(buff) == 1 && !strcmp(buff, "1")))
++		hwe->detect_checker = DETECT_CHECKER_ON;
++	else
++		hwe->detect_checker = DETECT_CHECKER_UNDEF;
++
++	FREE(buff);
++	return 0;
++}
++
++static int
+ hw_deferred_remove_handler(vector strvec)
+ {
+ 	struct hwentry *hwe = VECTOR_LAST_SLOT(conf->hwtable);
+@@ -3059,6 +3109,19 @@ snprint_detect_prio(char * buff, int len
+ }
+ 
+ static int
++snprint_detect_checker(char * buff, int len, void * data)
++{
++	struct hwentry * hwe = (struct hwentry *)data;
++
++	if (hwe->detect_checker == DETECT_CHECKER_ON)
++		return snprintf(buff, len, "yes");
++	else if (hwe->detect_checker == DETECT_CHECKER_OFF)
++		return snprintf(buff, len, "no");
++	else
++		return 0;
++}
++
++static int
+ snprint_hw_max_sectors_kb(char * buff, int len, void * data)
+ {
+ 	struct hwentry * hwe = (struct hwentry *)data;
+@@ -3424,6 +3487,15 @@ snprint_def_detect_prio(char * buff, int
+ }
+ 
+ static int
++snprint_def_detect_checker(char * buff, int len, void * data)
++{
++	if (conf->detect_checker == DETECT_PRIO_ON)
++		return snprintf(buff, len, "yes");
++	else
++		return snprintf(buff, len, "no");
++}
++
++static int
+ snprint_def_hw_strmatch(char * buff, int len, void * data)
+ {
+ 	if (conf->hw_strmatch)
+@@ -3611,6 +3683,7 @@ init_keywords(void)
+ 	install_keyword("find_multipaths", &def_find_multipaths_handler, &snprint_def_find_multipaths);
+ 	install_keyword("retain_attached_hw_handler", &def_retain_hwhandler_handler, &snprint_def_retain_hwhandler_handler);
+ 	install_keyword("detect_prio", &def_detect_prio_handler, &snprint_def_detect_prio);
++	install_keyword("detect_path_checker", &def_detect_checker_handler, &snprint_def_detect_checker);
+ 	install_keyword("hw_str_match", &def_hw_strmatch_handler, &snprint_def_hw_strmatch);
+ 	install_keyword("force_sync", &def_force_sync_handler, &snprint_def_force_sync);
+ 	install_keyword("deferred_remove", &def_deferred_remove_handler, &snprint_def_deferred_remove);
+@@ -3690,6 +3763,7 @@ init_keywords(void)
+ 	install_keyword("user_friendly_names", &hw_names_handler, &snprint_hw_user_friendly_names);
+ 	install_keyword("retain_attached_hw_handler", &hw_retain_hwhandler_handler, &snprint_hw_retain_hwhandler_handler);
+ 	install_keyword("detect_prio", &hw_detect_prio_handler, &snprint_detect_prio);
++	install_keyword("detect_path_checker", &hw_detect_checker_handler, &snprint_detect_checker);
+ 	install_keyword("deferred_remove", &hw_deferred_remove_handler, &snprint_hw_deferred_remove);
+ 	install_keyword("delay_watch_checks", &hw_delay_watch_checks_handler, &snprint_hw_delay_watch_checks);
+ 	install_keyword("delay_wait_checks", &hw_delay_wait_checks_handler, &snprint_hw_delay_wait_checks);
+Index: multipath-tools-130222/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.c
++++ multipath-tools-130222/libmultipath/discovery.c
+@@ -1107,6 +1107,7 @@ get_state (struct path * pp, int daemon)
+ 				return PATH_UNCHECKED;
+ 			}
+ 		}
++		select_detect_checker(pp);
+ 		select_checker(pp);
+ 		if (!checker_selected(c)) {
+ 			condlog(3, "%s: No checker selected", pp->dev);
+Index: multipath-tools-130222/libmultipath/hwtable.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/hwtable.c
++++ multipath-tools-130222/libmultipath/hwtable.c
+@@ -289,6 +289,7 @@ static struct hwentry default_hw[] = {
+ 		.prio_args     = NULL,
+ 		.retain_hwhandler = RETAIN_HWHANDLER_ON,
+ 		.detect_prio   = DETECT_PRIO_ON,
++		.detect_checker = DETECT_CHECKER_ON,
+ 	},
+ 	{
+ 		.vendor        = "EMC",
+Index: multipath-tools-130222/libmultipath/propsel.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/propsel.c
++++ multipath-tools-130222/libmultipath/propsel.c
+@@ -335,11 +335,43 @@ select_hwhandler (struct multipath * mp)
+ 	return 0;
+ }
+ 
++int
++detect_alua(struct path * pp)
++{
++	int ret;
++	int tpgs = 0;
++
++	if ((tpgs = get_target_port_group_support(pp->fd)) <= 0)
++		return 0;
++	pp->tpgs = tpgs;
++	ret = get_target_port_group(pp->fd, NULL);
++	if (ret < 0)
++		return 0;
++	if (get_asymmetric_access_state(pp->fd, ret, NULL) < 0)
++		return 0;
++	return 1;
++}
++
++void
++detect_checker(struct path * pp)
++{
++	if (detect_alua(pp))
++		checker_get(&pp->checker, TUR);
++}
++
+ extern int
+ select_checker(struct path *pp)
+ {
+ 	struct checker * c = &pp->checker;
+ 
++	if (pp->detect_checker == DETECT_CHECKER_ON) {
++		detect_checker(pp);
++		if (checker_selected(c)) {
++			condlog(3, "%s: path checker = %s (detected setting)",
++				pp->dev, checker_name(c));
++			goto out;
++		}
++	}
+ 	if (pp->hwe && pp->hwe->checker_name) {
+ 		checker_get(c, pp->hwe->checker_name);
+ 		condlog(3, "%s: path checker = %s (controller setting)",
+@@ -396,19 +428,8 @@ select_getuid (struct path * pp)
+ void
+ detect_prio(struct path * pp)
+ {
+-	int ret;
+-	struct prio *p = &pp->prio;
+-	int tpgs = 0;
+-
+-	if ((tpgs = get_target_port_group_support(pp->fd)) <= 0)
+-		return;
+-	pp->tpgs = tpgs;
+-	ret = get_target_port_group(pp->fd, NULL);
+-	if (ret < 0)
+-		return;
+-	if (get_asymmetric_access_state(pp->fd, ret, NULL) < 0)
+-		return;
+-	prio_get(p, PRIO_ALUA, DEFAULT_PRIO_ARGS);
++	if (detect_alua(pp))
++		prio_get(&pp->prio, PRIO_ALUA, DEFAULT_PRIO_ARGS);
+ }
+ 
+ extern int
+@@ -803,6 +824,24 @@ select_detect_prio (struct path * pp)
+ 	return 0;
+ }
+ 
++extern int
++select_detect_checker (struct path * pp)
++{
++	if (pp->hwe && pp->hwe->detect_checker) {
++		pp->detect_checker = pp->hwe->detect_checker;
++		condlog(3, "%s: detect_checker = %d (controller default)", pp->dev, pp->detect_checker);
++		return 0;
++	}
++	if (conf->detect_checker) {
++		pp->detect_checker = conf->detect_checker;
++		condlog(3, "%s: detect_checker = %d (config file default)", pp->dev, pp->detect_checker);
++		return 0;
++	}
++	pp->detect_checker = DEFAULT_DETECT_CHECKER;
++	condlog(3, "%s: detect_checker = %d (compiled in default)", pp->dev, pp->detect_checker);
++	return 0;
++}
++
+ extern int
+ select_delay_watch_checks (struct multipath * mp)
+ {
+Index: multipath-tools-130222/libmultipath/propsel.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/propsel.h
++++ multipath-tools-130222/libmultipath/propsel.h
+@@ -20,6 +20,7 @@ int select_dev_loss(struct multipath *mp
+ int select_reservation_key(struct multipath *mp);
+ int select_retain_hwhandler (struct multipath * mp);
+ int select_detect_prio(struct path * pp);
++int select_detect_checker(struct path * pp);
+ int select_deferred_remove(struct multipath *mp);
+ int select_delay_watch_checks (struct multipath * mp);
+ int select_delay_wait_checks (struct multipath * mp);
+Index: multipath-tools-130222/libmultipath/structs.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/structs.h
++++ multipath-tools-130222/libmultipath/structs.h
+@@ -115,6 +115,12 @@ enum detect_prio_states {
+ 	DETECT_PRIO_ON,
+ };
+ 
++enum detect_checker_states {
++	DETECT_CHECKER_UNDEF,
++	DETECT_CHECKER_OFF,
++	DETECT_CHECKER_ON,
++};
++
+ enum deferred_remove_states {
+ 	DEFERRED_REMOVE_UNDEF,
+ 	DEFERRED_REMOVE_OFF,
+@@ -204,6 +210,7 @@ struct path {
+ 	int priority;
+ 	int pgindex;
+ 	int detect_prio;
++	int detect_checker;
+ 	int watch_checks;
+ 	int wait_checks;
+ 	int tpgs;
+Index: multipath-tools-130222/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools-130222.orig/multipath/multipath.conf.5
++++ multipath-tools-130222/multipath/multipath.conf.5
+@@ -448,6 +448,15 @@ will automatically use the
+ prioritizer. If not, the prioritizer will be selected as usual. Default is
+ .I no
+ .TP
++.B detect_checker
++If set to
++.I yes
++, multipath will try to detect if the device supports ALUA. If so, the device
++will automatically use the
++.I tur
++checker. If not, the prioritizer will be selected as ususal. Default is
++.I no
++.TP
+ .B hw_str_match
+ If set to
+ .I yes

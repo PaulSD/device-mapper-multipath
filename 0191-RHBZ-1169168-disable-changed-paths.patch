@@ -1,0 +1,210 @@
+---
+ libmultipath/config.c    |    1 +
+ libmultipath/config.h    |    1 +
+ libmultipath/dict.c      |   33 +++++++++++++++++++++++++++++++++
+ libmultipath/discovery.c |   11 ++++++-----
+ libmultipath/discovery.h |    1 +
+ libmultipath/structs.h   |    1 +
+ multipathd/main.c        |   26 ++++++++++++++++++++++++++
+ 7 files changed, 69 insertions(+), 5 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/discovery.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.c
++++ multipath-tools-130222/libmultipath/discovery.c
+@@ -1155,8 +1155,8 @@ free_dev:
+ 	return ret;
+ }
+ 
+-static int
+-get_uid (struct path * pp)
++int
++get_uid (struct path * pp, struct udev_device *udev)
+ {
+ 	char *c;
+ 	const char *value;
+@@ -1165,7 +1165,7 @@ get_uid (struct path * pp)
+ 	if (!pp->uid_attribute)
+ 		select_getuid(pp);
+ 
+-	if (!pp->udev) {
++	if (!udev) {
+ 		condlog(1, "%s: no udev information", pp->dev);
+ 		return 1;
+ 	}
+@@ -1180,7 +1180,7 @@ get_uid (struct path * pp)
+ 			pp->tick = conf->retrigger_delay;
+ 		}
+ 	} else {
+-		value = udev_device_get_property_value(pp->udev,
++		value = udev_device_get_property_value(udev,
+ 						       pp->uid_attribute);
+ 		if ((!value || strlen(value) == 0) &&
+ 		     conf->cmd == CMD_VALID_PATH)
+@@ -1194,6 +1194,7 @@ get_uid (struct path * pp)
+ 				len = strlen(value);
+ 			}
+ 			strncpy(pp->wwid, value, len);
++			condlog(4, "%s: got wwid of '%s'", pp->dev, pp->wwid);
+ 			pp->missing_udev_info = INFO_OK;
+ 			pp->tick = 0;
+ 		} else {
+@@ -1282,7 +1283,7 @@ pathinfo (struct path *pp, vector hwtabl
+ 	}
+ 
+ 	if ((mask & DI_WWID) && !strlen(pp->wwid))
+-		get_uid(pp);
++		get_uid(pp, pp->udev);
+ 	if (mask & DI_BLACKLIST && mask & DI_WWID) {
+ 		if (filter_wwid(conf->blist_wwid, conf->elist_wwid,
+ 				pp->wwid) > 0) {
+Index: multipath-tools-130222/libmultipath/discovery.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/discovery.h
++++ multipath-tools-130222/libmultipath/discovery.h
+@@ -44,6 +44,7 @@ int sysfs_set_scsi_tmo (struct multipath
+ int sysfs_get_timeout(struct path *pp, unsigned int *timeout);
+ int sysfs_get_host_pci_name(struct path *pp, char *pci_name);
+ int sysfs_get_iscsi_ip_address(struct path *pp, char *ip_address);
++int get_uid (struct path * pp, struct udev_device *udev);
+ 
+ /*
+  * discovery bitmask
+Index: multipath-tools-130222/libmultipath/structs.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/structs.h
++++ multipath-tools-130222/libmultipath/structs.h
+@@ -209,6 +209,7 @@ struct path {
+ 	int fd;
+ 	int missing_udev_info;
+ 	int retriggers;
++	int wwid_changed;
+ 
+ 	/* configlet pointers */
+ 	struct hwentry * hwe;
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -784,6 +784,26 @@ uev_update_path (struct uevent *uev, str
+ 	if (pp->missing_udev_info == INFO_REQUESTED)
+ 		return uev_add_path(uev, vecs);
+ 
++	if (conf->disable_changed_wwids &&
++	    (strlen(pp->wwid) || pp->wwid_changed)) {
++		char wwid[WWID_SIZE];
++
++		strcpy(wwid, pp->wwid);
++		get_uid(pp, uev->udev);
++		if (strcmp(wwid, pp->wwid) != 0) {
++			condlog(0, "%s: path wwid changed from '%s' to '%s'. disallowing", uev->kernel, wwid, pp->wwid);
++			strcpy(pp->wwid, wwid);
++			if (!pp->wwid_changed) {
++				pp->wwid_changed = 1;
++				pp->tick = 1;
++				dm_fail_path(pp->mpp->alias, pp->dev_t);
++			}
++		}
++		else {
++			pp->wwid_changed = 0;
++		}
++	}
++
+ 	/* reinit the prio values on change event, in case something is
+ 	 * different */
+ 	prio_init(&pp->prio);
+@@ -1284,6 +1304,12 @@ check_path (struct vectors * vecs, struc
+ 	else
+ 		checker_clear_message(&pp->checker);
+ 
++	if (pp->wwid_changed) {
++		condlog(2, "%s: path wwid has changed. Refusing to use",
++			pp->dev);
++		newstate = PATH_DOWN;
++	}
++
+ 	if (newstate == PATH_WILD || newstate == PATH_UNCHECKED) {
+ 		condlog(2, "%s: unusable path", pp->dev);
+ 		pathinfo(pp, conf->hwtable, 0);
+Index: multipath-tools-130222/libmultipath/config.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.c
++++ multipath-tools-130222/libmultipath/config.c
+@@ -681,6 +681,7 @@ load_config (char * file, struct udev *u
+ 	conf->uev_wait_timeout = DEFAULT_UEV_WAIT_TIMEOUT;
+ 	conf->skip_kpartx = DEFAULT_SKIP_KPARTX;
+ 	conf->remove_retries = 0;
++	conf->disable_changed_wwids = 0;
+ 
+ 	/*
+ 	 * preload default hwtable
+Index: multipath-tools-130222/libmultipath/config.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/config.h
++++ multipath-tools-130222/libmultipath/config.h
+@@ -147,6 +147,7 @@ struct config {
+ 	int uev_wait_timeout;
+ 	int skip_kpartx;
+ 	int remove_retries;
++	int disable_changed_wwids;
+ 	unsigned int version[3];
+ 
+ 	char * dev;
+Index: multipath-tools-130222/libmultipath/dict.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/dict.c
++++ multipath-tools-130222/libmultipath/dict.c
+@@ -953,6 +953,29 @@ def_remove_retries_handler(vector strvec
+ 	return 0;
+ }
+ 
++static int
++def_disable_changed_wwids_handler(vector strvec)
++{
++	char * buff;
++
++	buff = set_value(strvec);
++
++	if (!buff)
++		return 1;
++
++	if ((strlen(buff) == 2 && !strcmp(buff, "no")) ||
++	    (strlen(buff) == 1 && !strcmp(buff, "0")))
++		conf->disable_changed_wwids = 0;
++	else if ((strlen(buff) == 3 && !strcmp(buff, "yes")) ||
++		 (strlen(buff) == 1 && !strcmp(buff, "1")))
++		conf->disable_changed_wwids = 1;
++	else
++		conf->disable_changed_wwids = 0;
++
++	FREE(buff);
++	return 0;
++}
++
+ /*
+  * blacklist block handlers
+  */
+@@ -3429,6 +3452,15 @@ snprint_def_remove_retries (char * buff,
+ }
+ 
+ static int
++snprint_def_disable_changed_wwids(char * buff, int len, void * data)
++{
++	if (conf->disable_changed_wwids == 1)
++		return snprintf(buff, len, "yes");
++	else
++		return snprintf(buff, len, "no");
++}
++
++static int
+ snprint_ble_simple (char * buff, int len, void * data)
+ {
+ 	struct blentry * ble = (struct blentry *)data;
+@@ -3508,6 +3540,7 @@ init_keywords(void)
+ 	install_keyword("missing_uev_wait_timeout", &def_uev_wait_timeout_handler, &snprint_def_uev_wait_timeout);
+ 	install_keyword("new_bindings_in_boot", &def_new_bindings_in_boot_handler, &snprint_def_new_bindings_in_boot);
+ 	install_keyword("remove_retries", &def_remove_retries_handler, &snprint_def_remove_retries);
++	install_keyword("disable_changed_wwids", &def_disable_changed_wwids_handler, &snprint_def_disable_changed_wwids);
+ 	__deprecated install_keyword("default_selector", &def_selector_handler, NULL);
+ 	__deprecated install_keyword("default_path_grouping_policy", &def_pgpolicy_handler, NULL);
+ 	__deprecated install_keyword("default_uid_attribute", &def_uid_attribute_handler, NULL);

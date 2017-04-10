@@ -1,0 +1,99 @@
+---
+ multipath/multipath.conf.5 |   56 ++++++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 51 insertions(+), 5 deletions(-)
+
+Index: multipath-tools-130222/multipath/multipath.conf.5
+===================================================================
+--- multipath-tools-130222.orig/multipath/multipath.conf.5
++++ multipath-tools-130222/multipath/multipath.conf.5
+@@ -240,18 +240,21 @@ Specify any device-mapper features to be
+ .I num list
+ where
+ .I num
+-is the number of features in
++is the number, between 0 and 6, of features in
+ .I list.
+-Possible values for the feature list are
++Possible values for the feature list are:
+ .RS
+ .TP 12
+-.B queue_if_no_path
++.I queue_if_no_path
+ Queue IO if no path is active; identical to the
+ .I no_path_retry
+ keyword.
+ .TP
+-.B no_partitions
+-Disable automatic partitions generation via kpartx.
++.I pg_init_retries
++Number of times to retry pg_init, it must be between 1 and 50.
++.TP
++.I pg_init_delay_msecs
++Number of msecs before pg_init retry, it must be between 0 and 60000.
+ .RE
+ .TP
+ .B path_checker
+@@ -511,6 +514,45 @@ If set to
+ .I yes
+ , kpartx will not automatically create partitions on the device. The default is
+ .I no
++.TP
++.B ignore_new_boot_devs
++If set to
++.I yes
++, multipath will never attempt to create a multipath device whose wwid is not
++listed in /etc/multipath/wwids, while running in the initramfs.  This keeps
++multipath from adding new devices during the initramfs portion of bootup. The
++default is
++.I no
++.TP
++.B retrigger_tries
++This sets how many times multipathd will reissue change uevents on block
++devices that are not blacklisted, but have no wwid set by udev. Multipath
++assumes that any devices that should not report a wwid are blacklisted. This
++means that if a non-blacklisted device has no wwid, it is likely that udev
++timed out while processing it.  Multipathd will wait for a while, and then
++reissue a change uevent to give udev another chance to set the wwid. The
++default is
++.I 3
++.TP
++.B retrigger_delay
++This sets how long multipathd should wait, after receiving a uevent for a
++non-blacklisted device without a wwid set by udev, before reissuing a
++change uevent.  The goal of this delay is to give udev a chance to finish
++processing its current batch of uevents before sending more, to hopefully
++avoid it timing out. The default is
++.I 10
++.TP
++.B new_bindings_in_boot
++If set to
++.I yes
++, multipath will allow new user_friendly_names bindings to be created while
++running in the initramfs.  Otherwise, multipath will not create
++user_friendly_names bindings while running in the initramfs. Instead, it will
++use the WWID for the name of a device that was configured to use
++user_friendly_names.  When multipathd is restarted later in boot on the
++regular filesystem, the device will be renamed to a user_friendly_name. The
++default is
++.I no
+ .
+ .SH "blacklist section"
+ The
+@@ -603,6 +645,8 @@ section:
+ .TP
+ .B flush_on_last_del
+ .TP
++.B user_friendly_names
++.TP
+ .B no_path_retry
+ .TP
+ .B rr_min_io
+@@ -697,6 +741,8 @@ section:
+ .TP
+ .B no_path_retry
+ .TP
++.B user_friendly_names
++.TP
+ .B rr_min_io
+ .TP
+ .B rr_min_io_rq

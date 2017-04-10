@@ -1,0 +1,280 @@
+[PATCH] Multipath: Remove duplicated memset() for multipathd show command.
+[PATCH] multipath-tools: New way to limit the IPC command length.
+[PATCH] multipath-tools: Perform socket client uid check on IPC commands.
+
+Signed-off-by: Gris Ge <fge@redhat.com>
+---
+ libmultipath/print.c  |   10 ----------
+ libmultipath/uxsock.c |   38 +++++++++++++++++++++++++++++---------
+ libmultipath/uxsock.h |    9 +++++++++
+ multipathd/main.c     |   15 +++++++++++++--
+ multipathd/uxlsnr.c   |   31 ++++++++++++++++++++++++++-----
+ multipathd/uxlsnr.h   |    8 +++++---
+ 6 files changed, 82 insertions(+), 29 deletions(-)
+
+Index: multipath-tools-130222/libmultipath/print.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/print.c
++++ multipath-tools-130222/libmultipath/print.c
+@@ -771,8 +771,6 @@ snprint_multipath_header (char * line, i
+ 	int fwd;
+ 	struct multipath_data * data;
+ 
+-	memset(line, 0, len);
+-
+ 	do {
+ 		if (!TAIL)
+ 			break;
+@@ -806,8 +804,6 @@ snprint_multipath (char * line, int len,
+ 	struct multipath_data * data;
+ 	char buff[MAX_FIELD_LEN] = {};
+ 
+-	memset(line, 0, len);
+-
+ 	do {
+ 		if (!TAIL)
+ 			break;
+@@ -842,8 +838,6 @@ snprint_path_header (char * line, int le
+ 	int fwd;
+ 	struct path_data * data;
+ 
+-	memset(line, 0, len);
+-
+ 	do {
+ 		if (!TAIL)
+ 			break;
+@@ -877,8 +871,6 @@ snprint_path (char * line, int len, char
+ 	struct path_data * data;
+ 	char buff[MAX_FIELD_LEN];
+ 
+-	memset(line, 0, len);
+-
+ 	do {
+ 		if (!TAIL)
+ 			break;
+@@ -914,8 +906,6 @@ snprint_pathgroup (char * line, int len,
+ 	struct pathgroup_data * data;
+ 	char buff[MAX_FIELD_LEN];
+ 
+-	memset(line, 0, len);
+-
+ 	do {
+ 		if (!TAIL)
+ 			break;
+Index: multipath-tools-130222/libmultipath/uxsock.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/uxsock.c
++++ multipath-tools-130222/libmultipath/uxsock.c
+@@ -20,6 +20,15 @@
+ 
+ #include "memory.h"
+ #include "uxsock.h"
++
++/*
++ * Code is similar with mpath_recv_reply() with data size limitation
++ * and debug-able malloc.
++ * When limit == 0, it means no limit on data size, used for socket client
++ * to receiving data from multipathd.
++ */
++static int _recv_packet(int fd, char **buf, ssize_t limit);
++
+ /*
+  * create a unix domain socket and start listening on it
+  * return a file descriptor open on the socket
+@@ -95,27 +104,38 @@ int send_packet(int fd, const char *buf)
+ 	return ret;
+ }
+ 
+-/*
+- * receive a packet in length prefix format
+- */
+-int recv_packet(int fd, char **buf)
++static int _recv_packet(int fd, char **buf, ssize_t limit)
+ {
+-	int err;
+-	ssize_t len;
++	int err = 0;
++	ssize_t len = 0;
+ 	unsigned int timeout = DEFAULT_REPLY_TIMEOUT;
+ 
+ 	*buf = NULL;
+ 	len = mpath_recv_reply_len(fd, timeout);
+ 	if (len <= 0)
+ 		return len;
++	if ((limit > 0) && (len > limit))
++		return -EINVAL;
+ 	(*buf) = MALLOC(len);
+ 	if (!*buf)
+ 		return -ENOMEM;
+ 	err = mpath_recv_reply_data(fd, *buf, len, timeout);
+-	if (err) {
++	if (err != 0) {
+ 		FREE(*buf);
+ 		(*buf) = NULL;
+-		return err;
+ 	}
+-	return 0;
++	return err;
++}
++
++/*
++ * receive a packet in length prefix format
++ */
++int recv_packet(int fd, char **buf)
++{
++	return _recv_packet(fd, buf, 0 /* no limit */);
++}
++
++int recv_packet_from_client(int fd, char **buf)
++{
++	return _recv_packet(fd, buf, _MAX_CMD_LEN);
+ }
+Index: multipath-tools-130222/libmultipath/uxsock.h
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/uxsock.h
++++ multipath-tools-130222/libmultipath/uxsock.h
+@@ -3,3 +3,12 @@ int ux_socket_listen(const char *name);
+ int send_packet(int fd, const char *buf);
+ int recv_packet(int fd, char **buf);
+ size_t write_all(int fd, const void *buf, size_t len);
++
++#define _MAX_CMD_LEN           512
++
++/*
++ * Used for receiving socket command from untrusted socket client where data
++ * size is restricted to 512(_MAX_CMD_LEN) at most.
++ * Return -EINVAL if data length requested by client exceeded the _MAX_CMD_LEN.
++ */
++int recv_packet_from_client(int fd, char **buf);
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -18,6 +18,7 @@
+ #include <linux/oom.h>
+ #include <libudev.h>
+ #include <semaphore.h>
++#include <stdbool.h>
+ #include <mpath_persist.h>
+ #include "prioritizers/alua_rtpg.h"
+ 
+@@ -859,7 +860,8 @@ map_discovery (struct vectors * vecs)
+ }
+ 
+ int
+-uxsock_trigger (char * str, char ** reply, int * len, void * trigger_data)
++uxsock_trigger (char * str, char ** reply, int * len, bool is_root,
++		void * trigger_data)
+ {
+ 	struct vectors * vecs;
+ 	int r;
+@@ -872,6 +874,15 @@ uxsock_trigger (char * str, char ** repl
+ 	lock(vecs->lock);
+ 	pthread_testcancel();
+ 
++	if ((str != NULL) && (is_root == false) &&
++	    (strncmp(str, "list", strlen("list")) != 0) &&
++	    (strncmp(str, "show", strlen("show")) != 0)) {
++		*reply = STRDUP("permission deny: need to be root");
++		*len = strlen(*reply) + 1;
++		r = 1;
++		goto out;
++	}
++
+ 	r = parse_cmd(str, reply, len, vecs);
+ 
+ 	if (r > 0) {
+@@ -885,7 +896,7 @@ uxsock_trigger (char * str, char ** repl
+ 		r = 0;
+ 	}
+ 	/* else if (r < 0) leave *reply alone */
+-
++out:
+ 	lock_cleanup_pop(vecs->lock);
+ 	return r;
+ }
+Index: multipath-tools-130222/multipathd/uxlsnr.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/uxlsnr.c
++++ multipath-tools-130222/multipathd/uxlsnr.c
+@@ -21,6 +21,7 @@
+ #include <sys/un.h>
+ #include <sys/poll.h>
+ #include <signal.h>
++#include <stdbool.h>
+ #include <checkers.h>
+ #include <memory.h>
+ #include <debug.h>
+@@ -48,6 +49,23 @@ struct pollfd *polls;
+ volatile sig_atomic_t reconfig_sig = 0;
+ volatile sig_atomic_t log_reset_sig = 0;
+ 
++static bool _socket_client_is_root(int fd);
++
++static bool _socket_client_is_root(int fd)
++{
++	socklen_t len = 0;
++	struct ucred uc;
++
++	len = sizeof(struct ucred);
++	if ((fd >= 0) &&
++	    (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &uc, &len) == 0) &&
++	    (uc.uid == 0))
++			return true;
++
++	/* Treat error as not root client */
++	return false;
++}
++
+ /*
+  * handle a new client joining
+  */
+@@ -105,8 +123,7 @@ void uxsock_cleanup(void *arg)
+ /*
+  * entry point
+  */
+-void * uxsock_listen(int (*uxsock_trigger)(char *, char **, int *, void *),
+-			void * trigger_data)
++void * uxsock_listen(uxsock_trigger_fn uxsock_trigger, void * trigger_data)
+ {
+ 	int ux_sock;
+ 	int rlen;
+@@ -171,12 +188,16 @@ void * uxsock_listen(int (*uxsock_trigge
+ 			struct client *next = c->next;
+ 
+ 			if (polls[i].revents & POLLIN) {
+-				if (recv_packet(c->fd, &inbuf) != 0) {
++				if (recv_packet_from_client(c->fd,
++							    &inbuf) != 0) {
+ 					dead_client(c);
++				} else if (!inbuf) {
++					condlog(4, "recv_packet_from_client "
++						"get null request");
++					continue;
+ 				} else {
+ 					condlog(4, "Got request [%s]", inbuf);
+-					uxsock_trigger(inbuf, &reply, &rlen,
+-						       trigger_data);
++					uxsock_trigger(inbuf, &reply, &rlen, _socket_client_is_root(c->fd), trigger_data);
+ 					if (reply) {
+ 						if (send_packet(c->fd,
+ 								reply) != 0) {
+Index: multipath-tools-130222/multipathd/uxlsnr.h
+===================================================================
+--- multipath-tools-130222.orig/multipathd/uxlsnr.h
++++ multipath-tools-130222/multipathd/uxlsnr.h
+@@ -1,9 +1,11 @@
+ #ifndef _UXLSNR_H
+ #define _UXLSNR_H
+ 
+-void * uxsock_listen(int (*uxsock_trigger)
+-			(char *, char **, int *, void *),
+-			void * trigger_data);
++#include <stdbool.h>
++
++typedef int (uxsock_trigger_fn)(char *, char **, int *, bool, void *);
++
++void *uxsock_listen(uxsock_trigger_fn uxsock_trigger, void * trigger_data);
+ 
+ extern volatile sig_atomic_t reconfig_sig;
+ extern volatile sig_atomic_t log_reset_sig;

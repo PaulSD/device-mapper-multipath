@@ -1,0 +1,35 @@
+---
+ multipathd/main.c |    9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -878,7 +878,8 @@ uxsock_trigger (char * str, char ** repl
+ 	    (strncmp(str, "list", strlen("list")) != 0) &&
+ 	    (strncmp(str, "show", strlen("show")) != 0)) {
+ 		*reply = STRDUP("permission deny: need to be root");
+-		*len = strlen(*reply) + 1;
++		if (*reply)
++			*len = strlen(*reply) + 1;
+ 		r = 1;
+ 		goto out;
+ 	}
+@@ -887,12 +888,14 @@ uxsock_trigger (char * str, char ** repl
+ 
+ 	if (r > 0) {
+ 		*reply = STRDUP("fail\n");
+-		*len = strlen(*reply) + 1;
++		if (*reply)
++			*len = strlen(*reply) + 1;
+ 		r = 1;
+ 	}
+ 	else if (!r && *len == 0) {
+ 		*reply = STRDUP("ok\n");
+-		*len = strlen(*reply) + 1;
++		if (*reply)
++			*len = strlen(*reply) + 1;
+ 		r = 0;
+ 	}
+ 	/* else if (r < 0) leave *reply alone */

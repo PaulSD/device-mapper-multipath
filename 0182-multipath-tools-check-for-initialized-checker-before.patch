@@ -1,0 +1,49 @@
+From 7592f62383e6143a54d89885e505834c4977c4a6 Mon Sep 17 00:00:00 2001
+From: Mike Christie <mchristi@redhat.com>
+Date: Tue, 16 Aug 2016 11:44:27 -0500
+Subject: [PATCH 06/11] multipath-tools: check for initialized checker before
+
+For bz from upstream commit:
+
+commit b5773d46a4550c3c222bb415197e0bc5f09c1169
+Author: Mike Christie <mchristi@redhat.com>
+Date:   Mon Aug 15 12:13:45 2016 -0500
+
+    multipath-tools: check for initialized checker before
+
+    This fixes a regression added with:
+    015f87b16a7797a17afd514aec46e65c2a1a2f73
+
+    We can hit a race where when pathinfo is setting up a path, the path
+    could have gone down already. In the DI_CHECKER chunk we then do not
+run
+    get_state and attach a checker. Later when check_path is run
+    path_offline could still return PATH_DOWN or PATH_REMOVED and
+    get_state is again not run so we do not get to attach a checker. I
+    was then running repair_path since the state was PATH_DOWN, and we
+then
+    hit a segfault.
+
+    This has us test if a checker is selected before running repair.
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
+---
+ libmultipath/checkers.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/checkers.c b/libmultipath/checkers.c
+index fa7d8b7..6cd8d34 100644
+--- a/libmultipath/checkers.c
++++ b/libmultipath/checkers.c
+@@ -212,7 +212,7 @@ void checker_put (struct checker * dst)
+ 
+ void checker_repair (struct checker * c)
+ {
+-	if (!c)
++	if (!c || !checker_selected(c))
+ 		return;
+ 
+ 	c->message[0] = '\0';
+-- 
+1.8.3.1
+

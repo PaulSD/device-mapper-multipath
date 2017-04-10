@@ -1,0 +1,34 @@
+---
+ libmultipath/hwtable.c |   19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+Index: multipath-tools-130222/libmultipath/hwtable.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/hwtable.c
++++ multipath-tools-130222/libmultipath/hwtable.c
+@@ -1168,6 +1168,25 @@ static struct hwentry default_hw[] = {
+ 		.prio_name     = PRIO_ALUA,
+ 		.prio_args     = NULL,
+ 	},
++	/*
++	 * Infinidat
++	*/
++	{
++		.vendor        = "NFINIDAT",
++		.product       = "InfiniBox.*",
++		.features      = DEFAULT_FEATURES,
++		.hwhandler     = DEFAULT_HWHANDLER,
++		.pgpolicy      = GROUP_BY_PRIO,
++		.pgfailback    = 30,
++		.rr_weight     = RR_WEIGHT_PRIO,
++		.no_path_retry = NO_PATH_RETRY_FAIL,
++		.checker_name  = TUR,
++		.prio_name     = PRIO_ALUA,
++		.prio_args     = NULL,
++		.selector      = "round-robin 0",
++		.flush_on_last_del = FLUSH_ENABLED,
++		.dev_loss      = 30,
++	},
+ 	{
+ 		.vendor        = "XtremIO",
+ 		.product       = "XtremApp",

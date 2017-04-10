@@ -3,14 +3,14 @@
  libmultipath/config.h      |    2 
  libmultipath/configure.c   |    4 +
  libmultipath/defaults.h    |    1 
- libmultipath/dict.c        |   25 +++++++++
+ libmultipath/dict.c        |   25 ++++++++
  libmultipath/structs.h     |    2 
  multipath.conf.defaults    |    1 
- multipath/multipath.conf.5 |    8 +++
- multipathd/cli_handlers.c  |   65 ++++++++++++++++++++----
- multipathd/main.c          |  119 +++++++++++++++++++++++++++++++++++++++++++--
+ multipath/multipath.conf.5 |    8 ++
+ multipathd/cli_handlers.c  |   65 ++++++++++++++++++----
+ multipathd/main.c          |  132 +++++++++++++++++++++++++++++++++++++++++++--
  multipathd/main.h          |    1 
- 11 files changed, 216 insertions(+), 13 deletions(-)
+ 11 files changed, 229 insertions(+), 13 deletions(-)
 
 Index: multipath-tools-130222/libmultipath/configure.c
 ===================================================================
@@ -22,7 +22,7 @@ Index: multipath-tools-130222/libmultipath/configure.c
  				mpp->action = ACT_NOTHING;
 +			else {
 +				mpp->wait_for_udev = 1;
-+				mpp->uev_msg_tick = conf->uev_msg_delay;
++				mpp->uev_wait_tick = conf->uev_wait_timeout;
 +			}
  		}
  		dm_setgeometry(mpp);
@@ -36,7 +36,7 @@ Index: multipath-tools-130222/libmultipath/structs.h
  	int queuedio;
  	int action;
 +	int wait_for_udev;
-+	int uev_msg_tick;
++	int uev_wait_tick;
  	int pgfailback;
  	int failback_tick;
  	int rr_weight;
@@ -175,7 +175,7 @@ Index: multipath-tools-130222/libmultipath/config.h
  	int retrigger_delay;
  	int new_bindings_in_boot;
 +	int delayed_reconfig;
-+	int uev_msg_delay;
++	int uev_wait_timeout;
  	unsigned int version[3];
  
  	char * dev;
@@ -293,20 +293,33 @@ Index: multipath-tools-130222/multipathd/main.c
  			retval = reload_map(vecs, pp->mpp, 0);
  
  			condlog(2, "%s: map %s reloaded (retval %d)",
-@@ -1063,6 +1136,20 @@ followover_should_failback(struct path *
+@@ -1063,6 +1136,33 @@ followover_should_failback(struct path *
  }
  
  static void
-+missing_uev_message_tick(vector mpvec)
++missing_uev_wait_tick(struct vectors *vecs)
 +{
 +	struct multipath * mpp;
 +	unsigned int i;
++	int timed_out = 0;
 +
-+	vector_foreach_slot (mpvec, mpp, i) {
-+		if (mpp->wait_for_udev && --mpp->uev_msg_tick <= 0) {
-+			condlog(0, "%s: startup incomplete. Still waiting on udev", mpp->alias);
-+			mpp->uev_msg_tick = conf->uev_msg_delay;
++	vector_foreach_slot (vecs->mpvec, mpp, i) {
++		if (mpp->wait_for_udev && --mpp->uev_wait_tick <= 0) {
++			timed_out = 1;
++			condlog(0, "%s: timeout waiting on creation uevent. enabling reloads", mpp->alias);
++			if (mpp->wait_for_udev > 1 && update_map(mpp, vecs)) {
++				/* update_map removed map */
++				i--;
++				continue;
++			}
++			mpp->wait_for_udev = 0;
 +		}
++	}
++
++	if (timed_out && conf->delayed_reconfig &&
++	    !need_to_delay_reconfig(vecs)) {
++		condlog(2, "reconfigure (delayed)");
++		reconfigure(vecs);
 +	}
 +}
 +
@@ -314,7 +327,7 @@ Index: multipath-tools-130222/multipathd/main.c
  defered_failback_tick (vector mpvec)
  {
  	struct multipath * mpp;
-@@ -1316,6 +1403,9 @@ check_path (struct vectors * vecs, struc
+@@ -1316,6 +1416,9 @@ check_path (struct vectors * vecs, struc
  
  	pp->state = newstate;
  
@@ -324,15 +337,15 @@ Index: multipath-tools-130222/multipathd/main.c
  	/*
  	 * path prio refreshing
  	 */
-@@ -1369,6 +1459,7 @@ checkerloop (void *ap)
+@@ -1369,6 +1472,7 @@ checkerloop (void *ap)
  		if (vecs->mpvec) {
  			defered_failback_tick(vecs->mpvec);
  			retry_count_tick(vecs->mpvec);
-+			missing_uev_message_tick(vecs->mpvec);
++			missing_uev_wait_tick(vecs);
  		}
  		if (count)
  			count--;
-@@ -1465,6 +1556,22 @@ configure (struct vectors * vecs, int st
+@@ -1465,6 +1569,22 @@ configure (struct vectors * vecs, int st
  }
  
  int
@@ -355,7 +368,7 @@ Index: multipath-tools-130222/multipathd/main.c
  reconfigure (struct vectors * vecs)
  {
  	struct config * old = conf;
-@@ -1544,12 +1651,18 @@ void
+@@ -1544,12 +1664,18 @@ void
  handle_signals(void)
  {
  	if (reconfig_sig && running_state == DAEMON_RUNNING) {
@@ -396,7 +409,7 @@ Index: multipath-tools-130222/libmultipath/config.c
  	conf->retrigger_tries = DEFAULT_RETRIGGER_TRIES;
  	conf->retrigger_delay = DEFAULT_RETRIGGER_DELAY;
  	conf->new_bindings_in_boot = 0;
-+	conf->uev_msg_delay = DEFAULT_UEV_MSG_DELAY;
++	conf->uev_wait_timeout = DEFAULT_UEV_WAIT_TIMEOUT;
  
  	/*
  	 * preload default hwtable
@@ -408,7 +421,7 @@ Index: multipath-tools-130222/libmultipath/defaults.h
  #define DEFAULT_DELAY_CHECKS DELAY_CHECKS_OFF
  #define DEFAULT_RETRIGGER_DELAY 10
  #define DEFAULT_RETRIGGER_TRIES 3
-+#define DEFAULT_UEV_MSG_DELAY 30
++#define DEFAULT_UEV_WAIT_TIMEOUT 30
  
  #define DEFAULT_CHECKINT	5
  #define MAX_CHECKINT(a)		(a << 2)
@@ -420,7 +433,7 @@ Index: multipath-tools-130222/libmultipath/dict.c
  }
  
  static int
-+def_uev_msg_delay_handler(vector strvec)
++def_uev_wait_timeout_handler(vector strvec)
 +{
 +	char *buff;
 +
@@ -429,9 +442,9 @@ Index: multipath-tools-130222/libmultipath/dict.c
 +	if (!buff)
 +		return 1;
 +
-+	conf->uev_msg_delay = atoi(buff);
-+	if (conf->uev_msg_delay <= 0)
-+		conf->uev_msg_delay = DEFAULT_UEV_MSG_DELAY;
++	conf->uev_wait_timeout = atoi(buff);
++	if (conf->uev_wait_timeout <= 0)
++		conf->uev_wait_timeout = DEFAULT_UEV_WAIT_TIMEOUT;
 +	FREE(buff);
 +
 +	return 0;
@@ -445,9 +458,9 @@ Index: multipath-tools-130222/libmultipath/dict.c
  }
  
  static int
-+snprint_def_uev_msg_delay (char * buff, int len, void * data)
++snprint_def_uev_wait_timeout (char * buff, int len, void * data)
 +{
-+	return snprintf(buff, len, "%i", conf->uev_msg_delay);
++	return snprintf(buff, len, "%i", conf->uev_wait_timeout);
 +}
 +
 +static int
@@ -458,7 +471,7 @@ Index: multipath-tools-130222/libmultipath/dict.c
  	install_keyword("delay_wait_checks", &def_delay_wait_checks_handler, &snprint_def_delay_wait_checks);
  	install_keyword("retrigger_tries", &def_retrigger_tries_handler, &snprint_def_retrigger_tries);
  	install_keyword("retrigger_delay", &def_retrigger_delay_handler, &snprint_def_retrigger_delay);
-+	install_keyword("missing_uev_msg_delay", &def_uev_msg_delay_handler, &snprint_def_uev_msg_delay);
++	install_keyword("missing_uev_wait_timeout", &def_uev_wait_timeout_handler, &snprint_def_uev_wait_timeout);
  	install_keyword("new_bindings_in_boot", &def_new_bindings_in_boot_handler, &snprint_def_new_bindings_in_boot);
  	__deprecated install_keyword("default_selector", &def_selector_handler, NULL);
  	__deprecated install_keyword("default_path_grouping_policy", &def_pgpolicy_handler, NULL);
@@ -470,7 +483,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #	config_dir "/etc/multipath/conf.d"
  #	delay_watch_checks no
  #	delay_wait_checks no
-+#	missing_uev_msg_delay 30
++#	missing_uev_wait_timeout 30
  #}
  #blacklist {
  #	devnode "^(ram|raw|loop|fd|md|dm-|sr|scd|st)[0-9]*"
@@ -483,12 +496,12 @@ Index: multipath-tools-130222/multipath/multipath.conf.5
  checks. Default is
  .I no
 +.TP
-+.B missing_uev_msg_delay
-+Controls how long multipathd will wait, after a new multipath device is created,
-+to receive a change event from udev for the device, before printing a warning
-+message. This warning message will print every
-+.I missing_uev_msg_delay
-+seconds until the uevent is received. the default is
++.B missing_uev_wait_timeout
++Controls how many seconds multipathd will wait, after a new multipath device
++is created, to receive a change event from udev for the device, before
++automatically enabling device reloads. Usually multipathd will delay reloads
++on a device until it receives a change uevent from the initial table load. The
++default is
 +.I 30
  .
  .SH "blacklist section"

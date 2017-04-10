@@ -128,7 +128,7 @@ Index: multipath-tools-130222/multipathd/main.c
  				dm_queue_if_no_path(mpp->alias, 0);
  			}
  			if (!flush_map(mpp, vecs, 1)) {
-@@ -1184,6 +1185,7 @@ retry_count_tick(vector mpvec)
+@@ -1197,6 +1198,7 @@ retry_count_tick(vector mpvec)
  			mpp->stat_total_queueing_time++;
  			condlog(4, "%s: Retrying.. No active path", mpp->alias);
  			if(--mpp->retry_tick == 0) {

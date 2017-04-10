@@ -1,0 +1,17 @@
+---
+ libmultipath/devmapper.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: multipath-tools-130222/libmultipath/devmapper.c
+===================================================================
+--- multipath-tools-130222.orig/libmultipath/devmapper.c
++++ multipath-tools-130222/libmultipath/devmapper.c
+@@ -1387,7 +1387,7 @@ dm_rename (const char * old, char * new,
+ {
+ 	int r = 0;
+ 	struct dm_task *dmt;
+-	uint32_t cookie;
++	uint32_t cookie = 0;
+ 	uint16_t udev_flags = ((conf->daemon)? DM_UDEV_DISABLE_LIBRARY_FALLBACK : 0) | ((skip_kpartx == SKIP_KPARTX_ON)? MPATH_UDEV_NO_KPARTX_FLAG : 0);
+ 
+ 	if (dm_rename_partmaps(old, new))

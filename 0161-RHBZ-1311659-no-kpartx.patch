@@ -37,7 +37,7 @@ Index: multipath-tools-130222/libmultipath/config.c
 @@ -677,6 +679,7 @@ load_config (char * file, struct udev *u
  	conf->retrigger_delay = DEFAULT_RETRIGGER_DELAY;
  	conf->new_bindings_in_boot = 0;
- 	conf->uev_msg_delay = DEFAULT_UEV_MSG_DELAY;
+ 	conf->uev_wait_timeout = DEFAULT_UEV_WAIT_TIMEOUT;
 +	conf->skip_kpartx = DEFAULT_SKIP_KPARTX;
  
  	/*
@@ -65,7 +65,7 @@ Index: multipath-tools-130222/libmultipath/config.h
 @@ -143,6 +145,7 @@ struct config {
  	int new_bindings_in_boot;
  	int delayed_reconfig;
- 	int uev_msg_delay;
+ 	int uev_wait_timeout;
 +	int skip_kpartx;
  	unsigned int version[3];
  
@@ -138,7 +138,7 @@ Index: multipath-tools-130222/libmultipath/defaults.h
 @@ -24,6 +24,7 @@
  #define DEFAULT_RETRIGGER_DELAY 10
  #define DEFAULT_RETRIGGER_TRIES 3
- #define DEFAULT_UEV_MSG_DELAY 30
+ #define DEFAULT_UEV_WAIT_TIMEOUT 30
 +#define DEFAULT_SKIP_KPARTX SKIP_KPARTX_OFF
  
  #define DEFAULT_CHECKINT	5
@@ -585,9 +585,9 @@ Index: multipath-tools-130222/multipath/multipath.conf.5
 ===================================================================
 --- multipath-tools-130222.orig/multipath/multipath.conf.5
 +++ multipath-tools-130222/multipath/multipath.conf.5
-@@ -505,6 +505,12 @@ message. This warning message will print
- .I missing_uev_msg_delay
- seconds until the uevent is received. the default is
+@@ -505,6 +505,12 @@ automatically enabling device reloads. U
+ on a device until it receives a change uevent from the initial table load. The
+ default is
  .I 30
 +.TP
 +.B skip_kpartx

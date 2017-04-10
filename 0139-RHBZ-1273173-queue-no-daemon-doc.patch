@@ -1,7 +1,7 @@
 ---
- multipath.conf.defaults    |   57 +++++++++++++++++++++++++++++++++++++--------
+ multipath.conf.defaults    |   56 +++++++++++++++++++++++++++++++++++++--------
  multipath/multipath.conf.5 |    2 -
- 2 files changed, 48 insertions(+), 11 deletions(-)
+ 2 files changed, 48 insertions(+), 10 deletions(-)
 
 Index: multipath-tools-130222/multipath/multipath.conf.5
 ===================================================================
@@ -34,7 +34,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #	path_selector "service-time 0"
  #	path_grouping_policy "failover"
  #	uid_attribute "ID_SERIAL"
-@@ -12,28 +15,35 @@
+@@ -12,28 +15,36 @@
  #	features "0"
  #	path_checker "directio"
  #	alias_prefix "mpath"
@@ -62,9 +62,9 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #	config_dir "/etc/multipath/conf.d"
  #	delay_watch_checks no
  #	delay_wait_checks no
--#	missing_uev_msg_delay 30
 +#	retrigger_tries 3
 +#	retrigger_delay 10
+ #	missing_uev_wait_timeout 30
 +#	new_bindings_in_boot no
  #}
  #blacklist {
@@ -74,7 +74,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #	devnode "^dcssblk[0-9]*"
  #	device {
  #		vendor "DGC"
-@@ -68,7 +78,7 @@
+@@ -68,7 +79,7 @@
  #		product "Universal Xport"
  #	}
  #	device {
@@ -83,7 +83,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #		product "Universal Xport"
  #	}
  #}
-@@ -666,7 +676,7 @@
+@@ -666,7 +677,7 @@
  #		features "2 pg_init_retries 50"
  #		hardware_handler "1 rdac"
  #		prio "rdac"
@@ -92,7 +92,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #		rr_weight "uniform"
  #		no_path_retry 15
  #	}
-@@ -679,7 +689,7 @@
+@@ -679,7 +690,7 @@
  #		features "2 pg_init_retries 50"
  #		hardware_handler "1 rdac"
  #		prio "rdac"
@@ -101,7 +101,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #		rr_weight "uniform"
  #		no_path_retry 15
  #	}
-@@ -696,6 +706,7 @@
+@@ -696,6 +707,7 @@
  #		rr_min_io 128
  #		flush_on_last_del "yes"
  #		dev_loss_tmo "infinity"
@@ -109,7 +109,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #		retain_attached_hw_handler yes
  #		detect_prio yes
  #	}
-@@ -876,7 +887,7 @@
+@@ -876,7 +888,7 @@
  #		rr_min_io_rq 1
  #	}
  #	device {
@@ -118,7 +118,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #		product "INF-01-00"
  #		product_blacklist "Universal Xport"
  #		path_grouping_policy "group_by_prio"
-@@ -886,7 +897,9 @@
+@@ -886,7 +898,9 @@
  #		prio "rdac"
  #		failback immediate
  #		rr_weight "uniform"
@@ -129,7 +129,7 @@ Index: multipath-tools-130222/multipath.conf.defaults
  #	}
  #	device {
  #		vendor "STK"
-@@ -925,6 +938,30 @@
+@@ -925,6 +939,30 @@
  #		rr_weight "uniform"
  #		no_path_retry "queue"
  #	}

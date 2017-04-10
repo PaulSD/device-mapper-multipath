@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 85%{?dist}
+Release: 86%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -180,21 +180,64 @@ Patch0169: 0169-UPBZ-1353357-json-output.patch
 Patch0170: 0170-UPBZ-1352925-fix-typo.patch
 Patch0171: 0171-UPBZ-1356651-allow-zero-size.patch
 Patch0172: 0172-RHBZ-1350931-no-active-add.patch
+Patch0173: 0173-RH-update-man-page.patch
+Patch0174: 0174-RHBZ-1362396-modprobe.patch
+Patch0175: 0175-RHBZ-1357382-ordering.patch
+Patch0176: 0176-RHBZ-1363830-fix-rename.patch
+Patch0177: 0177-libmultipath-correctly-initialize-pp-sg_id.patch
+Patch0178: 0178-libmultipath-add-rbd-discovery.patch
+Patch0179: 0179-multipath-tools-add-checker-callout-to-repair-path.patch
+Patch0180: 0180-multipath-tools-Add-rbd-checker.patch
+Patch0181: 0181-multipath-tools-Add-rbd-to-the-hwtable.patch
+Patch0182: 0182-multipath-tools-check-for-initialized-checker-before.patch
+Patch0183: 0183-multipathd-Don-t-call-repair-on-blacklisted-path.patch
+Patch0184: 0184-rbd-fix-sync-repair-support.patch
+Patch0185: 0185-rbd-check-for-nonshared-clients.patch
+Patch0186: 0186-rbd-check-for-exclusive-lock-enabled.patch
+Patch0187: 0187-rbd-fixup-log-messages.patch
+Patch0188: 0188-RHBZ-1368501-dont-exit.patch
+Patch0189: 0189-RHBZ-1368211-remove-retries.patch
+Patch0190: 0190-RHBZ-1380602-rbd-lock-on-read.patch
+Patch0191: 0191-RHBZ-1169168-disable-changed-paths.patch
+Patch0192: 0192-RHBZ-1362409-infinibox-config.patch
+Patch0194: 0194-RHBZ-1351964-kpartx-recurse.patch
+Patch0195: 0195-RHBZ-1359510-no-daemon-msg.patch
+Patch0196: 0196-RHBZ-1239173-dont-set-flag.patch
+Patch0197: 0197-RHBZ-1394059-max-sectors-kb.patch
+Patch0198: 0198-RHBZ-1372032-detect-path-checker.patch
+Patch0199: 0199-RHBZ-1279355-3pardata-config.patch
+Patch0200: 0200-RHBZ-1402092-orphan-status.patch
+Patch0201: 0201-RHBZ-1403552-silence-warning.patch
+Patch0202: 0202-RHBZ-1362120-skip-prio.patch
+Patch0203: 0203-RHBZ-1363718-add-msgs.patch
+Patch0204: 0204-RHBZ-1406226-nimble-config.patch
+Patch0205: 0205-RHBZ-1416569-reset-stats.patch
+Patch0206: 0206-RHBZ-1239173-pt2-no-paths.patch
+Patch0207: 0207-UP-add-libmpathcmd.patch
+Patch0208: 0208-UPBZ-1430097-multipathd-IPC-changes.patch
+Patch0209: 0209-UPBZ-1430097-multipath-C-API.patch
+Patch0210: 0210-RH-fix-uninstall.patch
+Patch0211: 0211-RH-strlen-fix.patch
+Patch0212: 0212-RHBZ-1431562-for-read-only.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
-Requires: device-mapper >= 1.02.96
+Requires: device-mapper >= 7:1.02.96
 Requires: initscripts
 Requires(post): systemd-units systemd-sysv chkconfig
 Requires(preun): systemd-units
 Requires(postun): systemd-units
 
 # build/setup
-BuildRequires: libaio-devel, device-mapper-devel >= 1.02.82-2
+BuildRequires: libaio-devel, device-mapper-devel >= 1.02.89
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
 BuildRequires: systemd-units, systemd-devel
+BuildRequires: json-c-devel, perl, pkgconfig
+%ifarch x86_64
+BuildRequires: librados2-devel
+%endif
 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -212,8 +255,19 @@ Group: System Environment/Libraries
 
 %description libs
 The %{name}-libs provides the path checker
-and prioritizer modules. It also contains the multipath shared library,
+and prioritizer modules. It also contains the libmpathpersist and
+libmpathcmd shared libraries, as well as multipath's internal library,
 libmultipath.
+
+%package devel
+Summary: Development libraries and headers for %{name}
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-libs = %{version}-%{release}
+
+%description devel
+This package contains the files need to develop applications that use
+device-mapper-multipath's lbmpathpersist and libmpathcmd libraries.
 
 %if 0%{?fedora} < 23
 %package sysvinit
@@ -231,6 +285,27 @@ Group: System Environment/Base
 
 %description -n kpartx
 kpartx manages partition creation and removal for device-mapper devices.
+
+%package -n libdmmp
+Summary: device-mapper-multipath C API library
+Group: System Environment/Libraries
+Requires: json-c
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-libs = %{version}-%{release}
+
+%description -n libdmmp
+This package contains the shared library for the device-mapper-multipath
+C API library.
+
+%package -n libdmmp-devel
+Summary: device-mapper-multipath C API library headers
+Group: Development/Libraries
+Requires: pkgconfig
+Requires: libdmmp = %{version}-%{release}
+
+%description -n libdmmp-devel
+This package contains the files needed to develop applications that use
+device-mapper-multipath's libdmmp C API library
 
 %prep
 %setup -q -n multipath-tools-130222
@@ -405,12 +480,52 @@ kpartx manages partition creation and removal for device-mapper devices.
 %patch0170 -p1
 %patch0171 -p1
 %patch0172 -p1
+%patch0173 -p1
+%patch0174 -p1
+%patch0175 -p1
+%patch0176 -p1
+%patch0177 -p1
+%patch0178 -p1
+%patch0179 -p1
+%patch0180 -p1
+%patch0181 -p1
+%patch0182 -p1
+%patch0183 -p1
+%patch0184 -p1
+%patch0185 -p1
+%patch0186 -p1
+%patch0187 -p1
+%patch0188 -p1
+%patch0189 -p1
+%patch0190 -p1
+%patch0191 -p1
+%patch0192 -p1
+%patch0194 -p1
+%patch0195 -p1
+%patch0196 -p1
+%patch0197 -p1
+%patch0198 -p1
+%patch0199 -p1
+%patch0200 -p1
+%patch0201 -p1
+%patch0202 -p1
+%patch0203 -p1
+%patch0204 -p1
+%patch0205 -p1
+%patch0206 -p1
+%patch0207 -p1
+%patch0208 -p1
+%patch0209 -p1
+%patch0210 -p1
+%patch0211 -p1
+%patch0212 -p1
 cp %{SOURCE1} .
 
 %build
 %define _sbindir /usr/sbin
 %define _libdir /usr/%{_lib}
 %define _libmpathdir %{_libdir}/multipath
+%define _pkgconfdir %{_libdir}/pkgconfig
 make %{?_smp_mflags} LIB=%{_lib}
 
 %install
@@ -422,7 +537,9 @@ make install \
 	syslibdir=%{_libdir} \
 	libdir=%{_libmpathdir} \
 	rcdir=%{_initrddir} \
-	unitdir=%{_unitdir}
+	unitdir=%{_unitdir} \
+	includedir=%{_includedir} \
+	pkgconfdir=%{_pkgconfdir}
 
 # tree fix up
 install -d %{buildroot}/etc/multipath
@@ -464,8 +581,6 @@ fi
 %{_sbindir}/mpathconf
 %{_sbindir}/mpathpersist
 %{_unitdir}/multipathd.service
-%{_mandir}/man3/mpath_persistent_reserve_in.3.gz
-%{_mandir}/man3/mpath_persistent_reserve_out.3.gz
 %{_mandir}/man5/multipath.conf.5.gz
 %{_mandir}/man8/multipath.8.gz
 %{_mandir}/man8/multipathd.8.gz
@@ -486,14 +601,24 @@ fi
 %license COPYING
 %{_libdir}/libmultipath.so
 %{_libdir}/libmultipath.so.*
-%{_libdir}/libmpathpersist.so
 %{_libdir}/libmpathpersist.so.*
+%{_libdir}/libmpathcmd.so.*
 %dir %{_libmpathdir}
 %{_libmpathdir}/*
 
 %post libs -p /sbin/ldconfig
 
 %postun libs -p /sbin/ldconfig
+
+%files devel
+%defattr(-,root,root,-)
+%doc AUTHOR COPYING
+%{_libdir}/libmpathpersist.so
+%{_libdir}/libmpathcmd.so
+%{_includedir}/mpath_cmd.h
+%{_includedir}/mpath_persist.h
+%{_mandir}/man3/mpath_persistent_reserve_in.3.gz
+%{_mandir}/man3/mpath_persistent_reserve_out.3.gz
 
 %if 0%{?fedora} < 23
 %files sysvinit
@@ -505,7 +630,114 @@ fi
 %{_sbindir}/kpartx
 %{_mandir}/man8/kpartx.8.gz
 
+%files -n libdmmp
+%defattr(-,root,root,-)
+%doc AUTHOR COPYING
+%{_libdir}/libdmmp.so.*
+
+%post -n libdmmp -p /sbin/ldconfig
+
+%postun -n libdmmp -p /sbin/ldconfig
+
+%files -n libdmmp-devel
+%defattr(-,root,root,-)
+%doc AUTHOR COPYING
+%{_libdir}/libdmmp.so
+%dir %{_includedir}/libdmmp
+%{_includedir}/libdmmp/*
+%{_mandir}/man3/dmmp_*
+%{_mandir}/man3/libdmmp.h.3.gz
+%{_pkgconfdir}/libdmmp.pc
+
 %changelog
+* Fri Apr  7 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-86
+- Modify 0136-RHBZ-1304687-wait-for-map-add.patch
+  * switch to missing_uev_wait_timeout to stop waiting for uev
+- Refresh 0137-RHBZ-1280524-clear-chkr-msg.patch
+- Refresh 0150-RHBZ-1253913-fix-startup-msg.patch
+- Refresh 0154-UPBZ-1291406-disable-reinstate.patch
+- Refresh 0156-UPBZ-1313324-dont-fail-discovery.patch
+- Refresh 0161-RHBZ-1311659-no-kpartx.patch
+- Refresh 0167-RHBZ-1335176-fix-show-cmds.patch
+- Add 0173-RH-update-man-page.patch
+- Add 0174-RHBZ-1362396-modprobe.patch
+  * make starting the multipathd service modprobe dm-multipath in the
+    sysvinit scripts
+- Add 0175-RHBZ-1357382-ordering.patch
+  * force multipathd.service to start after systemd-udev-trigger.service
+- Add 0176-RHBZ-1363830-fix-rename.patch
+  * initialized a variable to make dm_rename not fail randomly
+- Add 0177-libmultipath-correctly-initialize-pp-sg_id.patch
+  * This and all the following patches add the rbd patch checker
+- Add 0178-libmultipath-add-rbd-discovery.patch
+- Add 0179-multipath-tools-add-checker-callout-to-repair-path.patch
+- Add 0180-multipath-tools-Add-rbd-checker.patch
+- Add 0181-multipath-tools-Add-rbd-to-the-hwtable.patch
+- Add 0182-multipath-tools-check-for-initialized-checker-before.patch
+- Add 0183-multipathd-Don-t-call-repair-on-blacklisted-path.patch
+- Add 0184-rbd-fix-sync-repair-support.patch
+- Add 0185-rbd-check-for-nonshared-clients.patch
+- Add 0186-rbd-check-for-exclusive-lock-enabled.patch
+- Add 0187-rbd-fixup-log-messages.patch
+- Add 0188-RHBZ-1368501-dont-exit.patch
+  * make multipathd not exit if it encounters recoverable errors on startup
+- Add 0189-RHBZ-1368211-remove-retries.patch
+  * add "remove_retries" multipath.conf parameter to make multiple attempts
+    to remove a multipath device if it is busy.
+- Add 0190-RHBZ-1380602-rbd-lock-on-read.patch
+  * pass lock_on_read when remapping image
+- Add 0191-RHBZ-1169168-disable-changed-paths.patch
+  * add "disabled_changed_wwids" multipath.conf parameter to disable
+    paths whose wwid changes
+- Add 0192-RHBZ-1362409-infinibox-config.patch
+- Add 0194-RHBZ-1351964-kpartx-recurse.patch
+  * fix recursion on corrupt dos partitions
+- Add 0195-RHBZ-1359510-no-daemon-msg.patch
+  * print a messages when multipathd isn't running
+- Add 0196-RHBZ-1239173-dont-set-flag.patch
+  * don't set reload flag on reloads when you gain your first
+    valid path
+- Add 0197-RHBZ-1394059-max-sectors-kb.patch
+  * add "max_sectors_kb" multipath.conf parameter to set max_sectors_kb
+    on a multipath device and all its path devices
+- Add 0198-RHBZ-1372032-detect-path-checker.patch
+  * add "detect_checker" multipath.conf parameter to detect ALUA arrays
+    and set the path checker to TUR
+- Add 0199-RHBZ-1279355-3pardata-config.patch
+- Add 0200-RHBZ-1402092-orphan-status.patch
+  * clear status on orphan paths
+- Add 0201-RHBZ-1403552-silence-warning.patch
+- Add 0202-RHBZ-1362120-skip-prio.patch
+  * don't run prio on failed paths
+- Add 0203-RHBZ-1363718-add-msgs.patch
+- Add 0204-RHBZ-1406226-nimble-config.patch
+- Add 0205-RHBZ-1416569-reset-stats.patch
+  * add "reset maps stats" and "reset map <map> stats" multipathd
+    interactive commands to reset the stats tracked by multipathd
+- Add 0206-RHBZ-1239173-pt2-no-paths.patch
+  * make multipath correctly disable scanning and rules running when
+    it gets a uevent and there are not valid paths.
+- Add 0207-UP-add-libmpathcmd.patch
+  * New shared library, libmpathcmd, that sends and receives messages from
+    multipathd. device-mapper-multipath now uses this library internally.
+- Add 0208-UPBZ-1430097-multipathd-IPC-changes.patch
+  * validation that modifying commands are coming from root.
+- Add 0209-UPBZ-1430097-multipath-C-API.patch
+  * New shared library. libdmmp, that presents the information from multipathd
+    in a structured manner to make it easier for callers to use
+- Add 0210-RH-fix-uninstall.patch
+  * Minor compilation fixes
+- Add 0211-RH-strlen-fix.patch
+  * checks that variables are not NULL before passing them to strlen
+- Add 0212-RHBZ-1431562-for-read-only.patch
+- Make 3 new subpackages
+  * device-mapper-multipath-devel, libdmmp, and libdmmp-devel. libmpathcmd
+    and libmpathprio are in device-mapper-multipath-libs and
+    device-mapper-multipath-devel. libdmmp is in its own subpackages
+- Move libmpathprio devel files to device-mapper-multipath-devel
+- Added BuildRequires on librados2-devel
+
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.4.9-85
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

@@ -1,0 +1,24 @@
+---
+ multipathd/main.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+Index: multipath-tools-130222/multipathd/main.c
+===================================================================
+--- multipath-tools-130222.orig/multipathd/main.c
++++ multipath-tools-130222/multipathd/main.c
+@@ -337,6 +337,7 @@ ev_add_map (char * dev, char * alias, st
+ 
+ 	if (mpp) {
+ 		if (mpp->wait_for_udev > 1) {
++			condlog(2, "%s: performing delayed actions", mpp->alias);
+ 			if (update_map(mpp, vecs))
+ 			/* setup multipathd removed the map */
+ 				return 1;
+@@ -535,6 +536,7 @@ ev_add_path (struct path * pp, struct ve
+ 		     pp->tpgs == TPGS_IMPLICIT))
+ 			mpp->force_udev_reload = 1;
+ 		else {
++			condlog(2, "%s : delaying path addition until %s is fully initialized", pp->dev, mpp->alias);
+ 			mpp->wait_for_udev = 2;
+ 			orphan_path(pp);
+ 			return 0;

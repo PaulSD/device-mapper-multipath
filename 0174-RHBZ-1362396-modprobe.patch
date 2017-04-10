@@ -1,0 +1,16 @@
+---
+ multipathd/multipathd.init.redhat |    1 +
+ 1 file changed, 1 insertion(+)
+
+Index: multipath-tools-130222/multipathd/multipathd.init.redhat
+===================================================================
+--- multipath-tools-130222.orig/multipathd/multipathd.init.redhat
++++ multipath-tools-130222/multipathd/multipathd.init.redhat
+@@ -67,6 +67,7 @@ popd > /dev/null
+ start() {
+ 	test -x $DAEMON || exit 5
+ 	echo -n $"Starting $prog daemon: "
++	modprobe dm-multipath >/dev/null 2>&1
+ 	daemon $DAEMON
+ 	RETVAL=$?
+ 	[ $RETVAL -eq 0 ] && touch $lockdir/$prog

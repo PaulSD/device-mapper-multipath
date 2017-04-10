@@ -214,7 +214,7 @@ Index: multipath-tools-130222/multipathd/main.c
 ===================================================================
 --- multipath-tools-130222.orig/multipathd/main.c
 +++ multipath-tools-130222/multipathd/main.c
-@@ -1502,7 +1502,7 @@ configure (struct vectors * vecs, int st
+@@ -1515,7 +1515,7 @@ configure (struct vectors * vecs, int st
  	struct multipath * mpp;
  	struct path * pp;
  	vector mpvec;
@@ -223,7 +223,7 @@ Index: multipath-tools-130222/multipathd/main.c
  
  	if (!vecs->pathvec && !(vecs->pathvec = vector_alloc()))
  		return 1;
-@@ -1516,7 +1516,9 @@ configure (struct vectors * vecs, int st
+@@ -1529,7 +1529,9 @@ configure (struct vectors * vecs, int st
  	/*
  	 * probe for current path (from sysfs) and map (from dm) sets
  	 */
