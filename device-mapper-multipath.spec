@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.4.9
-Release: 86%{?dist}
+Release: 87%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -223,7 +223,7 @@ Patch0212: 0212-RHBZ-1431562-for-read-only.patch
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
-Requires: device-mapper >= 7:1.02.96
+Requires: device-mapper >= 1.02.96
 Requires: initscripts
 Requires(post): systemd-units systemd-sysv chkconfig
 Requires(preun): systemd-units
@@ -650,6 +650,11 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Apr 12 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-87
+- Remove Epoch from device-mapper requires
+  * The RHEL releases of device-mapper set the Epoch, and this was
+    accidentally retained in the fedora spec file.
+
 * Fri Apr  7 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.4.9-86
 - Modify 0136-RHBZ-1304687-wait-for-map-add.patch
   * switch to missing_uev_wait_timeout to stop waiting for uev
