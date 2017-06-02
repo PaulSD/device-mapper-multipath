@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.1
-Release: 1.gitf21166a%{?dist}
+Release: 2.gitf21166a%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -20,6 +20,10 @@ Patch0006: 0006-RH-use-rpm-optflags-if-present.patch
 Patch0007: 0007-RH-add-mpathconf.patch
 Patch0008: 0008-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
 Patch0009: 0009-RH-trigger-change-uevent-on-new-device-creation.patch
+Patch0010: 0010-libmultipath-change-how-RADOS-checker-is-enabled.patch
+Patch0011: 0011-multipath-set-verbosity-to-default-during-config.patch
+Patch0012: 0012-mpath-skip-device-configs-without-vendor-product.patch
+Patch0013: 0013-multipathd-fix-show-maps-json-crash.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -117,19 +121,18 @@ device-mapper-multipath's libdmmp C API library
 %patch0007 -p1
 %patch0008 -p1
 %patch0009 -p1
+%patch0010 -p1
+%patch0011 -p1
+%patch0012 -p1
+%patch0013 -p1
 cp %{SOURCE1} .
 
 %build
-%ifarch x86_64
-  %define _rados 1
-%else
-  %define _rados 0
-%endif
 %define _sbindir /usr/sbin
 %define _libdir /usr/%{_lib}
 %define _libmpathdir %{_libdir}/multipath
 %define _pkgconfdir %{_libdir}/pkgconfig
-make %{?_smp_mflags} LIB=%{_lib} ENABLE_RADOS=%{_rados}
+make %{?_smp_mflags} LIB=%{_lib}
 
 %install
 make install \
@@ -140,8 +143,7 @@ make install \
 	rcdir=%{_initrddir} \
 	unitdir=%{_unitdir} \
 	includedir=%{_includedir} \
-	pkgconfdir=%{_pkgconfdir} \
-	ENABLE_RADOS=%{_rados}
+	pkgconfdir=%{_pkgconfdir}
 
 # tree fix up
 install -d %{buildroot}/etc/multipath
@@ -256,6 +258,26 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Jun  2 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.1-2.gitf21166a
+- Modify 0004-RH-Remove-the-property-blacklist-exception-builtin.patch
+  * update multipath.conf.5 man page to remove builtin listing
+- Modify 0005-RH-don-t-start-without-a-config-file.patch
+  * update multipathd.8 man page to note that a config file is necessary
+- Modify 0007-RH-add-mpathconf.patch
+  * add property blacklist-exception to default config file
+- Add 0010-libmultipath-change-how-RADOS-checker-is-enabled.patch
+  * Makefile now autodetects librados. Posted upstream
+- Remove related RADOS option from spec file
+- Add 0011-multipath-set-verbosity-to-default-during-config.patch
+  * Allow multipath to print warning messages during configuration.
+    Posted upstream
+- Add 0012-mpath-skip-device-configs-without-vendor-product.patch
+  * device entries without vendor/product were breaking configurations.
+    Posted upsteam
+- Add 0013-multipathd-fix-show-maps-json-crash.patch
+  * multipathd crashed showing json output with no devices. Posted
+    upstream
+
 * Tue May 23 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.1-1.gitf21166a
 - Update Source to the latest upstream commit
 - Add 0001-libmultipath-add-comment-about-resuming.patch

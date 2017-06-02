@@ -14,9 +14,9 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/config.c |   1 +
  multipath/Makefile    |   5 +
- multipath/mpathconf   | 460 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ multipath/mpathconf   | 464 ++++++++++++++++++++++++++++++++++++++++++++++++++
  multipath/mpathconf.8 | 101 +++++++++++
- 4 files changed, 567 insertions(+)
+ 4 files changed, 571 insertions(+)
  create mode 100644 multipath/mpathconf
  create mode 100644 multipath/mpathconf.8
 
@@ -68,10 +68,10 @@ index 1e9ee4b..3d4d459 100644
  	$(RM) core *.o $(EXEC) *.gz
 diff --git a/multipath/mpathconf b/multipath/mpathconf
 new file mode 100644
-index 0000000..c232ae9
+index 0000000..e839134
 --- /dev/null
 +++ b/multipath/mpathconf
-@@ -0,0 +1,460 @@
+@@ -0,0 +1,464 @@
 +#!/bin/bash
 +#
 +# Copyright (C) 2010 Red Hat, Inc. All rights reserved.
@@ -106,6 +106,10 @@ index 0000000..c232ae9
 +defaults {
 +	user_friendly_names yes
 +	find_multipaths yes
++}
++
++blacklist_exceptions {
++        property \"(SCSI_IDENT_|ID_WWN)\"
 +}"
 +
 +CONFIGFILE="/etc/multipath.conf"

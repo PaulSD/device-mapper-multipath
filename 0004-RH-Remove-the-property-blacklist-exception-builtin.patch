@@ -13,8 +13,9 @@ it.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
- libmultipath/blacklist.c | 15 ++++++---------
- 1 file changed, 6 insertions(+), 9 deletions(-)
+ libmultipath/blacklist.c   | 15 ++++++---------
+ multipath/multipath.conf.5 |  4 ----
+ 2 files changed, 6 insertions(+), 13 deletions(-)
 
 diff --git a/libmultipath/blacklist.c b/libmultipath/blacklist.c
 index ee396e2..19d4697 100644
@@ -49,6 +50,21 @@ index ee396e2..19d4697 100644
  }
  
  void
+diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
+index f04ff19..fbbbb27 100644
+--- a/multipath/multipath.conf.5
++++ b/multipath/multipath.conf.5
+@@ -1014,10 +1014,6 @@ The \fIWorld Wide Identification\fR of a device.
+ .TP
+ .B property
+ Regular expression of the udev property to be whitelisted.
+-.RS
+-.TP
+-The default is: \fB(SCSI_IDENT_|ID_WWN)\fR
+-.RE
+ .TP
+ .B device
+ Subsection for the device description. This subsection recognizes the
 -- 
 2.7.4
 
