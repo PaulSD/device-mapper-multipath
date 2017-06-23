@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.1
-Release: 2.gitf21166a%{?dist}
+Release: 3.gitf21166a%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -258,6 +258,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Jun 23 2017 Tom Callaway <spot@fedoraproject.org> - 0.7.1-3.gitf21166a
+- rebuild to resolve broken deps
+
 * Fri Jun  2 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.1-2.gitf21166a
 - Modify 0004-RH-Remove-the-property-blacklist-exception-builtin.patch
   * update multipath.conf.5 man page to remove builtin listing
