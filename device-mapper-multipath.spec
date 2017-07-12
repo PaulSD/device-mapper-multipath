@@ -39,7 +39,7 @@ BuildRequires: libaio-devel, device-mapper-devel >= 1.02.89
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
 BuildRequires: systemd-units, systemd-devel
-BuildRequires: json-c-devel, perl, pkgconfig
+BuildRequires: json-c-devel, perl-interpreter, pkgconfig
 BuildRequires: userspace-rcu-devel
 %ifarch x86_64
 BuildRequires: librados-devel
