@@ -20,7 +20,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 22 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index bb6619b..aae69b8 100644
+index 6b23601..9368962 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
 @@ -25,6 +25,7 @@
@@ -31,7 +31,7 @@ index bb6619b..aae69b8 100644
  
  static int
  hwe_strmatch (struct hwentry *hwe1, struct hwentry *hwe2)
-@@ -667,6 +668,22 @@ load_config (char * file)
+@@ -674,6 +675,22 @@ load_config (char * file)
  			factorize_hwtable(conf->hwtable, builtin_hwtable_size);
  		}
  
@@ -79,7 +79,7 @@ index 4d78b98..5753766 100644
  KERNEL=="dm-*", GOTO="check_kpartx"
  ENV{DEVTYPE}!="partition", GOTO="test_dev"
 diff --git a/multipathd/multipathd.8 b/multipathd/multipathd.8
-index 4c765af..c1499a5 100644
+index 2615728..0875212 100644
 --- a/multipathd/multipathd.8
 +++ b/multipathd/multipathd.8
 @@ -39,6 +39,8 @@ map regains its maximum performance and redundancy.

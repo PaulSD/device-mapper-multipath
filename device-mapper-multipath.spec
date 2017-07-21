@@ -1,17 +1,17 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.1
-Release: 3.gitf21166a%{?dist}
+Release: 4.git847cc43%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "http://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=f21166a;sf=tgz" -o multipath-tools-f21166a.tgz
-Source0: multipath-tools-f21166a.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=847cc43;sf=tgz" -o multipath-tools-git847cc43.tgz
+Source0: multipath-tools-git847cc43.tgz
 Source1: multipath.conf
-Patch0001: 0001-libmultipath-add-comment-about-resuming.patch
+Patch0001: 0001-libmultipath-update-3PARdata-builtin-config.patch
 Patch0002: 0002-multipath-attempt-at-common-multipath.rules.patch
 Patch0003: 0003-RH-fixup-udev-rules-for-redhat.patch
 Patch0004: 0004-RH-Remove-the-property-blacklist-exception-builtin.patch
@@ -20,10 +20,6 @@ Patch0006: 0006-RH-use-rpm-optflags-if-present.patch
 Patch0007: 0007-RH-add-mpathconf.patch
 Patch0008: 0008-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
 Patch0009: 0009-RH-trigger-change-uevent-on-new-device-creation.patch
-Patch0010: 0010-libmultipath-change-how-RADOS-checker-is-enabled.patch
-Patch0011: 0011-multipath-set-verbosity-to-default-during-config.patch
-Patch0012: 0012-mpath-skip-device-configs-without-vendor-product.patch
-Patch0013: 0013-multipathd-fix-show-maps-json-crash.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -111,7 +107,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-f21166a
+%setup -q -n multipath-tools-847cc43
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -121,10 +117,6 @@ device-mapper-multipath's libdmmp C API library
 %patch0007 -p1
 %patch0008 -p1
 %patch0009 -p1
-%patch0010 -p1
-%patch0011 -p1
-%patch0012 -p1
-%patch0013 -p1
 cp %{SOURCE1} .
 
 %build
@@ -139,6 +131,7 @@ make install \
 	DESTDIR=%{buildroot} \
 	bindir=%{_sbindir} \
 	syslibdir=%{_libdir} \
+	usrlibdir=%{_libdir} \
 	libdir=%{_libmpathdir} \
 	rcdir=%{_initrddir} \
 	unitdir=%{_unitdir} \
@@ -258,6 +251,14 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Jul 21 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.1-4.git847cc43
+- Update Source to the latest upstream commit
+  * Previous patches 0001 and 0010-0013 are included in this commit.
+- Add 0001-libmultipath-update-3PARdata-builtin-config.patch
+  * Change for building configuration. Posted upstream
+- Modify 0006-RH-use-rpm-optflags-if-present.patch
+  * Add missing lines to actually use RPM_OPT_FLAGS.
+
 * Fri Jun 23 2017 Tom Callaway <spot@fedoraproject.org> - 0.7.1-3.gitf21166a
 - rebuild to resolve broken deps
 

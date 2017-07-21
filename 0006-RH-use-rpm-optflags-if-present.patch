@@ -9,14 +9,14 @@ still being generic.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
- Makefile.inc | 20 +++++++++++++-------
- 1 file changed, 13 insertions(+), 7 deletions(-)
+ Makefile.inc | 22 +++++++++++++++-------
+ 1 file changed, 15 insertions(+), 7 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index 2591fa9..ffcc8b6 100644
+index cea015b..d6b4ef7 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
-@@ -80,13 +80,19 @@ TEST_CC_OPTION = $(shell \
+@@ -82,13 +82,21 @@ TEST_CC_OPTION = $(shell \
  		echo "$(2)"; \
  	fi)
  
@@ -36,6 +36,8 @@ index 2591fa9..ffcc8b6 100644
 +	ifeq ($(shell test -f /usr/lib/rpm/redhat/redhat-hardened-cc1 && echo 1),1)
 +		OPTFLAGS += -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1
 +	endif
++else
++	OPTFLAGS = $(RPM_OPT_FLAGS)
 +endif
 +OPTFLAGS	+= -Wextra -Wstrict-prototypes -Wformat=2 -Werror=implicit-int \
 +		   -Werror=implicit-function-declaration -Wno-sign-compare \

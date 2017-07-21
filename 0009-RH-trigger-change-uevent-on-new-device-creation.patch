@@ -96,7 +96,7 @@ index 88bb72b..249c6c1 100644
  		}
  		else {
 diff --git a/multipath/main.c b/multipath/main.c
-index 72585b0..2eda6a3 100644
+index 9dda21d..baae256 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -336,7 +336,7 @@ configure (struct config *conf, enum mpath_cmds cmd,
@@ -109,7 +109,7 @@ index 72585b0..2eda6a3 100644
  			else
  				printf("failed adding '%s' to wwids file\n",
 diff --git a/multipathd/main.c b/multipathd/main.c
-index 81c76ca..874bcce 100644
+index 4be2c57..fc5b18a 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
 @@ -2093,7 +2093,8 @@ configure (struct vectors * vecs, int start_waiters)

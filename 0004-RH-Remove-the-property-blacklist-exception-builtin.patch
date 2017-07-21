@@ -51,10 +51,10 @@ index ee396e2..19d4697 100644
  
  void
 diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
-index f04ff19..fbbbb27 100644
+index 0049cba..35fc0b1 100644
 --- a/multipath/multipath.conf.5
 +++ b/multipath/multipath.conf.5
-@@ -1014,10 +1014,6 @@ The \fIWorld Wide Identification\fR of a device.
+@@ -1034,10 +1034,6 @@ The \fIWorld Wide Identification\fR of a device.
  .TP
  .B property
  Regular expression of the udev property to be whitelisted.

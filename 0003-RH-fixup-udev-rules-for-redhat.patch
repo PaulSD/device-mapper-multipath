@@ -19,13 +19,13 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  4 files changed, 12 insertions(+), 11 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index 1815f9a..2591fa9 100644
+index 29c290a..cea015b 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
-@@ -47,7 +47,7 @@ endif
- 
+@@ -48,7 +48,7 @@ endif
  prefix		=
  exec_prefix	= $(prefix)
+ usr_prefix	= $(prefix)
 -bindir		= $(exec_prefix)/sbin
 +bindir		= $(exec_prefix)/usr/sbin
  libudevdir	= $(prefix)/$(SYSTEMDPATH)/udev

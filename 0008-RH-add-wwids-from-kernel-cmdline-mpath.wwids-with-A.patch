@@ -85,7 +85,7 @@ index 9527012..b665232 100644
  
  #endif /* _WWIDS_H */
 diff --git a/multipath/main.c b/multipath/main.c
-index 4174d43..72585b0 100644
+index dede017..9dda21d 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -102,7 +102,7 @@ usage (char * progname)
