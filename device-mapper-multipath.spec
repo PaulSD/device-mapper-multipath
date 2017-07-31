@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.1
-Release: 5.git847cc43%{?dist}
+Release: 6.git847cc43%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -68,16 +68,6 @@ Requires: %{name}-libs = %{version}-%{release}
 This package contains the files need to develop applications that use
 device-mapper-multipath's lbmpathpersist and libmpathcmd libraries.
 
-%if 0%{?fedora} < 23
-%package sysvinit
-Summary: SysV init script for device-mapper-multipath
-Group: System Environment/Libraries
-
-%description sysvinit
-SysV style init script for device-mapper-multipth. It needs to be
-installed only if systemd is not used as the system init process.
-%endif
-
 %package -n kpartx
 Summary: Partition device manager for device-mapper devices
 Group: System Environment/Base
@@ -140,10 +130,7 @@ make install \
 
 # tree fix up
 install -d %{buildroot}/etc/multipath
-
-%if 0%{?fedora} >= 23
 rm -rf %{buildroot}/%{_initrddir}
-%endif
 
 
 %clean
@@ -165,11 +152,6 @@ fi
 # make sure old systemd symlinks are removed after changing the [Install]
 # section in multipathd.service from multi-user.target to sysinit.target
 /bin/systemctl --quiet is-enabled multipathd.service >/dev/null 2>&1 && /bin/systemctl reenable multipathd.service ||:
-
-%if 0%{?fedora} < 23
-%triggerpostun -n %{name}-sysvinit -- %{name} < 0.4.9-16
-/sbin/chkconfig --add mdmonitor >/dev/null 2>&1 || :
-%endif
 
 %files
 %defattr(-,root,root,-)
@@ -218,11 +200,6 @@ fi
 %{_mandir}/man3/mpath_persistent_reserve_in.3.gz
 %{_mandir}/man3/mpath_persistent_reserve_out.3.gz
 
-%if 0%{?fedora} < 23
-%files sysvinit
-%{_initrddir}/multipathd
-%endif
-
 %files -n kpartx
 %defattr(-,root,root,-)
 %doc README
@@ -251,6 +228,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Jul 31 2017 Troy Dawson <tdawson@redhat.com> - 0.7.1-6.git847cc43
+- Clean spec file - remove pre-fedora 23 cruft
+
 * Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.7.1-5.git847cc43
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
 
