@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.1
-Release: 6.git847cc43%{?dist}
+Release: 7.git847cc43%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -228,6 +228,10 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Aug  2 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.1-7.git847cc43
+- Modify 0005-RH-don-t-start-without-a-config-file.patch
+  * Fix man page typos
+
 * Mon Jul 31 2017 Troy Dawson <tdawson@redhat.com> - 0.7.1-6.git847cc43
 - Clean spec file - remove pre-fedora 23 cruft
 

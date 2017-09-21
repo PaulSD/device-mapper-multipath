@@ -79,7 +79,7 @@ index 4d78b98..5753766 100644
  KERNEL=="dm-*", GOTO="check_kpartx"
  ENV{DEVTYPE}!="partition", GOTO="test_dev"
 diff --git a/multipathd/multipathd.8 b/multipathd/multipathd.8
-index 2615728..0875212 100644
+index 2615728..d64040f 100644
 --- a/multipathd/multipathd.8
 +++ b/multipathd/multipathd.8
 @@ -39,6 +39,8 @@ map regains its maximum performance and redundancy.
@@ -87,7 +87,7 @@ index 2615728..0875212 100644
  In turn, the multipath tool signals the multipathd daemon when it is done with
  devmap reconfiguration, so that it can refresh its failed path list.
 +
-+In this Linux distribution, multipathd does not run unless a /etc/multipath.conffile exists
++In this Linux distribution, multipathd does not run unless a /etc/multipath.conf file exists.
  .
  .
  .\" ----------------------------------------------------------------------------
