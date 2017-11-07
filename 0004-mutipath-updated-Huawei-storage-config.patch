@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Wed, 1 Nov 2017 19:53:11 -0500
+Subject: [PATCH] mutipath: updated Huawei storage config
+
+I was given this updated built-in config by Zhou Weigang from
+Huawei.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/hwtable.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index b018ddf..78de1fa 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -940,7 +940,8 @@ static struct hwentry default_hw[] = {
+ 		/* OceanStor V3 */
+ 		.vendor        = "HUAWEI",
+ 		.product       = "XSG1",
+-		.pgpolicy      = MULTIBUS,
++		.pgpolicy      = GROUP_BY_PRIO,
++		.prio_name     = PRIO_ALUA,
+ 	},
+ 	/*
+ 	 * Red Hat
+-- 
+2.7.4
+

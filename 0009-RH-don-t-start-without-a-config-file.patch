@@ -20,18 +20,18 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 22 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 6b23601..9368962 100644
+index 9486116..85e32ee 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -25,6 +25,7 @@
- #include "prio.h"
+@@ -26,6 +26,7 @@
  #include "devmapper.h"
  #include "mpath_cmd.h"
+ #include "propsel.h"
 +#include "version.h"
  
  static int
  hwe_strmatch (struct hwentry *hwe1, struct hwentry *hwe2)
-@@ -674,6 +675,22 @@ load_config (char * file)
+@@ -659,6 +660,22 @@ load_config (char * file)
  			factorize_hwtable(conf->hwtable, builtin_hwtable_size);
  		}
  
@@ -55,10 +55,10 @@ index 6b23601..9368962 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index ffc69b5..614331c 100644
+index 67ff983..1dbb9a7 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
-@@ -7,6 +7,7 @@
+@@ -9,6 +9,7 @@
  
  #define ORIGIN_DEFAULT 0
  #define ORIGIN_CONFIG  1
@@ -67,19 +67,19 @@ index ffc69b5..614331c 100644
  /*
   * In kernel, fast_io_fail == 0 means immediate failure on rport delete.
 diff --git a/multipath/multipath.rules b/multipath/multipath.rules
-index 4d78b98..5753766 100644
+index bc1a852..2bc0348 100644
 --- a/multipath/multipath.rules
 +++ b/multipath/multipath.rules
-@@ -6,6 +6,7 @@ IMPORT{cmdline}="nompath"
+@@ -7,6 +7,7 @@ IMPORT{cmdline}="nompath"
  ENV{nompath}=="?*", GOTO="end_mpath"
  IMPORT{cmdline}="multipath"
  ENV{multipath}=="off", GOTO="end_mpath"
 +TEST!="/etc/multipath.conf", GOTO="end_mpath"
  
- KERNEL=="dm-*", GOTO="check_kpartx"
  ENV{DEVTYPE}!="partition", GOTO="test_dev"
+ IMPORT{parent}="DM_MULTIPATH_DEVICE_PATH"
 diff --git a/multipathd/multipathd.8 b/multipathd/multipathd.8
-index 2615728..d64040f 100644
+index 5c96680..0515211 100644
 --- a/multipathd/multipathd.8
 +++ b/multipathd/multipathd.8
 @@ -39,6 +39,8 @@ map regains its maximum performance and redundancy.

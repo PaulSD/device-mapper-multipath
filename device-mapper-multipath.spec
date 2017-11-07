@@ -1,26 +1,30 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
-Version: 0.7.1
-Release: 8.git847cc43%{?dist}
+Version: 0.7.3
+Release: 1%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=847cc43;sf=tgz" -o multipath-tools-git847cc43.tgz
-Source0: multipath-tools-git847cc43.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.7.3;sf=tgz" -o multipath-tools-0.7.3.tgz
+Source0: multipath-tools-0.7.3.tgz
 Source1: multipath.conf
-Patch0001: 0001-libmultipath-update-3PARdata-builtin-config.patch
-Patch0002: 0002-multipath-attempt-at-common-multipath.rules.patch
-Patch0003: 0003-RH-fixup-udev-rules-for-redhat.patch
-Patch0004: 0004-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0005: 0005-RH-don-t-start-without-a-config-file.patch
-Patch0006: 0006-RH-use-rpm-optflags-if-present.patch
-Patch0007: 0007-RH-add-mpathconf.patch
-Patch0008: 0008-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0009: 0009-RH-trigger-change-uevent-on-new-device-creation.patch
-Patch0010: 0010-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0001: 0001-mpathpersist-Fix-invalid-condition-check.patch
+Patch0002: 0002-multipath-add-man-page-info-for-my-prkey-changes.patch
+Patch0003: 0003-multipath-there-is-no-none-path-state.patch
+Patch0004: 0004-mutipath-updated-Huawei-storage-config.patch
+Patch0005: 0005-multipath-fix-doc-typo.patch
+Patch0006: 0006-multipath-add-ghost_delay-parameter.patch
+Patch0007: 0007-RH-fixup-udev-rules-for-redhat.patch
+Patch0008: 0008-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0009: 0009-RH-don-t-start-without-a-config-file.patch
+Patch0010: 0010-RH-use-rpm-optflags-if-present.patch
+Patch0011: 0011-RH-add-mpathconf.patch
+Patch0012: 0012-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0013: 0013-RH-trigger-change-uevent-on-new-device-creation.patch
+Patch0014: 0014-RH-warn-on-invalid-regex-instead-of-failing.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -98,7 +102,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-847cc43
+%setup -q -n multipath-tools-0.7.3
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -109,6 +113,10 @@ device-mapper-multipath's libdmmp C API library
 %patch0008 -p1
 %patch0009 -p1
 %patch0010 -p1
+%patch0011 -p1
+%patch0012 -p1
+%patch0013 -p1
+%patch0014 -p1
 cp %{SOURCE1} .
 
 %build
@@ -208,7 +216,11 @@ fi
 %{!?_licensedir:%global license %%doc}
 %license COPYING
 %{_sbindir}/kpartx
+/usr/lib/udev/kpartx_id
 %{_mandir}/man8/kpartx.8.gz
+%config /usr/lib/udev/rules.d/11-dm-parts.rules
+%config /usr/lib/udev/rules.d/66-kpartx.rules
+%config /usr/lib/udev/rules.d/68-del-part-nodes.rules
 
 %files -n libdmmp
 %defattr(-,root,root,-)
@@ -230,6 +242,25 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Nov  7 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.3-1
+- Update Source to upstream 0.7.3 release
+  * Previous patch 0001 is included in this commit, and 0002 was solved in a
+    different manner causing some change to previous patch 0003
+  * Previous patches 0003-0010 are now patches 0007-0014
+- Add 0001-mpathpersist-Fix-invalid-condition-check.patch
+  * Fix incorrect check. posted upstream
+- Add 0002-multipath-add-man-page-info-for-my-prkey-changes.patch
+  * Add missing man page info. posted upstream
+- Add 0003-multipath-there-is-no-none-path-state.patch
+  * remove incorrect path state. posted upstream
+- Add 0004-mutipath-updated-Huawei-storage-config.patch
+  * update builtin device configuration. posted upstream
+- Add 0005-multipath-fix-doc-typo.patch
+  * fix man page typo. posted upstream
+- Add 0006-multipath-add-ghost_delay-parameter.patch
+  * add new multipath.conf parameter "ghost_delay". posted upstream
+
+
 * Tue Nov  7 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.1-8.git847cc43
 - Refresh 0001-libmultipath-update-3PARdata-builtin-config.patch
 - Add 0010-RH-warn-on-invalid-regex-instead-of-failing.patch

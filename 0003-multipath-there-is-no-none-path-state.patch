@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 26 Oct 2017 17:00:20 -0500
+Subject: [PATCH] multipath: there is no "none" path state
+
+There is a "none" path checker, but not a "none" path state.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/checkers.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/libmultipath/checkers.c b/libmultipath/checkers.c
+index cd6d6a3..94d8486 100644
+--- a/libmultipath/checkers.c
++++ b/libmultipath/checkers.c
+@@ -19,7 +19,6 @@ char *checker_state_names[] = {
+ 	"timeout",
+ 	"removed",
+ 	"delayed",
+-	"none",
+ };
+ 
+ static LIST_HEAD(checkers);
+-- 
+2.7.4
+

@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Wed, 1 Nov 2017 19:58:10 -0500
+Subject: [PATCH] multipath: fix doc typo
+
+The dev_loss_tmo cap if fast_io_fail_tmo isn't set is 600 seconds,
+not 300 seconds.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipath/multipath.conf.5 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
+index 92ad8b1..4bd1a8d 100644
+--- a/multipath/multipath.conf.5
++++ b/multipath/multipath.conf.5
+@@ -653,7 +653,7 @@ seconds, or 68 years. It will be automatically adjusted to the overall
+ retry interval \fIno_path_retry\fR * \fIpolling_interval\fR
+ if a number of retries is given with \fIno_path_retry\fR and the
+ overall retry interval is longer than the specified \fIdev_loss_tmo\fR value.
+-The Linux kernel will cap this value to \fI300\fR if \fIfast_io_fail_tmo\fR
++The Linux kernel will cap this value to \fI600\fR if \fIfast_io_fail_tmo\fR
+ is not set. See KNOWN ISSUES.
+ .RS
+ .TP
+-- 
+2.7.4
+

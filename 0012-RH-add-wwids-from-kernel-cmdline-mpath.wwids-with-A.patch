@@ -85,7 +85,7 @@ index 9527012..b665232 100644
  
  #endif /* _WWIDS_H */
 diff --git a/multipath/main.c b/multipath/main.c
-index dede017..9dda21d 100644
+index bffe065..2e69300 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -102,7 +102,7 @@ usage (char * progname)
@@ -104,18 +104,18 @@ index dede017..9dda21d 100644
 +		"  -A      add devices from kernel command line mpath.wwids\n"
 +		"          parameters to wwids file\n"
  		"  -c      check if a device should be a path in a multipath device\n"
+ 		"  -C      check if a multipath device has usable paths\n"
  		"  -q      allow queue_if_no_path when multipathd is not running\n"
- 		"  -d      dry run, do not create or update devmaps\n"
-@@ -522,7 +524,7 @@ main (int argc, char *argv[])
+@@ -598,7 +600,7 @@ main (int argc, char *argv[])
  		exit(1);
  	multipath_conf = conf;
  	conf->retrigger_tries = 0;
--	while ((arg = getopt(argc, argv, ":adchl::FfM:v:p:b:BrR:itquwW")) != EOF ) {
-+	while ((arg = getopt(argc, argv, ":aAdchl::FfM:v:p:b:BrR:itquwW")) != EOF ) {
+-	while ((arg = getopt(argc, argv, ":adcChl::FfM:v:p:b:BrR:itquUwW")) != EOF ) {
++	while ((arg = getopt(argc, argv, ":aAdcChl::FfM:v:p:b:BrR:itquUwW")) != EOF ) {
  		switch(arg) {
  		case 1: printf("optarg : %s\n",optarg);
  			break;
-@@ -586,6 +588,10 @@ main (int argc, char *argv[])
+@@ -665,6 +667,10 @@ main (int argc, char *argv[])
  		case 't':
  			r = dump_config(conf);
  			goto out_free_config;
@@ -127,19 +127,19 @@ index dede017..9dda21d 100644
  			usage(argv[0]);
  			exit(0);
 diff --git a/multipath/multipath.8 b/multipath/multipath.8
-index b9436e5..b9ad6b1 100644
+index 56f8703..9fc2317 100644
 --- a/multipath/multipath.8
 +++ b/multipath/multipath.8
 @@ -25,7 +25,7 @@ multipath \- Device mapper target autoconfig.
  .RB [\| \-b\ \c
  .IR bindings_file \|]
  .RB [\| \-d \|]
--.RB [\| \-h | \-l | \-ll | \-f | \-t | \-F | \-B | \-c | \-q | \|-r | \|-i | \-a | \|-u | \-w | \-W \|]
-+.RB [\| \-h | \-l | \-ll | \-f | \-t | \-F | \-B | \-c | \-q | \|-r | \|-i | \-a | \-A | \-u | \-w | \-W \|]
+-.RB [\| \-h | \-l | \-ll | \-f | \-t | \-F | \-B | \-c | \-C | \-q | \-r | \-i | \-a | \-u | \-U | \-w | \-W \|]
++.RB [\| \-h | \-l | \-ll | \-f | \-t | \-F | \-B | \-c | \-C | \-q | \-r | \-i | \-a | \-A | \-u | \-U | \-w | \-W \|]
  .RB [\| \-p\ \c
  .IR failover | multibus | group_by_serial | group_by_prio | group_by_node_name \|]
  .RB [\| \-R\ \c
-@@ -122,6 +122,9 @@ Add the WWID for the specified device to the WWIDs file.
+@@ -128,6 +128,9 @@ Add the WWID for the specified device to the WWIDs file.
  Check if the device specified in the program environment should be
  a path in a multipath device.
  .
@@ -147,8 +147,8 @@ index b9436e5..b9ad6b1 100644
 +add wwids from any kernel command line mpath.wwid parameters to the wwids file
 +.
  .TP
- .B \-w
- Remove the WWID for the specified device from the WWIDs file.
+ .B \-U
+ Check if the device specified in the program environment is a multipath device
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
 index fafd088..a623a3f 100644
 --- a/multipathd/multipathd.service

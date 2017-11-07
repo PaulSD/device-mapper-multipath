@@ -21,10 +21,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 30 insertions(+), 10 deletions(-)
 
 diff --git a/libmultipath/configure.c b/libmultipath/configure.c
-index bd090d9..843dd09 100644
+index e2f393f..64d7751 100644
 --- a/libmultipath/configure.c
 +++ b/libmultipath/configure.c
-@@ -422,6 +422,28 @@ trigger_udev_change(const struct multipath *mpp)
+@@ -423,6 +423,28 @@ trigger_udev_change(const struct multipath *mpp)
  	udev_device_unref(udd);
  }
  
@@ -53,7 +53,7 @@ index bd090d9..843dd09 100644
  static int
  is_mpp_known_to_udev(const struct multipath *mpp)
  {
-@@ -802,8 +824,8 @@ int domap(struct multipath *mpp, char *params, int is_daemon)
+@@ -814,8 +836,8 @@ int domap(struct multipath *mpp, char *params, int is_daemon)
  		 * succeeded
  		 */
  		mpp->force_udev_reload = 0;
@@ -65,13 +65,13 @@ index bd090d9..843dd09 100644
  			/* multipath client mode */
  			dm_switchgroup(mpp->alias, mpp->bestpg);
 diff --git a/libmultipath/configure.h b/libmultipath/configure.h
-index fd7f581..253e29b 100644
+index 0ffc28e..09603ba 100644
 --- a/libmultipath/configure.h
 +++ b/libmultipath/configure.h
-@@ -36,3 +36,4 @@ int get_refwwid (enum mpath_cmds cmd, char * dev, enum devtypes dev_type,
- 		 vector pathvec, char **wwid);
+@@ -37,3 +37,4 @@ int get_refwwid (enum mpath_cmds cmd, char * dev, enum devtypes dev_type,
  int reload_map(struct vectors *vecs, struct multipath *mpp, int refresh, int is_daemon);
  int sysfs_get_host_adapter_name(struct path *pp, char *adapter_name);
+ struct udev_device *get_udev_device(const char *dev, enum devtypes dev_type);
 +void trigger_paths_udev_change(const struct multipath *mpp);
 diff --git a/libmultipath/wwids.c b/libmultipath/wwids.c
 index 88bb72b..249c6c1 100644
@@ -96,10 +96,10 @@ index 88bb72b..249c6c1 100644
  		}
  		else {
 diff --git a/multipath/main.c b/multipath/main.c
-index 9dda21d..baae256 100644
+index 2e69300..4dde5af 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
-@@ -336,7 +336,7 @@ configure (struct config *conf, enum mpath_cmds cmd,
+@@ -412,7 +412,7 @@ configure (struct config *conf, enum mpath_cmds cmd,
  		}
  		if (cmd == CMD_ADD_WWID) {
  			r = remember_wwid(refwwid);
@@ -109,10 +109,10 @@ index 9dda21d..baae256 100644
  			else
  				printf("failed adding '%s' to wwids file\n",
 diff --git a/multipathd/main.c b/multipathd/main.c
-index 4be2c57..fc5b18a 100644
+index c475fcd..50749a8 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -2093,7 +2093,8 @@ configure (struct vectors * vecs, int start_waiters)
+@@ -2138,7 +2138,8 @@ configure (struct vectors * vecs, int start_waiters)
  
  	sync_maps_state(mpvec);
  	vector_foreach_slot(mpvec, mpp, i){
@@ -122,7 +122,7 @@ index 4be2c57..fc5b18a 100644
  		update_map_pr(mpp);
  	}
  
-@@ -2175,10 +2176,6 @@ reconfigure (struct vectors * vecs)
+@@ -2220,10 +2221,6 @@ reconfigure (struct vectors * vecs)
  		conf->verbosity = verbosity;
  	if (bindings_read_only)
  		conf->bindings_read_only = bindings_read_only;

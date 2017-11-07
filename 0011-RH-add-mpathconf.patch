@@ -21,10 +21,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  create mode 100644 multipath/mpathconf.8
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 9368962..bdde113 100644
+index 85e32ee..f1a6ca8 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -679,6 +679,7 @@ load_config (char * file)
+@@ -664,6 +664,7 @@ load_config (char * file)
  		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
  		condlog(0, "A default multipath.conf file is located at");
  		condlog(0, "/usr/share/doc/device-mapper-multipath-%d.%d.%d/multipath.conf", MULTIPATH_VERSION(VERSION_CODE));
@@ -33,7 +33,7 @@ index 9368962..bdde113 100644
  			conf->blist_devnode = vector_alloc();
  			if (!conf->blist_devnode) {
 diff --git a/multipath/Makefile b/multipath/Makefile
-index 1e9ee4b..3d4d459 100644
+index dda5565..d35127a 100644
 --- a/multipath/Makefile
 +++ b/multipath/Makefile
 @@ -18,10 +18,12 @@ $(EXEC): $(OBJS)
