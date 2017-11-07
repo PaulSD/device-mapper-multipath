@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
-Date: Thu, 22 Jun 2017 15:49:06 -0500
+Date: Mon, 26 Jun 2017 14:03:19 -0500
 Subject: [PATCH] libmultipath: update 3PARdata builtin config
 
 This updated config comes from hp.

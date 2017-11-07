@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.1
-Release: 7.git847cc43%{?dist}
+Release: 8.git847cc43%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -20,6 +20,7 @@ Patch0006: 0006-RH-use-rpm-optflags-if-present.patch
 Patch0007: 0007-RH-add-mpathconf.patch
 Patch0008: 0008-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
 Patch0009: 0009-RH-trigger-change-uevent-on-new-device-creation.patch
+Patch0010: 0010-RH-warn-on-invalid-regex-instead-of-failing.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -107,6 +108,7 @@ device-mapper-multipath's libdmmp C API library
 %patch0007 -p1
 %patch0008 -p1
 %patch0009 -p1
+%patch0010 -p1
 cp %{SOURCE1} .
 
 %build
@@ -228,6 +230,12 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Nov  7 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.1-8.git847cc43
+- Refresh 0001-libmultipath-update-3PARdata-builtin-config.patch
+- Add 0010-RH-warn-on-invalid-regex-instead-of-failing.patch
+  * Change old-style multipath.conf regex "*" to a proper ".*" instead of
+    failing
+
 * Wed Aug  2 2017 Benjamin Marzinski <bmarzins@redhat.com> 0.7.1-7.git847cc43
 - Modify 0005-RH-don-t-start-without-a-config-file.patch
   * Fix man page typos
