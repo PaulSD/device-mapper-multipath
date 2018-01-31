@@ -1,0 +1,11 @@
+defaults {
+    user_friendly_names     yes
+}
+
+multipaths {
+   multipath {
+       wwid your_wwid
+       alias test
+   }
+}
+

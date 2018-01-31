@@ -1,0 +1,20 @@
+---
+# No tests suitable for atomic environment
+# No tests suitable for container environment
+
+# Tests suitable for classic environment
+- hosts: localhost
+  roles:
+  - role: standard-test-beakerlib
+    tags:
+    - classic
+    tests:
+     - medium_error_scsi_debug
+     - squelch_scsi_id
+     - multipathd_oom
+     - user_friendly_names
+     - multipath_conf_syntax
+     - kpartx_4k_aligned
+     - bindings  
+    required_packages:
+     - device-mapper-multipath
