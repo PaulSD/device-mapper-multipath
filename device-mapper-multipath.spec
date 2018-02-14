@@ -143,9 +143,6 @@ install -d %{buildroot}/etc/multipath
 rm -rf %{buildroot}/%{_initrddir}
 
 
-%clean
-rm -rf %{buildroot}
-
 %post
 %systemd_post multipathd.service
 
