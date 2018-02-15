@@ -12,15 +12,15 @@ simple way to disable multipath.  Simply removing or renaming
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
- libmultipath/config.c         | 17 +++++++++++++++++
+ libmultipath/config.c         | 15 +++++++++++++++
  libmultipath/config.h         |  1 +
  multipath/multipath.rules     |  1 +
  multipathd/multipathd.8       |  2 ++
  multipathd/multipathd.service |  1 +
- 5 files changed, 22 insertions(+)
+ 5 files changed, 20 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 9486116..85e32ee 100644
+index 3d6a24c..27826fa 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
 @@ -26,6 +26,7 @@
@@ -31,14 +31,12 @@ index 9486116..85e32ee 100644
  
  static int
  hwe_strmatch (struct hwentry *hwe1, struct hwentry *hwe2)
-@@ -659,6 +660,22 @@ load_config (char * file)
+@@ -656,6 +657,20 @@ load_config (char * file)
  			factorize_hwtable(conf->hwtable, builtin_hwtable_size);
  		}
  
 +	} else {
 +		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
-+		condlog(0, "A default multipath.conf file is located at");
-+		condlog(0, "/usr/share/doc/device-mapper-multipath-%d.%d.%d/multipath.conf", MULTIPATH_VERSION(VERSION_CODE));
 +		if (conf->blist_devnode == NULL) {
 +			conf->blist_devnode = vector_alloc();
 +			if (!conf->blist_devnode) {
@@ -55,7 +53,7 @@ index 9486116..85e32ee 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index 67ff983..1dbb9a7 100644
+index a20ac2a..21a3bbd 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -9,6 +9,7 @@

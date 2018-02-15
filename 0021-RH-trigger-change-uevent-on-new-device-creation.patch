@@ -9,22 +9,23 @@ that it will not claim the device in udev.  If the device is eventually
 multipathed, multipath should trigger a change uevent to update the udev
 database to claim the device.
 
-This also reverts commit 64e27ec066a001012f44550f095c93443e91d845.
+This also reverts commit 64e27ec066a001012f44550f095c93443e91d845 and
+commit ffbb886a8a16cb063d669cd76a1e656fd3ec8c4b.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/configure.c | 26 ++++++++++++++++++++++++--
  libmultipath/configure.h |  1 +
  libmultipath/wwids.c     |  4 ++--
- multipath/main.c         |  2 +-
+ multipath/main.c         | 12 +-----------
  multipathd/main.c        |  7 ++-----
- 5 files changed, 30 insertions(+), 10 deletions(-)
+ 5 files changed, 30 insertions(+), 20 deletions(-)
 
 diff --git a/libmultipath/configure.c b/libmultipath/configure.c
-index e2f393f..64d7751 100644
+index 22c11a2..7011ef7 100644
 --- a/libmultipath/configure.c
 +++ b/libmultipath/configure.c
-@@ -423,6 +423,28 @@ trigger_udev_change(const struct multipath *mpp)
+@@ -427,6 +427,28 @@ trigger_udev_change(const struct multipath *mpp)
  	udev_device_unref(udd);
  }
  
@@ -53,7 +54,7 @@ index e2f393f..64d7751 100644
  static int
  is_mpp_known_to_udev(const struct multipath *mpp)
  {
-@@ -814,8 +836,8 @@ int domap(struct multipath *mpp, char *params, int is_daemon)
+@@ -821,8 +843,8 @@ int domap(struct multipath *mpp, char *params, int is_daemon)
  		 * succeeded
  		 */
  		mpp->force_udev_reload = 0;
@@ -96,10 +97,10 @@ index 88bb72b..249c6c1 100644
  		}
  		else {
 diff --git a/multipath/main.c b/multipath/main.c
-index 2e69300..4dde5af 100644
+index ff570ac..ae6b06e 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
-@@ -412,7 +412,7 @@ configure (struct config *conf, enum mpath_cmds cmd,
+@@ -416,7 +416,7 @@ configure (struct config *conf, enum mpath_cmds cmd,
  		}
  		if (cmd == CMD_ADD_WWID) {
  			r = remember_wwid(refwwid);
@@ -108,11 +109,28 @@ index 2e69300..4dde5af 100644
  				printf("wwid '%s' added\n", refwwid);
  			else
  				printf("failed adding '%s' to wwids file\n",
+@@ -712,16 +712,6 @@ main (int argc, char *argv[])
+ 		}
+ 	}
+ 
+-	/*
+-	 * FIXME: new device detection with find_multipaths currently
+-	 * doesn't work reliably.
+-	 */
+-	if (cmd ==  CMD_VALID_PATH &&
+-	    conf->find_multipaths && conf->ignore_wwids) {
+-		condlog(2, "ignoring -i flag because find_multipath is set in multipath.conf");
+-		conf->ignore_wwids = 0;
+-	}
+-
+ 	if (getuid() != 0) {
+ 		fprintf(stderr, "need to be root\n");
+ 		exit(1);
 diff --git a/multipathd/main.c b/multipathd/main.c
-index c475fcd..50749a8 100644
+index 596654c..c860e88 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -2138,7 +2138,8 @@ configure (struct vectors * vecs, int start_waiters)
+@@ -2172,7 +2172,8 @@ configure (struct vectors * vecs)
  
  	sync_maps_state(mpvec);
  	vector_foreach_slot(mpvec, mpp, i){
@@ -122,7 +140,7 @@ index c475fcd..50749a8 100644
  		update_map_pr(mpp);
  	}
  
-@@ -2220,10 +2221,6 @@ reconfigure (struct vectors * vecs)
+@@ -2251,10 +2252,6 @@ reconfigure (struct vectors * vecs)
  		conf->verbosity = verbosity;
  	if (bindings_read_only)
  		conf->bindings_read_only = bindings_read_only;

@@ -13,7 +13,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 15 insertions(+), 7 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index cea015b..d6b4ef7 100644
+index 5145909..0b4ee17 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
 @@ -82,13 +82,21 @@ TEST_CC_OPTION = $(shell \
@@ -43,8 +43,8 @@ index cea015b..d6b4ef7 100644
 +		   -Werror=implicit-function-declaration -Wno-sign-compare \
 +		   -Wno-unused-parameter
  
- CFLAGS		= $(OPTFLAGS) -DLIB_STRING=\"${LIB}\" -DRUN_DIR=\"${RUN}\"
- BIN_CFLAGS	= -fPIE -DPIE
+ CFLAGS		:= $(OPTFLAGS) -DLIB_STRING=\"${LIB}\" -DRUN_DIR=\"${RUN}\" \
+ 		   $(CFLAGS)
 -- 
 2.7.4
 

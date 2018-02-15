@@ -16,7 +16,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 35 insertions(+), 6 deletions(-)
 
 diff --git a/libmultipath/dict.c b/libmultipath/dict.c
-index 54652d4..8d97602 100644
+index e52f1f7..31897cd 100644
 --- a/libmultipath/dict.c
 +++ b/libmultipath/dict.c
 @@ -52,6 +52,21 @@ set_str(vector strvec, void *ptr)
@@ -41,7 +41,7 @@ index 54652d4..8d97602 100644
  set_yes_no(vector strvec, void *ptr)
  {
  	char * buff;
-@@ -1190,7 +1205,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
+@@ -1200,7 +1215,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -50,7 +50,7 @@ index 54652d4..8d97602 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1206,7 +1221,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
+@@ -1216,7 +1231,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -59,7 +59,7 @@ index 54652d4..8d97602 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1301,16 +1316,16 @@ device_handler(struct config *conf, vector strvec)
+@@ -1311,16 +1326,16 @@ device_handler(struct config *conf, vector strvec)
  	return 0;
  }
  

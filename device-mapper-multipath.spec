@@ -1,30 +1,38 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
-Version: 0.7.3
-Release: 3%{?dist}
+Version: 0.7.4
+Release: 1.git07e7bd5%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.7.3;sf=tgz" -o multipath-tools-0.7.3.tgz
-Source0: multipath-tools-0.7.3.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=07e7bd5;sf=tgz" -o multipath-tools-07e7bd5.tgz
+Source0: multipath-tools-07e7bd5.tgz
 Source1: multipath.conf
-Patch0001: 0001-mpathpersist-Fix-invalid-condition-check.patch
-Patch0002: 0002-multipath-add-man-page-info-for-my-prkey-changes.patch
-Patch0003: 0003-multipath-there-is-no-none-path-state.patch
-Patch0004: 0004-mutipath-updated-Huawei-storage-config.patch
-Patch0005: 0005-multipath-fix-doc-typo.patch
-Patch0006: 0006-multipath-add-ghost_delay-parameter.patch
-Patch0007: 0007-RH-fixup-udev-rules-for-redhat.patch
-Patch0008: 0008-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0009: 0009-RH-don-t-start-without-a-config-file.patch
-Patch0010: 0010-RH-use-rpm-optflags-if-present.patch
-Patch0011: 0011-RH-add-mpathconf.patch
-Patch0012: 0012-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0013: 0013-RH-trigger-change-uevent-on-new-device-creation.patch
-Patch0014: 0014-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0001: 0001-libmultipath-fix-tur-checker-locking.patch
+Patch0002: 0002-multipath-fix-DEF_TIMEOUT-use.patch
+Patch0003: 0003-multipathd-remove-coalesce_paths-from-ev_add_map.patch
+Patch0004: 0004-multipathd-remove-unused-configure-parameter.patch
+Patch0005: 0005-Fix-set_no_path_retry-regression.patch
+Patch0006: 0006-multipathd-change-spurious-uevent-msg-priority.patch
+Patch0007: 0007-multipath-print-sysfs-state-in-fast-list-mode.patch
+Patch0008: 0008-libmultipath-move-remove_map-waiter-code-to-multipat.patch
+Patch0009: 0009-move-waiter-code-from-libmultipath-to-multipathd.patch
+Patch0010: 0010-call-start_waiter_thread-before-setup_multipath.patch
+Patch0011: 0011-libmultipath-add-helper-functions.patch
+Patch0012: 0012-multipathd-RFC-add-new-polling-dmevents-waiter-threa.patch
+Patch0013: 0013-libmultipath-condlog-log-to-stderr.patch
+Patch0014: 0014-multipathd-fix-compiler-warning-for-uev_pathfail_che.patch
+Patch0015: 0015-RH-fixup-udev-rules-for-redhat.patch
+Patch0016: 0016-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0017: 0017-RH-don-t-start-without-a-config-file.patch
+Patch0018: 0018-RH-use-rpm-optflags-if-present.patch
+Patch0019: 0019-RH-add-mpathconf.patch
+Patch0020: 0020-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0021: 0021-RH-trigger-change-uevent-on-new-device-creation.patch
+Patch0022: 0022-RH-warn-on-invalid-regex-instead-of-failing.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -102,7 +110,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-0.7.3
+%setup -q -n multipath-tools-07e7bd5
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -117,6 +125,14 @@ device-mapper-multipath's libdmmp C API library
 %patch0012 -p1
 %patch0013 -p1
 %patch0014 -p1
+%patch0015 -p1
+%patch0016 -p1
+%patch0017 -p1
+%patch0018 -p1
+%patch0019 -p1
+%patch0020 -p1
+%patch0021 -p1
+%patch0022 -p1
 cp %{SOURCE1} .
 
 %build
@@ -178,6 +194,7 @@ fi
 %{!?_licensedir:%global license %%doc}
 %license COPYING
 %doc README
+%doc README.alua
 %doc multipath.conf
 %dir /etc/multipath
 
@@ -239,6 +256,40 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Feb 15 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.4-1.git07e7bd5
+- Update Source to the latest upstream commit
+  * Previous patches 0001-0006 are included in this commit
+  * Previous patches 0007-0014 are now patches 0015-0022
+- Add 0001-libmultipath-fix-tur-checker-locking.patch
+  * Fixed spinlock bug. posted upstream
+- Add 0002-multipath-fix-DEF_TIMEOUT-use.patch
+  * Add missing sec to ms conversion. posted upstream
+- Add 0003-multipathd-remove-coalesce_paths-from-ev_add_map.patch
+  * Remove unused code. posted upstream
+- Add 0004-multipathd-remove-unused-configure-parameter.patch
+  * Remove unused code. posted upstream
+- Add 0005-Fix-set_no_path_retry-regression.patch
+  * Fix issue with queueing and path addition. posted upstream
+- Add 0006-multipathd-change-spurious-uevent-msg-priority.patch
+  * Change message priority to Notice. posted upstream
+- Add 0007-multipath-print-sysfs-state-in-fast-list-mode.patch
+  * Show sysfs state correctly in fast list mode (-l). posted upstream
+- Add 0008-libmultipath-move-remove_map-waiter-code-to-multipat.patch
+  * Move code around. posted upstream
+- Add 0009-move-waiter-code-from-libmultipath-to-multipathd.patch
+  * Move code around. posted upstream
+- Add 0010-call-start_waiter_thread-before-setup_multipath.patch
+  * Fix race on multipath device creations. posted upstream
+- Add 0011-libmultipath-add-helper-functions.patch
+  * posted upstream
+- Add 0012-multipathd-RFC-add-new-polling-dmevents-waiter-threa.patch
+  * Add alternate method of getting dmevents, that doesn't
+    require a thread per device. posted upstream
+- Add 0013-libmultipath-condlog-log-to-stderr.patch
+  * change condlog to log to stderr instead of stdout. posted upstream
+- Add 0014-multipathd-fix-compiler-warning-for-uev_pathfail_che.patch
+  * fix indentation issue. posted upstream
+
 * Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.7.3-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
