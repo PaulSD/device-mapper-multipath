@@ -1,0 +1,8 @@
+multipath: Test that some fatal errors which should not be retried, for example a medium error, correctly generate an I/O error and do not get infinitely retried.
+
+steps:
+1.# modprobe scsi_debug  dev_size_mb=1024 num_tgts=1 vpd_use_hostno=0 add_host=2 delay=20  max_luns=2 no_lun_0=1 opts=2 every_nth=1
+2.# multipath -ll | grep -C 5 scsi_debug
+3.# dd if=/dev/zero of=/dev/sdf bs=1024 count=262144
+4. check if an I/O error generated
+
