@@ -159,6 +159,7 @@ AA
         sleep 5s #multipathd return premature
         multipath -r
         multipathd -k'reconfigure'
+        sleep 5s
         mpath_name_list=$(dmsetup table \
             | perl -ne 'print "$1 " if /(mpath[a-z0-9]+):[0-9 ]+multipath.*/')
         fi
@@ -217,6 +218,7 @@ AA
     service multipathd restart
     sleep 5s #multipathd return premature
     multipathd -k'reconfig'
+    sleep 5s
 
     mpath_name_list=$(dmsetup table | perl -ne 'print "$1 " if /(mpath[a-z0-9]+):[0-9 ]+multipath.*/')
     if [ "CHK${mpath_name_list}" != "CHK" ];then

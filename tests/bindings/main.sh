@@ -26,6 +26,7 @@ trun "service multipathd stop"
 rpm -q device-mapper-multipath || yum install -y device-mapper-multipath
 trun "mpathconf --enable --with_multipathd y --user_friendly_names y"
 trun "service multipathd status"
+sleep 5
 
 trun "multipath -F"
 sleep 5
@@ -44,6 +45,7 @@ trun "multipath -r"
 sleep 5
 tok "[[ -b /dev/mapper/$new_alias ]]"
 tok is_mpath $new_alias
+sleep 5
 
 trun "multipath -F"
 sleep 5
@@ -51,4 +53,5 @@ trun "modprobe -r scsi_debug"
 trun "service multipathd stop"
 sleep 3
 trun "multipath -W"
+trun "rm /etc/multipath/bindings"
 tend
