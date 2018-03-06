@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.4
-Release: 1.git07e7bd5%{?dist}
+Release: 2.git07e7bd5%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -256,6 +256,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Mar 06 2018 Björn Esser <besser82@fedoraproject.org> - 0.7.4-2.git07e7bd5
+- Rebuilt for libjson-c.so.4 (json-c v0.13.1)
+
 * Thu Feb 15 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.4-1.git07e7bd5
 - Update Source to the latest upstream commit
   * Previous patches 0001-0006 are included in this commit
