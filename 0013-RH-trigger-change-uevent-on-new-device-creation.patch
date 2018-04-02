@@ -22,10 +22,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 30 insertions(+), 20 deletions(-)
 
 diff --git a/libmultipath/configure.c b/libmultipath/configure.c
-index 22c11a2..7011ef7 100644
+index 61f68f8..81b0bc4 100644
 --- a/libmultipath/configure.c
 +++ b/libmultipath/configure.c
-@@ -427,6 +427,28 @@ trigger_udev_change(const struct multipath *mpp)
+@@ -444,6 +444,28 @@ trigger_udev_change(const struct multipath *mpp)
  	udev_device_unref(udd);
  }
  
@@ -54,7 +54,7 @@ index 22c11a2..7011ef7 100644
  static int
  is_mpp_known_to_udev(const struct multipath *mpp)
  {
-@@ -821,8 +843,8 @@ int domap(struct multipath *mpp, char *params, int is_daemon)
+@@ -842,8 +864,8 @@ int domap(struct multipath *mpp, char *params, int is_daemon)
  		 * succeeded
  		 */
  		mpp->force_udev_reload = 0;
@@ -66,19 +66,19 @@ index 22c11a2..7011ef7 100644
  			/* multipath client mode */
  			dm_switchgroup(mpp->alias, mpp->bestpg);
 diff --git a/libmultipath/configure.h b/libmultipath/configure.h
-index 0ffc28e..09603ba 100644
+index 27a7e6f..545cbc2 100644
 --- a/libmultipath/configure.h
 +++ b/libmultipath/configure.h
 @@ -37,3 +37,4 @@ int get_refwwid (enum mpath_cmds cmd, char * dev, enum devtypes dev_type,
+ 		 vector pathvec, char **wwid);
  int reload_map(struct vectors *vecs, struct multipath *mpp, int refresh, int is_daemon);
- int sysfs_get_host_adapter_name(struct path *pp, char *adapter_name);
  struct udev_device *get_udev_device(const char *dev, enum devtypes dev_type);
 +void trigger_paths_udev_change(const struct multipath *mpp);
 diff --git a/libmultipath/wwids.c b/libmultipath/wwids.c
-index 88bb72b..249c6c1 100644
+index 9722714..9e9baed 100644
 --- a/libmultipath/wwids.c
 +++ b/libmultipath/wwids.c
-@@ -319,7 +319,7 @@ remember_wwid(char *wwid)
+@@ -321,7 +321,7 @@ remember_wwid(char *wwid)
  		condlog(3, "wrote wwid %s to wwids file", wwid);
  	else
  		condlog(4, "wwid %s already in wwids file", wwid);
@@ -87,7 +87,7 @@ index 88bb72b..249c6c1 100644
  }
  
  int remember_cmdline_wwid(void)
-@@ -353,7 +353,7 @@ int remember_cmdline_wwid(void)
+@@ -355,7 +355,7 @@ int remember_cmdline_wwid(void)
  			next++;
  		}
  		if (strlen(ptr)) {
@@ -97,10 +97,10 @@ index 88bb72b..249c6c1 100644
  		}
  		else {
 diff --git a/multipath/main.c b/multipath/main.c
-index ff570ac..ae6b06e 100644
+index baf6759..12d6f15 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
-@@ -416,7 +416,7 @@ configure (struct config *conf, enum mpath_cmds cmd,
+@@ -427,7 +427,7 @@ configure (struct config *conf, enum mpath_cmds cmd,
  		}
  		if (cmd == CMD_ADD_WWID) {
  			r = remember_wwid(refwwid);
@@ -109,7 +109,7 @@ index ff570ac..ae6b06e 100644
  				printf("wwid '%s' added\n", refwwid);
  			else
  				printf("failed adding '%s' to wwids file\n",
-@@ -712,16 +712,6 @@ main (int argc, char *argv[])
+@@ -782,16 +782,6 @@ main (int argc, char *argv[])
  		}
  	}
  
@@ -127,10 +127,10 @@ index ff570ac..ae6b06e 100644
  		fprintf(stderr, "need to be root\n");
  		exit(1);
 diff --git a/multipathd/main.c b/multipathd/main.c
-index 596654c..c860e88 100644
+index 841d3e9..417fc7e 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -2172,7 +2172,8 @@ configure (struct vectors * vecs)
+@@ -2323,7 +2323,8 @@ configure (struct vectors * vecs)
  
  	sync_maps_state(mpvec);
  	vector_foreach_slot(mpvec, mpp, i){
@@ -140,7 +140,7 @@ index 596654c..c860e88 100644
  		update_map_pr(mpp);
  	}
  
-@@ -2251,10 +2252,6 @@ reconfigure (struct vectors * vecs)
+@@ -2403,10 +2404,6 @@ reconfigure (struct vectors * vecs)
  		conf->verbosity = verbosity;
  	if (bindings_read_only)
  		conf->bindings_read_only = bindings_read_only;

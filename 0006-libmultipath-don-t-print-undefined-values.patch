@@ -1,0 +1,60 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 29 Mar 2018 18:26:12 -0500
+Subject: [PATCH] libmultipath: don't print undefined values
+
+commit 48e9fd9f ("libmultipath: parser: use call-by-value for "snprint"
+methods") removed some of the code that checked for undefined values to
+avoid printing them.  This lead to device configurations that printed
+out values for parameters that they hadn't configured. This patch adds
+that code back in.
+
+Fixes: 48e9fd9f ("libmultipath: parser: use call-by-value for "snprint" methods")
+Cc: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/dict.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/libmultipath/dict.c b/libmultipath/dict.c
+index ac9216c..1a18337 100644
+--- a/libmultipath/dict.c
++++ b/libmultipath/dict.c
+@@ -101,12 +101,16 @@ print_int (char *buff, int len, long v)
+ static int
+ print_nonzero (char *buff, int len, long v)
+ {
++	if (!v)
++		return 0;
+ 	return snprintf(buff, len, "%li", v);
+ }
+ 
+ static int
+ print_str (char *buff, int len, const char *ptr)
+ {
++	if (!ptr)
++		return 0;
+ 	return snprintf(buff, len, "\"%s\"", ptr);
+ }
+ 
+@@ -120,6 +124,8 @@ print_yes_no (char *buff, int len, long v)
+ static int
+ print_yes_no_undef (char *buff, int len, long v)
+ {
++	if (!v)
++		return 0;
+ 	return snprintf(buff, len, "\"%s\"",
+ 			(v == YNU_NO)? "no" : "yes");
+ }
+@@ -665,6 +671,8 @@ set_dev_loss(vector strvec, void *ptr)
+ int
+ print_dev_loss(char * buff, int len, unsigned long v)
+ {
++	if (!v)
++		return 0;
+ 	if (v >= MAX_DEV_LOSS_TMO)
+ 		return snprintf(buff, len, "\"infinity\"");
+ 	return snprintf(buff, len, "%lu", v);
+-- 
+2.7.4
+

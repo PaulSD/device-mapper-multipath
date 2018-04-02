@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 29 Mar 2018 12:48:08 -0500
+Subject: [PATCH] multipathd: minor dmevents polling code cleanups
+
+Change strncpy to strlcpy and lock_cleanup_pop to pthread_cleanup_pop,
+based on suggestions by Martin Wilck
+
+Cc: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipathd/dmevents.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/multipathd/dmevents.c b/multipathd/dmevents.c
+index 0b0d0ce..e98a974 100644
+--- a/multipathd/dmevents.c
++++ b/multipathd/dmevents.c
+@@ -24,6 +24,7 @@
+ #include "debug.h"
+ #include "main.h"
+ #include "dmevents.h"
++#include "util.h"
+ 
+ #ifndef DM_DEV_ARM_POLL
+ #define DM_DEV_ARM_POLL _IOWR(DM_IOCTL, DM_DEV_SET_GEOMETRY_CMD + 1, struct dm_ioctl)
+@@ -214,8 +215,7 @@ int watch_dmevents(char *name)
+ 		return -1;
+ 	}
+ 
+-	strncpy(dev_evt->name, name, WWID_SIZE);
+-	dev_evt->name[WWID_SIZE - 1] = 0;
++	strlcpy(dev_evt->name, name, WWID_SIZE);
+ 	dev_evt->evt_nr = event_nr;
+ 	dev_evt->action = EVENT_NOTHING;
+ 
+@@ -350,7 +350,7 @@ static int dmevent_loop (void)
+ 			remove_map_by_alias(curr_dev.name, waiter->vecs, 1);
+ 		else
+ 			r = update_multipath(waiter->vecs, curr_dev.name, 1);
+-		lock_cleanup_pop(&waiter->vecs->lock);
++		pthread_cleanup_pop(1);
+ 
+ 		if (r) {
+ 			condlog(2, "%s: stopped watching dmevents",
+-- 
+2.7.4
+

@@ -20,7 +20,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 20 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 3d6a24c..27826fa 100644
+index 085a3e1..83d26be 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
 @@ -26,6 +26,7 @@
@@ -53,7 +53,7 @@ index 3d6a24c..27826fa 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index a20ac2a..21a3bbd 100644
+index 329f3ed..bc34eb7 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -9,6 +9,7 @@
@@ -65,7 +65,7 @@ index a20ac2a..21a3bbd 100644
  /*
   * In kernel, fast_io_fail == 0 means immediate failure on rport delete.
 diff --git a/multipath/multipath.rules b/multipath/multipath.rules
-index bc1a852..2bc0348 100644
+index 6f8ee2b..d1a484e 100644
 --- a/multipath/multipath.rules
 +++ b/multipath/multipath.rules
 @@ -7,6 +7,7 @@ IMPORT{cmdline}="nompath"
@@ -90,11 +90,11 @@ index 5c96680..0515211 100644
  .
  .\" ----------------------------------------------------------------------------
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
-index fd66cf6..fafd088 100644
+index ba24983..17434ce 100644
 --- a/multipathd/multipathd.service
 +++ b/multipathd/multipathd.service
 @@ -4,6 +4,7 @@ Wants=systemd-udev-trigger.service systemd-udev-settle.service
- Before=iscsi.service iscsid.service lvm2-lvmetad.service lvm2-activation-early.service
+ Before=iscsi.service iscsid.service lvm2-activation-early.service
  Before=local-fs-pre.target blk-availability.service
  After=multipathd.socket systemd-udev-trigger.service systemd-udev-settle.service
 +ConditionPathExists=/etc/multipath.conf

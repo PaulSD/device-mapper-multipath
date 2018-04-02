@@ -22,10 +22,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 58 insertions(+), 3 deletions(-)
 
 diff --git a/libmultipath/wwids.c b/libmultipath/wwids.c
-index bc70a27..88bb72b 100644
+index 0ec9f25..9722714 100644
 --- a/libmultipath/wwids.c
 +++ b/libmultipath/wwids.c
-@@ -321,3 +321,47 @@ remember_wwid(char *wwid)
+@@ -323,3 +323,47 @@ remember_wwid(char *wwid)
  		condlog(4, "wwid %s already in wwids file", wwid);
  	return 0;
  }
@@ -85,10 +85,10 @@ index 9527012..b665232 100644
  
  #endif /* _WWIDS_H */
 diff --git a/multipath/main.c b/multipath/main.c
-index d2415a9..ff570ac 100644
+index d08c688..baf6759 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
-@@ -102,7 +102,7 @@ usage (char * progname)
+@@ -104,7 +104,7 @@ usage (char * progname)
  {
  	fprintf (stderr, VERSION_STRING);
  	fprintf (stderr, "Usage:\n");
@@ -97,7 +97,7 @@ index d2415a9..ff570ac 100644
  	fprintf (stderr, "  %s -l|-ll|-f [-v lvl] [-b fil] [-R num] [dev]\n", progname);
  	fprintf (stderr, "  %s -F [-v lvl] [-R num]\n", progname);
  	fprintf (stderr, "  %s -t\n", progname);
-@@ -116,6 +116,8 @@ usage (char * progname)
+@@ -118,6 +118,8 @@ usage (char * progname)
  		"  -f      flush a multipath device map\n"
  		"  -F      flush all multipath device maps\n"
  		"  -a      add a device wwid to the wwids file\n"
@@ -106,7 +106,7 @@ index d2415a9..ff570ac 100644
  		"  -c      check if a device should be a path in a multipath device\n"
  		"  -C      check if a multipath device has usable paths\n"
  		"  -q      allow queue_if_no_path when multipathd is not running\n"
-@@ -602,7 +604,7 @@ main (int argc, char *argv[])
+@@ -672,7 +674,7 @@ main (int argc, char *argv[])
  		exit(1);
  	multipath_conf = conf;
  	conf->retrigger_tries = 0;
@@ -115,7 +115,7 @@ index d2415a9..ff570ac 100644
  		switch(arg) {
  		case 1: printf("optarg : %s\n",optarg);
  			break;
-@@ -669,6 +671,10 @@ main (int argc, char *argv[])
+@@ -739,6 +741,10 @@ main (int argc, char *argv[])
  		case 't':
  			r = dump_config(conf);
  			goto out_free_config;
@@ -150,7 +150,7 @@ index 56f8703..9fc2317 100644
  .B \-U
  Check if the device specified in the program environment is a multipath device
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
-index fafd088..a623a3f 100644
+index 17434ce..0fbcc46 100644
 --- a/multipathd/multipathd.service
 +++ b/multipathd/multipathd.service
 @@ -15,6 +15,7 @@ Type=notify
@@ -160,7 +160,7 @@ index fafd088..a623a3f 100644
 +ExecStartPre=-/sbin/multipath -A
  ExecStart=/sbin/multipathd -d -s
  ExecReload=/sbin/multipathd reconfigure
- 
+ TasksMax=infinity
 -- 
 2.7.4
 

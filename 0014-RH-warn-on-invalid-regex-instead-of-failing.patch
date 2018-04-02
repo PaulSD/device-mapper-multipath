@@ -16,10 +16,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 35 insertions(+), 6 deletions(-)
 
 diff --git a/libmultipath/dict.c b/libmultipath/dict.c
-index e52f1f7..31897cd 100644
+index 1a18337..167696a 100644
 --- a/libmultipath/dict.c
 +++ b/libmultipath/dict.c
-@@ -52,6 +52,21 @@ set_str(vector strvec, void *ptr)
+@@ -53,6 +53,21 @@ set_str(vector strvec, void *ptr)
  }
  
  static int
@@ -41,7 +41,7 @@ index e52f1f7..31897cd 100644
  set_yes_no(vector strvec, void *ptr)
  {
  	char * buff;
-@@ -1200,7 +1215,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
+@@ -1199,7 +1214,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -50,7 +50,7 @@ index e52f1f7..31897cd 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1216,7 +1231,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
+@@ -1215,7 +1230,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -59,7 +59,7 @@ index e52f1f7..31897cd 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1311,16 +1326,16 @@ device_handler(struct config *conf, vector strvec)
+@@ -1316,16 +1331,16 @@ device_handler(struct config *conf, vector strvec)
  	return 0;
  }
  
@@ -81,10 +81,10 @@ index e52f1f7..31897cd 100644
  
  declare_hw_handler(hwhandler, set_str)
 diff --git a/libmultipath/parser.c b/libmultipath/parser.c
-index c47d891..74b4efe 100644
+index b8b7e0d..34b4ad2 100644
 --- a/libmultipath/parser.c
 +++ b/libmultipath/parser.c
-@@ -346,6 +346,19 @@ set_value(vector strvec)
+@@ -380,6 +380,19 @@ set_value(vector strvec)
  	return alloc;
  }
  
@@ -105,10 +105,10 @@ index c47d891..74b4efe 100644
  static int kw_level = 0;
  
 diff --git a/libmultipath/parser.h b/libmultipath/parser.h
-index 519b805..96f40bd 100644
+index 62906e9..b791705 100644
 --- a/libmultipath/parser.h
 +++ b/libmultipath/parser.h
-@@ -73,6 +73,7 @@ extern void dump_keywords(vector keydump, int level);
+@@ -77,6 +77,7 @@ extern void dump_keywords(vector keydump, int level);
  extern void free_keywords(vector keywords);
  extern vector alloc_strvec(char *string);
  extern void *set_value(vector strvec);

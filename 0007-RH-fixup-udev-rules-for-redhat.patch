@@ -15,10 +15,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index d953f5e..5145909 100644
+index 57a1835..f589ab0 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
-@@ -48,7 +48,7 @@ endif
+@@ -51,7 +51,7 @@ endif
  prefix		=
  exec_prefix	= $(prefix)
  usr_prefix	= $(prefix)
@@ -40,7 +40,7 @@ index 8f99049..8a3a171 100644
  
  LABEL="kpartx_end"
 diff --git a/multipath/Makefile b/multipath/Makefile
-index 468c056..dda5565 100644
+index 0828a8f..b9bbb3c 100644
 --- a/multipath/Makefile
 +++ b/multipath/Makefile
 @@ -24,7 +24,7 @@ install:

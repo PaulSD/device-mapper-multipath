@@ -21,7 +21,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  create mode 100644 multipath/mpathconf.8
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 27826fa..9bf4fb7 100644
+index 83d26be..a50f41a 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
 @@ -659,6 +659,7 @@ load_config (char * file)
@@ -33,10 +33,10 @@ index 27826fa..9bf4fb7 100644
  			conf->blist_devnode = vector_alloc();
  			if (!conf->blist_devnode) {
 diff --git a/multipath/Makefile b/multipath/Makefile
-index dda5565..d35127a 100644
+index b9bbb3c..e720c7f 100644
 --- a/multipath/Makefile
 +++ b/multipath/Makefile
-@@ -18,10 +18,12 @@ $(EXEC): $(OBJS)
+@@ -18,10 +18,12 @@ $(EXEC): $(OBJS) $(multipathdir)/libmultipath.so $(mpathcmddir)/libmpathcmd.so
  	$(CC) $(CFLAGS) $(OBJS) -o $(EXEC) $(LDFLAGS) $(LIBDEPS)
  	$(GZIP) $(EXEC).8 > $(EXEC).8.gz
  	$(GZIP) $(EXEC).conf.5 > $(EXEC).conf.5.gz
@@ -64,7 +64,7 @@ index dda5565..d35127a 100644
  	$(RM) $(DESTDIR)$(man5dir)/$(EXEC).conf.5.gz
 +	$(RM) $(DESTDIR)$(man8dir)/mpathconf.8.gz
  
- clean:
+ clean: dep_clean
  	$(RM) core *.o $(EXEC) *.gz
 diff --git a/multipath/mpathconf b/multipath/mpathconf
 new file mode 100644

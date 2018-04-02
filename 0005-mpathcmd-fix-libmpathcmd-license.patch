@@ -1,0 +1,58 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 29 Mar 2018 15:00:12 -0500
+Subject: [PATCH] mpathcmd: fix libmpathcmd license
+
+There is no version 2 of the GNU Lesser General Public License, so
+change the license header to version 2.1, which does exist. Also copy
+the license header to mpath_cmd.c.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmpathcmd/mpath_cmd.c | 19 +++++++++++++++++++
+ libmpathcmd/mpath_cmd.h |  2 +-
+ 2 files changed, 20 insertions(+), 1 deletion(-)
+
+diff --git a/libmpathcmd/mpath_cmd.c b/libmpathcmd/mpath_cmd.c
+index 29d148c..61e6a98 100644
+--- a/libmpathcmd/mpath_cmd.c
++++ b/libmpathcmd/mpath_cmd.c
+@@ -1,3 +1,22 @@
++/*
++ * Copyright (C) 2015 Red Hat, Inc.
++ *
++ * This file is part of the device-mapper multipath userspace tools.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public License
++ * as published by the Free Software Foundation; either version 2.1
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
+ #include <stdlib.h>
+ #include <unistd.h>
+ #include <stdio.h>
+diff --git a/libmpathcmd/mpath_cmd.h b/libmpathcmd/mpath_cmd.h
+index b57b708..aaa8da9 100644
+--- a/libmpathcmd/mpath_cmd.h
++++ b/libmpathcmd/mpath_cmd.h
+@@ -5,7 +5,7 @@
+  *
+  * This program is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU Lesser General Public License
+- * as published by the Free Software Foundation; either version 2
++ * as published by the Free Software Foundation; either version 2.1
+  * of the License, or (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+-- 
+2.7.4
+

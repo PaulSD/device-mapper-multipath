@@ -1,38 +1,30 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
-Version: 0.7.4
-Release: 2.git07e7bd5%{?dist}
+Version: 0.7.6
+Release: 1.git1cb704b%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=07e7bd5;sf=tgz" -o multipath-tools-07e7bd5.tgz
-Source0: multipath-tools-07e7bd5.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=1cb704b;sf=tgz" -o multipath-tools-1cb704b.tgz
+Source0: multipath-tools-1cb704b.tgz
 Source1: multipath.conf
-Patch0001: 0001-libmultipath-fix-tur-checker-locking.patch
-Patch0002: 0002-multipath-fix-DEF_TIMEOUT-use.patch
-Patch0003: 0003-multipathd-remove-coalesce_paths-from-ev_add_map.patch
-Patch0004: 0004-multipathd-remove-unused-configure-parameter.patch
-Patch0005: 0005-Fix-set_no_path_retry-regression.patch
-Patch0006: 0006-multipathd-change-spurious-uevent-msg-priority.patch
-Patch0007: 0007-multipath-print-sysfs-state-in-fast-list-mode.patch
-Patch0008: 0008-libmultipath-move-remove_map-waiter-code-to-multipat.patch
-Patch0009: 0009-move-waiter-code-from-libmultipath-to-multipathd.patch
-Patch0010: 0010-call-start_waiter_thread-before-setup_multipath.patch
-Patch0011: 0011-libmultipath-add-helper-functions.patch
-Patch0012: 0012-multipathd-RFC-add-new-polling-dmevents-waiter-threa.patch
-Patch0013: 0013-libmultipath-condlog-log-to-stderr.patch
-Patch0014: 0014-multipathd-fix-compiler-warning-for-uev_pathfail_che.patch
-Patch0015: 0015-RH-fixup-udev-rules-for-redhat.patch
-Patch0016: 0016-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0017: 0017-RH-don-t-start-without-a-config-file.patch
-Patch0018: 0018-RH-use-rpm-optflags-if-present.patch
-Patch0019: 0019-RH-add-mpathconf.patch
-Patch0020: 0020-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0021: 0021-RH-trigger-change-uevent-on-new-device-creation.patch
-Patch0022: 0022-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0001: 0001-multipathd-remove-incorrect-pthread_testcancel.patch
+Patch0002: 0002-multipath-add-comments.patch
+Patch0003: 0003-multipathd-minor-dmevents-polling-code-cleanups.patch
+Patch0004: 0004-multipathd-remove-unneeded-function-parameter.patch
+Patch0005: 0005-mpathcmd-fix-libmpathcmd-license.patch
+Patch0006: 0006-libmultipath-don-t-print-undefined-values.patch
+Patch0007: 0007-RH-fixup-udev-rules-for-redhat.patch
+Patch0008: 0008-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0009: 0009-RH-don-t-start-without-a-config-file.patch
+Patch0010: 0010-RH-use-rpm-optflags-if-present.patch
+Patch0011: 0011-RH-add-mpathconf.patch
+Patch0012: 0012-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0013: 0013-RH-trigger-change-uevent-on-new-device-creation.patch
+Patch0014: 0014-RH-warn-on-invalid-regex-instead-of-failing.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -110,7 +102,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-07e7bd5
+%setup -q -n multipath-tools-1cb704b
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -125,14 +117,6 @@ device-mapper-multipath's libdmmp C API library
 %patch0012 -p1
 %patch0013 -p1
 %patch0014 -p1
-%patch0015 -p1
-%patch0016 -p1
-%patch0017 -p1
-%patch0018 -p1
-%patch0019 -p1
-%patch0020 -p1
-%patch0021 -p1
-%patch0022 -p1
 cp %{SOURCE1} .
 
 %build
@@ -256,6 +240,23 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Apr 02 2018 Björn Esser <besser82@fedoraproject.org> - 0.7.6-1.git1cb704b
+- Update Source to the latest upstream commit
+  * Previous patches 0001-0014 are included in this commit
+  * Previous patches 0015-0022 are now patches 0007-0014
+- 0001-multipathd-remove-incorrect-pthread_testcancel.patch
+  * Fixed pthread cancellation issue. posted upstream
+- 0002-multipath-add-comments.patch
+  * Posted upstream
+- 0003-multipathd-minor-dmevents-polling-code-cleanups.patch
+  * Fixed minor polling issues. posted upstream
+- 0004-multipathd-remove-unneeded-function-parameter.patch
+  * Posted upstream
+- 0005-mpathcmd-fix-libmpathcmd-license.patch
+  * License clarification. posted upstream
+- 0006-libmultipath-don-t-print-undefined-values.patch
+  * Fixed bug in 'multipath show config'. posted upstream
+
 * Tue Mar 06 2018 Björn Esser <besser82@fedoraproject.org> - 0.7.4-2.git07e7bd5
 - Rebuilt for libjson-c.so.4 (json-c v0.13.1)
 
