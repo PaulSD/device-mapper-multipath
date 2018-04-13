@@ -22,7 +22,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 58 insertions(+), 3 deletions(-)
 
 diff --git a/libmultipath/wwids.c b/libmultipath/wwids.c
-index 0ec9f25..9722714 100644
+index 8c21b33..82cef12 100644
 --- a/libmultipath/wwids.c
 +++ b/libmultipath/wwids.c
 @@ -323,3 +323,47 @@ remember_wwid(char *wwid)

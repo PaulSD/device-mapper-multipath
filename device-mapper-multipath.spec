@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.6
-Release: 1.git1cb704b%{?dist}
+Release: 2.git1cb704b%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -17,14 +17,15 @@ Patch0003: 0003-multipathd-minor-dmevents-polling-code-cleanups.patch
 Patch0004: 0004-multipathd-remove-unneeded-function-parameter.patch
 Patch0005: 0005-mpathcmd-fix-libmpathcmd-license.patch
 Patch0006: 0006-libmultipath-don-t-print-undefined-values.patch
-Patch0007: 0007-RH-fixup-udev-rules-for-redhat.patch
-Patch0008: 0008-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0009: 0009-RH-don-t-start-without-a-config-file.patch
-Patch0010: 0010-RH-use-rpm-optflags-if-present.patch
-Patch0011: 0011-RH-add-mpathconf.patch
-Patch0012: 0012-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0013: 0013-RH-trigger-change-uevent-on-new-device-creation.patch
-Patch0014: 0014-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0007: 0007-libmultipath-Fix-logic-in-should_multipath.patch
+Patch0008: 0008-RH-fixup-udev-rules-for-redhat.patch
+Patch0009: 0009-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0010: 0010-RH-don-t-start-without-a-config-file.patch
+Patch0011: 0011-RH-use-rpm-optflags-if-present.patch
+Patch0012: 0012-RH-add-mpathconf.patch
+Patch0013: 0013-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0014: 0014-RH-trigger-change-uevent-on-new-device-creation.patch
+Patch0015: 0015-RH-warn-on-invalid-regex-instead-of-failing.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -117,6 +118,7 @@ device-mapper-multipath's libdmmp C API library
 %patch0012 -p1
 %patch0013 -p1
 %patch0014 -p1
+%patch0015 -p1
 cp %{SOURCE1} .
 
 %build
@@ -240,6 +242,12 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Apr 13 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.6-2.git1cb704b
+- Add 0007-libmultipath-Fix-logic-in-should_multipath.patch
+  * fix bug in identifying multipathable devices. posted upstream
+- Rename files
+  * Previous patches 0007-0014 are now patches 0008-0015
+
 * Tue Apr 02 2018 Björn Esser <besser82@fedoraproject.org> - 0.7.6-1.git1cb704b
 - Update Source to the latest upstream commit
   * Previous patches 0001-0014 are included in this commit

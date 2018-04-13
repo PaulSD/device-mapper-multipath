@@ -75,7 +75,7 @@ index 27a7e6f..545cbc2 100644
  struct udev_device *get_udev_device(const char *dev, enum devtypes dev_type);
 +void trigger_paths_udev_change(const struct multipath *mpp);
 diff --git a/libmultipath/wwids.c b/libmultipath/wwids.c
-index 9722714..9e9baed 100644
+index 82cef12..6c88a3b 100644
 --- a/libmultipath/wwids.c
 +++ b/libmultipath/wwids.c
 @@ -321,7 +321,7 @@ remember_wwid(char *wwid)
