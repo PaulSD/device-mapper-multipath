@@ -1,7 +1,7 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
 Version: 0.7.6
-Release: 2.git1cb704b%{?dist}
+Release: 3.git1cb704b%{?dist}
 License: GPL+
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
@@ -18,14 +18,16 @@ Patch0004: 0004-multipathd-remove-unneeded-function-parameter.patch
 Patch0005: 0005-mpathcmd-fix-libmpathcmd-license.patch
 Patch0006: 0006-libmultipath-don-t-print-undefined-values.patch
 Patch0007: 0007-libmultipath-Fix-logic-in-should_multipath.patch
-Patch0008: 0008-RH-fixup-udev-rules-for-redhat.patch
-Patch0009: 0009-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0010: 0010-RH-don-t-start-without-a-config-file.patch
-Patch0011: 0011-RH-use-rpm-optflags-if-present.patch
-Patch0012: 0012-RH-add-mpathconf.patch
-Patch0013: 0013-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0014: 0014-RH-trigger-change-uevent-on-new-device-creation.patch
-Patch0015: 0015-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0008: 0008-multipathd-add-failures-path-format-wildcard.patch
+Patch0009: 0009-multipathd-fix-reservation_key-check.patch
+Patch0010: 0010-RH-fixup-udev-rules-for-redhat.patch
+Patch0011: 0011-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0012: 0012-RH-don-t-start-without-a-config-file.patch
+Patch0013: 0013-RH-use-rpm-optflags-if-present.patch
+Patch0014: 0014-RH-add-mpathconf.patch
+Patch0015: 0015-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0016: 0016-RH-trigger-change-uevent-on-new-device-creation.patch
+Patch0017: 0017-RH-warn-on-invalid-regex-instead-of-failing.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -119,6 +121,8 @@ device-mapper-multipath's libdmmp C API library
 %patch0013 -p1
 %patch0014 -p1
 %patch0015 -p1
+%patch0016 -p1
+%patch0017 -p1
 cp %{SOURCE1} .
 
 %build
@@ -242,6 +246,12 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Apr 24 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.6-3.git1cb704b
+- Add 0008-multipathd-add-failures-path-format-wildcard.patch
+- Add 0009-multipathd-fix-reservation_key-check.patch
+- Rename files
+  * Previous patches 0008-0015 are now patches 0010-0017
+
 * Fri Apr 13 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.6-2.git1cb704b
 - Add 0007-libmultipath-Fix-logic-in-should_multipath.patch
   * fix bug in identifying multipathable devices. posted upstream

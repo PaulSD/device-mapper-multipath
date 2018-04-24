@@ -127,7 +127,7 @@ index baf6759..12d6f15 100644
  		fprintf(stderr, "need to be root\n");
  		exit(1);
 diff --git a/multipathd/main.c b/multipathd/main.c
-index 841d3e9..417fc7e 100644
+index 84af946..b3f319a 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
 @@ -2323,7 +2323,8 @@ configure (struct vectors * vecs)
