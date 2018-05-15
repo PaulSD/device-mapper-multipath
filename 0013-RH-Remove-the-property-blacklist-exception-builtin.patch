@@ -14,8 +14,8 @@ it.
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/blacklist.c   | 15 ++++++---------
- multipath/multipath.conf.5 |  4 ----
- 2 files changed, 6 insertions(+), 13 deletions(-)
+ multipath/multipath.conf.5 | 14 ++++++++------
+ 2 files changed, 14 insertions(+), 15 deletions(-)
 
 diff --git a/libmultipath/blacklist.c b/libmultipath/blacklist.c
 index ee396e2..19d4697 100644
@@ -51,7 +51,7 @@ index ee396e2..19d4697 100644
  
  void
 diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
-index c4d0789..f046a54 100644
+index 8dae0f4..b1d33d2 100644
 --- a/multipath/multipath.conf.5
 +++ b/multipath/multipath.conf.5
 @@ -1131,10 +1131,6 @@ The \fIWorld Wide Identification\fR of a device.
@@ -65,6 +65,23 @@ index c4d0789..f046a54 100644
  .TP
  .B device
  Subsection for the device description. This subsection recognizes the
+@@ -1145,8 +1141,14 @@ keywords. For a full description of these keywords please see the \fIdevices\fR
+ section description.
+ .LP
+ The \fIproperty\fR whitelist handling is different from the usual
+-handling in the sense that the device \fIhas\fR to have a udev property that
+-matches the whitelist, otherwise the device will be blacklisted. In these cases the message \fIblacklisted, udev property missing\fR will be displayed.
++handling in the sense that if the propery whitelist is set, the device
++\fIhas\fR to have a udev property that matches the whitelist, otherwise the
++device will be blacklisted. In these cases the message \fIblacklisted, udev
++property missing\fR will be displayed. For example settting the
++property blacklist_exception to \fB(SCSI_IDENT_|ID_WWN)\fR will blacklist
++all devices that have no udev property whose name regex matches either
++\fBSCSI_IDENT_\fR or \fBID_WWN\fR. This works to exclude most
++non-multipathable devices.
+ .
+ .
+ .\" ----------------------------------------------------------------------------
 -- 
 2.7.4
 
