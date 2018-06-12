@@ -1,41 +1,50 @@
 Summary: Tools to manage multipath devices using device-mapper
 Name: device-mapper-multipath
-Version: 0.7.6
-Release: 4.git1cb704b%{?dist}
-License: GPL+
+Version: 0.7.7
+Release: 1%{?dist}
+License: GPLv2
 Group: System Environment/Base
 URL: http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=1cb704b;sf=tgz" -o multipath-tools-1cb704b.tgz
-Source0: multipath-tools-1cb704b.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.7.7;sf=tgz" -o multipath-tools-0.7.7.tgz
+Source0: multipath-tools-0.7.7.tgz
 Source1: multipath.conf
-Patch0001: 0001-multipathd-remove-incorrect-pthread_testcancel.patch
-Patch0002: 0002-multipath-add-comments.patch
-Patch0003: 0003-multipathd-minor-dmevents-polling-code-cleanups.patch
-Patch0004: 0004-multipathd-remove-unneeded-function-parameter.patch
-Patch0005: 0005-mpathcmd-fix-libmpathcmd-license.patch
-Patch0006: 0006-libmultipath-don-t-print-undefined-values.patch
-Patch0007: 0007-libmultipath-Fix-logic-in-should_multipath.patch
-Patch0008: 0008-multipathd-add-failures-path-format-wildcard.patch
-Patch0009: 0009-multipathd-fix-reservation_key-check.patch
-Patch0010: 0010-libmultipath-print-correct-default-for-delay_-_check.patch
-Patch0011: 0011-multipath.conf.5-clarify-property-whitelist-handling.patch
-Patch0012: 0012-RH-fixup-udev-rules-for-redhat.patch
-Patch0013: 0013-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0014: 0014-RH-don-t-start-without-a-config-file.patch
-Patch0015: 0015-RH-use-rpm-optflags-if-present.patch
-Patch0016: 0016-RH-add-mpathconf.patch
-Patch0017: 0017-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0018: 0018-RH-trigger-change-uevent-on-new-device-creation.patch
-Patch0019: 0019-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0001: 0001-multipath-tools-add-RDAC-SUN-ArrayStorage-to-hwtable.patch
+Patch0002: 0002-multipath-tools-remove-c-from-__cpluscplus-misspelle.patch
+Patch0003: 0003-multipath-tools-remove-emacs-autoconfig-of-kpartx-gp.patch
+Patch0004: 0004-multipath-tools-replace-FSF-address-with-a-www-point.patch
+Patch0005: 0005-multipath-tools-Remove-trailing-leading-whitespaces-.patch
+Patch0006: 0006-multipath-tools-fix-compilation-with-musl-libc.patch
+Patch0007: 0007-multipath-tools-add-x-to-doc-preclean.pl-and-split-m.patch
+Patch0008: 0008-multipath-tools-refresh-kernel-doc-from-kernel-sourc.patch
+Patch0009: 0009-multipath-tools-configure-hitachi-ams2000-and-hus100.patch
+Patch0010: 0010-libmultipath-don-t-reject-maps-with-undefined-prio.patch
+Patch0011: 0011-multipathd-handle-errors-in-uxlsnr-as-fatal.patch
+Patch0012: 0012-libmultipath-fix-error-parsing-find_multipaths-stric.patch 
+Patch0013: 0013-libmultipath-print-correct-default-for-delay_-_check.patch
+Patch0014: 0014-multipath.conf.5-clarify-property-whitelist-handling.patch
+Patch0015: 0015-mpathpersist-add-all_tg_pt-option.patch
+Patch0016: 0016-libmultipath-remove-rbd-code.patch
+Patch0017: 0017-mpathpersist-fix-aptpl-support.patch
+Patch0018: 0018-multipath-don-t-check-timestamps-without-a-path.patch
+Patch0019: 0019-libmultipath-fix-detect-alua-corner-case.patch
+Patch0020: 0020-multipath-fix-setting-conf-version.patch
+Patch0021: 0021-RH-fixup-udev-rules-for-redhat.patch
+Patch0022: 0022-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0023: 0023-RH-don-t-start-without-a-config-file.patch
+Patch0024: 0024-RH-use-rpm-optflags-if-present.patch
+Patch0025: 0025-RH-add-mpathconf.patch
+Patch0026: 0026-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0027: 0027-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0028: 0028-RH-reset-default-find_mutipaths-value-to-off.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
 Requires: device-mapper >= 1.02.96
-Requires: initscripts
+Requires: initscripts, userspace-rcu
 Requires(post): systemd-units systemd-sysv chkconfig
 Requires(preun): systemd-units
 Requires(postun): systemd-units
@@ -47,9 +56,6 @@ BuildRequires: readline-devel, ncurses-devel
 BuildRequires: systemd-units, systemd-devel
 BuildRequires: json-c-devel, perl-interpreter, pkgconfig
 BuildRequires: userspace-rcu-devel
-%ifarch x86_64
-BuildRequires: librados-devel
-%endif
 
 %description
 %{name} provides tools to manage multipath devices by
@@ -61,6 +67,8 @@ The tools are :
 %package libs
 Summary: The %{name} modules and shared library
 Group: System Environment/Libraries
+# only libmpathcmd is LGPLv2+
+License: GPLv2 and LGPLv2+
 
 %description libs
 The %{name}-libs provides the path checker
@@ -88,6 +96,7 @@ kpartx manages partition creation and removal for device-mapper devices.
 %package -n libdmmp
 Summary: device-mapper-multipath C API library
 Group: System Environment/Libraries
+License: GPLv3+
 Requires: json-c
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-libs = %{version}-%{release}
@@ -107,7 +116,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-1cb704b
+%setup -q -n multipath-tools-0.7.7
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -127,6 +136,15 @@ device-mapper-multipath's libdmmp C API library
 %patch0017 -p1
 %patch0018 -p1
 %patch0019 -p1
+%patch0020 -p1
+%patch0021 -p1
+%patch0022 -p1
+%patch0023 -p1
+%patch0024 -p1
+%patch0025 -p1
+%patch0026 -p1
+%patch0027 -p1
+%patch0028 -p1
 cp %{SOURCE1} .
 
 %build
@@ -186,7 +204,7 @@ fi
 %config /usr/lib/udev/rules.d/62-multipath.rules
 %config /usr/lib/udev/rules.d/11-dm-mpath.rules
 %{!?_licensedir:%global license %%doc}
-%license COPYING
+%license LICENSES/GPL-2.0 LICENSES/LGPL-2.0
 %doc README
 %doc README.alua
 %doc multipath.conf
@@ -196,7 +214,7 @@ fi
 %defattr(-,root,root,-)
 %doc README
 %{!?_licensedir:%global license %%doc}
-%license COPYING
+%license LICENSES/GPL-2.0 LICENSES/LGPL-2.0
 %{_libdir}/libmultipath.so
 %{_libdir}/libmultipath.so.*
 %{_libdir}/libmpathpersist.so.*
@@ -210,7 +228,7 @@ fi
 
 %files devel
 %defattr(-,root,root,-)
-%doc README COPYING
+%doc README LICENSES/GPL-2.0 LICENSES/LGPL-2.0
 %{_libdir}/libmpathpersist.so
 %{_libdir}/libmpathcmd.so
 %{_includedir}/mpath_cmd.h
@@ -222,7 +240,7 @@ fi
 %defattr(-,root,root,-)
 %doc README
 %{!?_licensedir:%global license %%doc}
-%license COPYING
+%license LICENSES/GPL-2.0
 %{_sbindir}/kpartx
 /usr/lib/udev/kpartx_id
 %{_mandir}/man8/kpartx.8.gz
@@ -232,7 +250,7 @@ fi
 
 %files -n libdmmp
 %defattr(-,root,root,-)
-%doc README COPYING
+%doc README LICENSES/GPL-3.0
 %{_libdir}/libdmmp.so.*
 
 %post -n libdmmp -p /sbin/ldconfig
@@ -241,7 +259,7 @@ fi
 
 %files -n libdmmp-devel
 %defattr(-,root,root,-)
-%doc README COPYING
+%doc README LICENSES/GPL-3.0
 %{_libdir}/libdmmp.so
 %dir %{_includedir}/libdmmp
 %{_includedir}/libdmmp/*
@@ -250,6 +268,35 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Jun 12 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-1
+- Update Source to 0.7.7
+  * Previous patches 0001-0009 & 0018 are included in this commit
+- Add upstream patches since 0.7.7
+  * patches 0001-0012 are from upstream commits since 0.7.7
+- Add 0015-mpathpersist-add-all_tg_pt-option.patch
+  * add new all_tg_pt multpiath.conf option. posted upstream
+- Add 0016-libmultipath-remove-rbd-code.patch
+  * remove unused rbd code. posted upstream
+- Add 0017-mpathpersist-fix-aptpl-support.patch
+  * add ":aptpl" suffix for reservation_key to fix aptpl support.
+    posted upstream
+- Add 0018-multipath-don-t-check-timestamps-without-a-path.patch
+  * fix multipath null dereference crash. posted upstream
+- Add 0019-libmultipath-fix-detect-alua-corner-case.patch
+  * fix alua detection with retain_hardware_handler set to off. posted
+    upstream
+- Add 0020-multipath-fix-setting-conf-version.patch
+  * multipath wasn't setting the kernel version correctly. posted upstream
+- Add 0028-RH-reset-default-find_mutipaths-value-to-off.patch
+  * default to RHEL7 and older device detection style. Redhat specific, to
+    keep customer experience the same.
+- Rename files
+  * Previous patches 0010-0011 are now patches 0013-0014
+  * Previous patches 0012-0017 & 0019 are now patches 0021-0027
+- Modify 0021-RH-fixup-udev-rules-for-redhat.patch
+  * Fix spurious compile warning with redhat compile options
+
+
 * Tue May 15 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.6-4.git1cb704b
 - Add 0010-libmultipath-print-correct-default-for-delay_-_check.patch
   * fix minor configuration printing issue

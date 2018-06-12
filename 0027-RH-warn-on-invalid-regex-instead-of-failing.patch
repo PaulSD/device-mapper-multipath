@@ -16,10 +16,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 35 insertions(+), 6 deletions(-)
 
 diff --git a/libmultipath/dict.c b/libmultipath/dict.c
-index 8f9944a..7fcd401 100644
+index 7ad0f5a..ab808d6 100644
 --- a/libmultipath/dict.c
 +++ b/libmultipath/dict.c
-@@ -53,6 +53,21 @@ set_str(vector strvec, void *ptr)
+@@ -55,6 +55,21 @@ set_str(vector strvec, void *ptr)
  }
  
  static int
@@ -41,7 +41,7 @@ index 8f9944a..7fcd401 100644
  set_yes_no(vector strvec, void *ptr)
  {
  	char * buff;
-@@ -1201,7 +1216,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
+@@ -1271,7 +1286,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -50,7 +50,7 @@ index 8f9944a..7fcd401 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1217,7 +1232,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
+@@ -1287,7 +1302,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -59,7 +59,7 @@ index 8f9944a..7fcd401 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1318,16 +1333,16 @@ device_handler(struct config *conf, vector strvec)
+@@ -1388,16 +1403,16 @@ device_handler(struct config *conf, vector strvec)
  	return 0;
  }
  

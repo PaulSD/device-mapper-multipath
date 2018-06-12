@@ -21,10 +21,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  create mode 100644 multipath/mpathconf.8
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 83d26be..a50f41a 100644
+index 0607403..5c98e48 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -659,6 +659,7 @@ load_config (char * file)
+@@ -661,6 +661,7 @@ load_config (char * file)
  
  	} else {
  		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");

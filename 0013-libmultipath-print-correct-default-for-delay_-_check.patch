@@ -12,10 +12,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/libmultipath/dict.c b/libmultipath/dict.c
-index 1a18337..8f9944a 100644
+index 4040611..3e7c5d6 100644
 --- a/libmultipath/dict.c
 +++ b/libmultipath/dict.c
-@@ -1067,7 +1067,8 @@ print_off_int_undef(char * buff, int len, long v)
+@@ -1115,7 +1115,8 @@ print_off_int_undef(char * buff, int len, long v)
  }
  
  declare_def_handler(delay_watch_checks, set_off_int_undef)
@@ -25,7 +25,7 @@ index 1a18337..8f9944a 100644
  declare_ovr_handler(delay_watch_checks, set_off_int_undef)
  declare_ovr_snprint(delay_watch_checks, print_off_int_undef)
  declare_hw_handler(delay_watch_checks, set_off_int_undef)
-@@ -1075,7 +1076,8 @@ declare_hw_snprint(delay_watch_checks, print_off_int_undef)
+@@ -1123,7 +1124,8 @@ declare_hw_snprint(delay_watch_checks, print_off_int_undef)
  declare_mp_handler(delay_watch_checks, set_off_int_undef)
  declare_mp_snprint(delay_watch_checks, print_off_int_undef)
  declare_def_handler(delay_wait_checks, set_off_int_undef)

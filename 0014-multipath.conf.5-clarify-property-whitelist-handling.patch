@@ -9,10 +9,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 3 insertions(+), 4 deletions(-)
 
 diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
-index c4d0789..8dae0f4 100644
+index f689795..96d1b66 100644
 --- a/multipath/multipath.conf.5
 +++ b/multipath/multipath.conf.5
-@@ -1144,10 +1144,9 @@ and
+@@ -1181,10 +1181,9 @@ and
  keywords. For a full description of these keywords please see the \fIdevices\fR
  section description.
  .LP
