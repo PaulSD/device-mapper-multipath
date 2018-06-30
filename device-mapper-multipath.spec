@@ -1,10 +1,9 @@
-Summary: Tools to manage multipath devices using device-mapper
-Name: device-mapper-multipath
+Name:    device-mapper-multipath
 Version: 0.7.7
-Release: 1%{?dist}
+Release: 2%{?dist}
+Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
-Group: System Environment/Base
-URL: http://christophe.varoqui.free.fr/
+URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
@@ -44,8 +43,8 @@ Patch0028: 0028-RH-reset-default-find_mutipaths-value-to-off.patch
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
 Requires: device-mapper >= 1.02.96
-Requires: initscripts, userspace-rcu
-Requires(post): systemd-units systemd-sysv chkconfig
+Requires: userspace-rcu
+Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
 
@@ -66,7 +65,6 @@ The tools are :
 
 %package libs
 Summary: The %{name} modules and shared library
-Group: System Environment/Libraries
 # only libmpathcmd is LGPLv2+
 License: GPLv2 and LGPLv2+
 
@@ -78,7 +76,6 @@ libmultipath.
 
 %package devel
 Summary: Development libraries and headers for %{name}
-Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-libs = %{version}-%{release}
 
@@ -88,14 +85,12 @@ device-mapper-multipath's lbmpathpersist and libmpathcmd libraries.
 
 %package -n kpartx
 Summary: Partition device manager for device-mapper devices
-Group: System Environment/Base
 
 %description -n kpartx
 kpartx manages partition creation and removal for device-mapper devices.
 
 %package -n libdmmp
 Summary: device-mapper-multipath C API library
-Group: System Environment/Libraries
 License: GPLv3+
 Requires: json-c
 Requires: %{name} = %{version}-%{release}
@@ -107,7 +102,6 @@ C API library.
 
 %package -n libdmmp-devel
 Summary: device-mapper-multipath C API library headers
-Group: Development/Libraries
 Requires: pkgconfig
 Requires: libdmmp = %{version}-%{release}
 
@@ -189,7 +183,7 @@ fi
 /bin/systemctl --quiet is-enabled multipathd.service >/dev/null 2>&1 && /bin/systemctl reenable multipathd.service ||:
 
 %files
-%defattr(-,root,root,-)
+%license LICENSES/GPL-2.0 LICENSES/LGPL-2.0
 %{_sbindir}/multipath
 %{_sbindir}/multipathd
 %{_sbindir}/mpathconf
@@ -203,18 +197,14 @@ fi
 %{_mandir}/man8/mpathpersist.8.gz
 %config /usr/lib/udev/rules.d/62-multipath.rules
 %config /usr/lib/udev/rules.d/11-dm-mpath.rules
-%{!?_licensedir:%global license %%doc}
-%license LICENSES/GPL-2.0 LICENSES/LGPL-2.0
 %doc README
 %doc README.alua
 %doc multipath.conf
 %dir /etc/multipath
 
 %files libs
-%defattr(-,root,root,-)
-%doc README
-%{!?_licensedir:%global license %%doc}
 %license LICENSES/GPL-2.0 LICENSES/LGPL-2.0
+%doc README
 %{_libdir}/libmultipath.so
 %{_libdir}/libmultipath.so.*
 %{_libdir}/libmpathpersist.so.*
@@ -227,8 +217,7 @@ fi
 %postun libs -p /sbin/ldconfig
 
 %files devel
-%defattr(-,root,root,-)
-%doc README LICENSES/GPL-2.0 LICENSES/LGPL-2.0
+%doc README
 %{_libdir}/libmpathpersist.so
 %{_libdir}/libmpathcmd.so
 %{_includedir}/mpath_cmd.h
@@ -237,10 +226,8 @@ fi
 %{_mandir}/man3/mpath_persistent_reserve_out.3.gz
 
 %files -n kpartx
-%defattr(-,root,root,-)
-%doc README
-%{!?_licensedir:%global license %%doc}
 %license LICENSES/GPL-2.0
+%doc README
 %{_sbindir}/kpartx
 /usr/lib/udev/kpartx_id
 %{_mandir}/man8/kpartx.8.gz
@@ -249,8 +236,8 @@ fi
 %config /usr/lib/udev/rules.d/68-del-part-nodes.rules
 
 %files -n libdmmp
-%defattr(-,root,root,-)
-%doc README LICENSES/GPL-3.0
+%license LICENSES/GPL-3.0
+%doc README
 %{_libdir}/libdmmp.so.*
 
 %post -n libdmmp -p /sbin/ldconfig
@@ -258,8 +245,7 @@ fi
 %postun -n libdmmp -p /sbin/ldconfig
 
 %files -n libdmmp-devel
-%defattr(-,root,root,-)
-%doc README LICENSES/GPL-3.0
+%doc README
 %{_libdir}/libdmmp.so
 %dir %{_includedir}/libdmmp
 %{_includedir}/libdmmp/*
@@ -268,6 +254,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Sat Jun 30 2018 Peter Robinson <pbrobinson@fedoraproject.org> 0.7.7-2
+- Spec cleanups, drop remains of initscripts dependencies
+
 * Tue Jun 12 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-1
 - Update Source to 0.7.7
   * Previous patches 0001-0009 & 0018 are included in this commit
