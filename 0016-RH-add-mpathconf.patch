@@ -12,23 +12,24 @@ a single command.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
- libmultipath/config.c |   1 +
+ libmultipath/config.c |   2 +
  multipath/Makefile    |   5 +
  multipath/mpathconf   | 464 ++++++++++++++++++++++++++++++++++++++++++++++++++
- multipath/mpathconf.8 | 101 +++++++++++
- 4 files changed, 571 insertions(+)
+ multipath/mpathconf.8 | 119 +++++++++++++
+ 4 files changed, 590 insertions(+)
  create mode 100644 multipath/mpathconf
  create mode 100644 multipath/mpathconf.8
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 0607403..5c98e48 100644
+index 6a9340a..bfd07e3 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -661,6 +661,7 @@ load_config (char * file)
- 
+@@ -748,6 +748,8 @@ load_config (char * file)
+ 		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
  	} else {
  		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
-+		condlog(0, "You can run /sbin/mpathconf to create or modify /etc/multipath.conf");
++		condlog(0, "You can run \"/sbin/mpathconf --enable\" to create");
++		condlog(0, "/etc/multipath.conf. See man mpathconf(8) for more details");
  		if (conf->blist_devnode == NULL) {
  			conf->blist_devnode = vector_alloc();
  			if (!conf->blist_devnode) {
@@ -538,10 +539,10 @@ index 0000000..e839134
 +fi
 diff --git a/multipath/mpathconf.8 b/multipath/mpathconf.8
 new file mode 100644
-index 0000000..4cd3267
+index 0000000..5b7ae0c
 --- /dev/null
 +++ b/multipath/mpathconf.8
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,119 @@
 +.TH MPATHCONF 8 "June 2010" "" "Linux Administrator's Manual"
 +.SH NAME
 +mpathconf - A tool for configuring device-mapper-multipath
@@ -563,7 +564,9 @@ index 0000000..4cd3267
 +.B multipathd
 +service to start automatically or not. If
 +.B mpathconf
-+is called with no commands, it will display the current configuration.
++is called with no commands, it will display the current configuration, but
++will not create of modify
++.B /etc/multipath.conf
 +
 +The default options for mpathconf are
 +.B --with_module
@@ -592,12 +595,24 @@ index 0000000..4cd3267
 +.B --enable
 +Removes any line that blacklists all device nodes from the
 +.B /etc/multipath.conf
-+blacklist section.
++blacklist section. Also, creates
++.B /etc/multipath.conf
++if it doesn't exist.
 +.TP
 +.B --disable
 +Adds a line that blacklists all device nodes to the
 +.B /etc/multipath.conf
 +blacklist section. If no blacklist section exists, it will create one.
++.TP
++.B --allow \fB<device>\fP
++Modifies the \fB/etc/multipath/conf\fP blacklist to blacklist all
++wwids and the blacklist_exceptions to whitelist \fB<device>\fP. \fB<device>\fP
++can be in the form of MAJOR:MINOR, a wwid, or the name of a device-mapper
++device, either a multipath device, or any device on stacked on top of one or
++more multipath devices. This command can be used multiple times to allow
++multiple devices.  \fBNOTE:\fP This action will create a configuration file that
++mpathconf will not be able to revert back to its previous state. Because
++of this, \fB--outfile\fP is required when using \fB--allow\fP.
 +.TP
 +.B --user_friendly_name \fP { \fBy\fP | \fBn\fP }
 +If set to \fBy\fP, this adds the line
@@ -614,6 +629,10 @@ index 0000000..4cd3267
 +.B /etc/multipath.conf
 +defaults section. If set to \fBn\fP, this removes the line, if present. This
 +command can be used aldong with any other command.
++.TP
++.B --outfile \fB<filename>\fP
++Write the resulting multipath configuration to \fB<filename>\fP instead of
++\fB/etc/multipath.conf\fP.
 +.SH OPTIONS
 +.TP
 +.B --with_module\fP { \fBy\fP | \fBn\fP }

@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Mon, 16 Jul 2018 16:43:57 -0500
+Subject: [PATCH] mpathpersist: add missing --param-rk usage info
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ mpathpersist/main.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/mpathpersist/main.c b/mpathpersist/main.c
+index 99151fe..0e4d3f2 100644
+--- a/mpathpersist/main.c
++++ b/mpathpersist/main.c
+@@ -705,6 +705,7 @@ static void usage(void)
+ 			"    --param-alltgpt|-Y         PR Out parameter 'ALL_TG_PT\n"
+ 			"    --param-aptpl|-Z           PR Out parameter 'APTPL'\n"
+ 			"    --read-keys|-k             PR In: Read Keys\n"
++			"    --param-rk=RK|-K RK        PR Out parameter reservation key\n"
+ 			"    --param-sark=SARK|-S SARK  PR Out parameter service "
+ 			"action\n"
+ 			"                               reservation key (SARK is in "
+-- 
+2.7.4
+

@@ -14,10 +14,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/libmultipath/propsel.c b/libmultipath/propsel.c
-index 62a6893..f626c74 100644
+index af3ed62..fdb5953 100644
 --- a/libmultipath/propsel.c
 +++ b/libmultipath/propsel.c
-@@ -403,9 +403,11 @@ int select_hwhandler(struct config *conf, struct multipath *mp)
+@@ -420,9 +420,11 @@ int select_hwhandler(struct config *conf, struct multipath *mp)
  	bool all_tpgs = true;
  
  	dh_state = &handler[2];

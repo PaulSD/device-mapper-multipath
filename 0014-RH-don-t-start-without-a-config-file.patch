@@ -20,7 +20,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 20 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 5872927..0607403 100644
+index 0aef186..6a9340a 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
 @@ -26,6 +26,7 @@
@@ -30,11 +30,11 @@ index 5872927..0607403 100644
 +#include "version.h"
  
  static int
- hwe_strmatch (struct hwentry *hwe1, struct hwentry *hwe2)
-@@ -658,6 +659,20 @@ load_config (char * file)
- 			factorize_hwtable(conf->hwtable, builtin_hwtable_size);
+ hwe_strmatch (const struct hwentry *hwe1, const struct hwentry *hwe2)
+@@ -745,6 +746,20 @@ load_config (char * file)
+ 			goto out;
  		}
- 
+ 		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
 +	} else {
 +		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
 +		if (conf->blist_devnode == NULL) {
@@ -53,7 +53,7 @@ index 5872927..0607403 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index fcbe3fc..3a42435 100644
+index 7d0cd9a..d7fb8e2 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -9,6 +9,7 @@
@@ -77,7 +77,7 @@ index d658073..b3f54d7 100644
  ENV{DEVTYPE}!="partition", GOTO="test_dev"
  IMPORT{parent}="DM_MULTIPATH_DEVICE_PATH"
 diff --git a/multipathd/multipathd.8 b/multipathd/multipathd.8
-index e78ac9e..09cdead 100644
+index 94c3f97..ed13efd 100644
 --- a/multipathd/multipathd.8
 +++ b/multipathd/multipathd.8
 @@ -38,6 +38,8 @@ map regains its maximum performance and redundancy.

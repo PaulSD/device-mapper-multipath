@@ -1,43 +1,34 @@
 Name:    device-mapper-multipath
 Version: 0.7.7
-Release: 3%{?dist}
+Release: 4.gitef6d98b%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.7.7;sf=tgz" -o multipath-tools-0.7.7.tgz
-Source0: multipath-tools-0.7.7.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=ef6d98b;sf=tgz" -o multipath-tools-ef6d98b.tgz
+Source0: multipath-tools-ef6d98b.tgz
 Source1: multipath.conf
-Patch0001: 0001-multipath-tools-add-RDAC-SUN-ArrayStorage-to-hwtable.patch
-Patch0002: 0002-multipath-tools-remove-c-from-__cpluscplus-misspelle.patch
-Patch0003: 0003-multipath-tools-remove-emacs-autoconfig-of-kpartx-gp.patch
-Patch0004: 0004-multipath-tools-replace-FSF-address-with-a-www-point.patch
-Patch0005: 0005-multipath-tools-Remove-trailing-leading-whitespaces-.patch
-Patch0006: 0006-multipath-tools-fix-compilation-with-musl-libc.patch
-Patch0007: 0007-multipath-tools-add-x-to-doc-preclean.pl-and-split-m.patch
-Patch0008: 0008-multipath-tools-refresh-kernel-doc-from-kernel-sourc.patch
-Patch0009: 0009-multipath-tools-configure-hitachi-ams2000-and-hus100.patch
-Patch0010: 0010-libmultipath-don-t-reject-maps-with-undefined-prio.patch
-Patch0011: 0011-multipathd-handle-errors-in-uxlsnr-as-fatal.patch
-Patch0012: 0012-libmultipath-fix-error-parsing-find_multipaths-stric.patch 
-Patch0013: 0013-libmultipath-print-correct-default-for-delay_-_check.patch
-Patch0014: 0014-multipath.conf.5-clarify-property-whitelist-handling.patch
-Patch0015: 0015-mpathpersist-add-all_tg_pt-option.patch
-Patch0016: 0016-libmultipath-remove-rbd-code.patch
-Patch0017: 0017-mpathpersist-fix-aptpl-support.patch
-Patch0018: 0018-multipath-don-t-check-timestamps-without-a-path.patch
-Patch0019: 0019-libmultipath-fix-detect-alua-corner-case.patch
-Patch0020: 0020-multipath-fix-setting-conf-version.patch
-Patch0021: 0021-RH-fixup-udev-rules-for-redhat.patch
-Patch0022: 0022-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0023: 0023-RH-don-t-start-without-a-config-file.patch
-Patch0024: 0024-RH-use-rpm-optflags-if-present.patch
-Patch0025: 0025-RH-add-mpathconf.patch
-Patch0026: 0026-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0027: 0027-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0028: 0028-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0001: 0001-libmultipath-remove-last-of-rbd-code.patch
+Patch0002: 0002-libmultipath-fix-detect-alua-corner-case.patch
+Patch0003: 0003-multipath-fix-setting-conf-version.patch
+Patch0004: 0004-mpathpersist-add-param-alltgpt-option.patch
+Patch0005: 0005-libmutipath-remove-unused-IDE-bus-type.patch
+Patch0006: 0006-multipathd-add-new-protocol-path-wildcard.patch
+Patch0007: 0007-libmultipath-add-protocol-blacklist-option.patch
+Patch0008: 0008-libmultipath-remove-_filter_-blacklist-functions.patch
+Patch0009: 0009-multipath-tests-change-to-work-with-old-make-version.patch
+Patch0010: 0010-multipath-tests-add-blacklist-tests.patch
+Patch0011: 0011-mpathpersist-add-missing-param-rk-usage-info.patch
+Patch0012: 0012-RH-fixup-udev-rules-for-redhat.patch
+Patch0013: 0013-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0014: 0014-RH-don-t-start-without-a-config-file.patch
+Patch0015: 0015-RH-use-rpm-optflags-if-present.patch
+Patch0016: 0016-RH-add-mpathconf.patch
+Patch0017: 0017-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0018: 0018-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0019: 0019-RH-reset-default-find_mutipaths-value-to-off.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -53,7 +44,7 @@ BuildRequires: libaio-devel, device-mapper-devel >= 1.02.89
 BuildRequires: libselinux-devel, libsepol-devel
 BuildRequires: readline-devel, ncurses-devel
 BuildRequires: systemd-units, systemd-devel
-BuildRequires: json-c-devel, perl-interpreter, pkgconfig
+BuildRequires: json-c-devel, perl-interpreter, pkgconfig, gcc
 BuildRequires: userspace-rcu-devel
 
 %description
@@ -110,7 +101,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-0.7.7
+%setup -q -n multipath-tools-ef6d98b
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -130,15 +121,6 @@ device-mapper-multipath's libdmmp C API library
 %patch0017 -p1
 %patch0018 -p1
 %patch0019 -p1
-%patch0020 -p1
-%patch0021 -p1
-%patch0022 -p1
-%patch0023 -p1
-%patch0024 -p1
-%patch0025 -p1
-%patch0026 -p1
-%patch0027 -p1
-%patch0028 -p1
 cp %{SOURCE1} .
 
 %build
@@ -254,6 +236,28 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Jul 12 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-4.gitef6d98b
+- Update Source to latest upstream commit
+  * Previous patches 0001-0018 are included in this commit
+- Rename files
+  * Previous patches 0019-0028 are now patches 0002-0003 & 0012-0019
+- Add 0001-libmultipath-remove-last-of-rbd-code.patch
+- Add 0004-mpathpersist-add-param-alltgpt-option.patch
+  * mpathpersist now accepts --param-alltgpt
+- Add 0005-libmutipath-remove-unused-IDE-bus-type.patch
+- Add 0006-multipathd-add-new-protocol-path-wildcard.patch
+  * multipathd show paths format now accepts %P for the path protocol/transport
+- Add 0007-libmultipath-add-protocol-blacklist-option.patch
+  * You can now use the "protocol" blacklist section parameter to blacklist
+    by protocol/transport
+- Add 0008-libmultipath-remove-_filter_-blacklist-functions.patch
+- Add 0009-multipath-tests-change-to-work-with-old-make-version.patch
+- Add 0010-multipath-tests-add-blacklist-tests.patch
+- Add 0011-mpathpersist-add-missing-param-rk-usage-info.patch
+- Refresh 0013-RH-Remove-the-property-blacklist-exception-builtin.patch
+- Modify 0016-RH-add-mpathconf.patch
+  * improve usage message and man page
+
 * Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.7.7-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
