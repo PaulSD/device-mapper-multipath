@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.7.7
-Release: 4.gitef6d98b%{?dist}
+Release: 5.gitef6d98b%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -38,6 +38,16 @@ Requires: userspace-rcu
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
+# Starting with 0.7.7-1, 62-multipath.rules changed in a way that is
+# incompatible with 65-md-incremental.rules in earlier mdadm packages.
+# Later mdadm packages are compatible with any version of
+# device-mapper-multipath. See bz #1628192 for more details
+Conflicts: mdadm < 4.1-rc2.0.2
+# Starting with 0.7.7-1, 62-multipath.rules changed in a way that is
+# incompatible with 80-udisks2.rules in earlier udisks2 packages.
+# Later udisks2 packages are compatible with any version of
+# device-mapper-multipath. See bz #1628192 for more details
+Conflicts: udisks2 < 2.8.0-2
 
 # build/setup
 BuildRequires: libaio-devel, device-mapper-devel >= 1.02.89
@@ -236,6 +246,11 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Sep 14 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-5.gitef6d98b
+- Add Conflicts for mdadm < 4.1-rc2.0.2 and udisks2 < 2.8.0-2
+  * Multipath udev rule update from 0.7.7-1 is incompatible with older versions
+    (bz #1628192)
+
 * Thu Jul 12 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-4.gitef6d98b
 - Update Source to latest upstream commit
   * Previous patches 0001-0018 are included in this commit
