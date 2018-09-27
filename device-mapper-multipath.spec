@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.7.7
-Release: 5.gitef6d98b%{?dist}
+Release: 6.git1a8625a%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -8,27 +8,36 @@ URL:     http://christophe.varoqui.free.fr/
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
 # curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=ef6d98b;sf=tgz" -o multipath-tools-ef6d98b.tgz
-Source0: multipath-tools-ef6d98b.tgz
+Source0: multipath-tools-1a8625a.tgz
 Source1: multipath.conf
-Patch0001: 0001-libmultipath-remove-last-of-rbd-code.patch
-Patch0002: 0002-libmultipath-fix-detect-alua-corner-case.patch
-Patch0003: 0003-multipath-fix-setting-conf-version.patch
-Patch0004: 0004-mpathpersist-add-param-alltgpt-option.patch
-Patch0005: 0005-libmutipath-remove-unused-IDE-bus-type.patch
-Patch0006: 0006-multipathd-add-new-protocol-path-wildcard.patch
-Patch0007: 0007-libmultipath-add-protocol-blacklist-option.patch
-Patch0008: 0008-libmultipath-remove-_filter_-blacklist-functions.patch
-Patch0009: 0009-multipath-tests-change-to-work-with-old-make-version.patch
-Patch0010: 0010-multipath-tests-add-blacklist-tests.patch
-Patch0011: 0011-mpathpersist-add-missing-param-rk-usage-info.patch
-Patch0012: 0012-RH-fixup-udev-rules-for-redhat.patch
-Patch0013: 0013-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0014: 0014-RH-don-t-start-without-a-config-file.patch
-Patch0015: 0015-RH-use-rpm-optflags-if-present.patch
-Patch0016: 0016-RH-add-mpathconf.patch
-Patch0017: 0017-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0018: 0018-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0019: 0019-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0001: 0001-libmultipath-fix-tur-checker-timeout.patch
+Patch0002: 0002-libmultipath-fix-tur-checker-double-locking.patch
+Patch0003: 0003-libmultipath-fix-tur-memory-misuse.patch
+Patch0004: 0004-libmultipath-cleanup-tur-locking.patch
+Patch0005: 0005-libmultipath-fix-tur-checker-timeout-issue.patch
+Patch0006: 0006-libmultipath-fix-set_int-error-path.patch
+Patch0007: 0007-libmultipath-fix-length-issues-in-get_vpd_sgio.patch
+Patch0008: 0008-libmultipath-_install_keyword-cleanup.patch
+Patch0009: 0009-libmultipath-remove-unused-code.patch
+Patch0010: 0010-libmultipath-fix-memory-issue-in-path_latency-prio.patch
+Patch0011: 0011-libmultipath-fix-null-dereference-int-alloc_path_gro.patch
+Patch0012: 0012-libmutipath-don-t-use-malformed-uevents.patch
+Patch0013: 0013-multipath-fix-max-array-size-in-print_cmd_valid.patch
+Patch0014: 0014-multipathd-function-return-value-tweaks.patch
+Patch0015: 0015-multipathd-minor-fixes.patch
+Patch0016: 0016-multipathd-remove-useless-check-and-fix-format.patch
+Patch0017: 0017-multipathd-fix-memory-leak-on-error-in-configure.patch
+Patch0018: 0018-libmultipath-Don-t-blank-intialized-paths.patch
+Patch0019: 0019-libmultipath-Fixup-updating-paths.patch
+Patch0020: 0020-multipath-tweak-logging-style.patch
+Patch0021: 0021-RH-fixup-udev-rules-for-redhat.patch
+Patch0022: 0022-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0023: 0023-RH-don-t-start-without-a-config-file.patch
+Patch0024: 0024-RH-use-rpm-optflags-if-present.patch
+Patch0025: 0025-RH-add-mpathconf.patch
+Patch0026: 0026-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0027: 0027-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0028: 0028-RH-reset-default-find_mutipaths-value-to-off.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -111,7 +120,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-ef6d98b
+%setup -q -n multipath-tools-1a8625a
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -131,6 +140,15 @@ device-mapper-multipath's libdmmp C API library
 %patch0017 -p1
 %patch0018 -p1
 %patch0019 -p1
+%patch0020 -p1
+%patch0021 -p1
+%patch0022 -p1
+%patch0023 -p1
+%patch0024 -p1
+%patch0025 -p1
+%patch0026 -p1
+%patch0027 -p1
+%patch0028 -p1
 cp %{SOURCE1} .
 
 %build
@@ -246,6 +264,39 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Sep 27 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-6.git1a8625a
+- Update Source to latest upstream commit
+  * Previous patches 0001-0011 are included in this commit
+- Rename files
+  * Previous patches 0012-0019 are now patches 0021-0028
+- Add 0001-libmultipath-fix-tur-checker-timeout.patch
+- Add 0002-libmultipath-fix-tur-checker-double-locking.patch
+- Add 0003-libmultipath-fix-tur-memory-misuse.patch
+- Add 0004-libmultipath-cleanup-tur-locking.patch
+- Add 0005-libmultipath-fix-tur-checker-timeout-issue.patch
+  * The above 5 patches cleanup locking issues with the
+    tur checker threads
+- Add 0006-libmultipath-fix-set_int-error-path.patch
+- Add 0007-libmultipath-fix-length-issues-in-get_vpd_sgio.patch
+- Add 0008-libmultipath-_install_keyword-cleanup.patch
+- Add 0009-libmultipath-remove-unused-code.patch
+- Add 0010-libmultipath-fix-memory-issue-in-path_latency-prio.patch
+- Add 0011-libmultipath-fix-null-dereference-int-alloc_path_gro.patch
+- Add 0012-libmutipath-don-t-use-malformed-uevents.patch
+- Add 0013-multipath-fix-max-array-size-in-print_cmd_valid.patch
+- Add 0014-multipathd-function-return-value-tweaks.patch
+- Add 0015-multipathd-minor-fixes.patch
+- Add 0016-multipathd-remove-useless-check-and-fix-format.patch
+- Add 0017-multipathd-fix-memory-leak-on-error-in-configure.patch
+  * The above 12 patches fix minor issues found by coverity
+- Add 0018-libmultipath-Don-t-blank-intialized-paths.patch
+- Add 0019-libmultipath-Fixup-updating-paths.patch
+  * Fix issues with paths whose wwid was not set or later changes
+- Add 0020-multipath-tweak-logging-style.patch
+  * multipathd interactive commands now send errors to stderr, instead
+    of syslog
+  * The above 20 patches have been submitted upstream
+
 * Fri Sep 14 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-5.gitef6d98b
 - Add Conflicts for mdadm < 4.1-rc2.0.2 and udisks2 < 2.8.0-2
   * Multipath udev rule update from 0.7.7-1 is incompatible with older versions

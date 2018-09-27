@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Fri, 27 Jul 2018 15:36:01 -0500
+Subject: [PATCH] libmultipath: fix length issues in get_vpd_sgio
+
+When get_vpd_sgio() finds out that the vpd info needed to be truncated
+to fit in the buffer, it doesn't trucate the size as well,  which allows
+it to overwrite the buffer. Also, in once len is set to -ENODATA,
+get_vpd_sgio() should exit, instead of using the negative len in
+memcpy(). Found by coverity.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/discovery.c | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index 0b1855d..3e0db7f 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -1116,17 +1116,21 @@ get_vpd_sgio (int fd, int pg, char * str, int maxlen)
+ 		return -ENODATA;
+ 	}
+ 	buff_len = get_unaligned_be16(&buff[2]) + 4;
+-	if (buff_len > 4096)
++	if (buff_len > 4096) {
+ 		condlog(3, "vpd pg%02x page truncated", pg);
+-
++		buff_len = 4096;
++	}
+ 	if (pg == 0x80)
+ 		len = parse_vpd_pg80(buff, str, maxlen);
+ 	else if (pg == 0x83)
+ 		len = parse_vpd_pg83(buff, buff_len, str, maxlen);
+ 	else if (pg == 0xc9 && maxlen >= 8) {
+-		len = buff_len < 8 ? -ENODATA :
+-			(buff_len <= maxlen ? buff_len : maxlen);
+-		memcpy (str, buff, len);
++		if (buff_len < 8)
++			len = -ENODATA;
++		else {
++			len = (buff_len <= maxlen)? buff_len : maxlen;
++			memcpy (str, buff, len);
++		}
+ 	} else
+ 		len = -ENOSYS;
+ 
+-- 
+2.7.4
+

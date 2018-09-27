@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Fri, 27 Jul 2018 13:38:49 -0500
+Subject: [PATCH] libmultipath: fix set_int error path
+
+set_int() wasn't checking if the line actually had a value before
+converting it to an integer.  Found by coverity. Also, it should
+be using set_value().
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/dict.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/libmultipath/dict.c b/libmultipath/dict.c
+index 32524d5..bf4701e 100644
+--- a/libmultipath/dict.c
++++ b/libmultipath/dict.c
+@@ -33,7 +33,10 @@ set_int(vector strvec, void *ptr)
+ 	int *int_ptr = (int *)ptr;
+ 	char * buff;
+ 
+-	buff = VECTOR_SLOT(strvec, 1);
++	buff = set_value(strvec);
++	if (!buff)
++		return 1;
++
+ 	*int_ptr = atoi(buff);
+ 
+ 	return 0;
+-- 
+2.7.4
+
