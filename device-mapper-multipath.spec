@@ -1,48 +1,29 @@
 Name:    device-mapper-multipath
-Version: 0.7.7
-Release: 7.gitb80318b%{?dist}
+Version: 0.7.8
+Release: 1%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=b80318b;sf=tgz" -o multipath-tools-b80318b.tgz
-Source0: multipath-tools-b80318b.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.7.8;sf=tgz" -o multipath-tools-0.7.8.tgz
+Source0: multipath-tools-0.7.8.tgz
 Source1: multipath.conf
-Patch0001: 0001-kpartx-Use-absolute-paths-to-create-mappings.patch
-Patch0002: 0002-libmultipath-fix-tur-checker-timeout.patch
-Patch0003: 0003-libmultipath-fix-tur-checker-double-locking.patch
-Patch0004: 0004-libmultipath-fix-tur-memory-misuse.patch
-Patch0005: 0005-libmultipath-cleanup-tur-locking.patch
-Patch0006: 0006-libmultipath-fix-tur-checker-timeout-issue.patch
-Patch0007: 0007-libmultipath-fix-set_int-error-path.patch
-Patch0008: 0008-libmultipath-fix-length-issues-in-get_vpd_sgio.patch
-Patch0009: 0009-libmultipath-_install_keyword-cleanup.patch
-Patch0010: 0010-libmultipath-remove-unused-code.patch
-Patch0011: 0011-libmultipath-fix-memory-issue-in-path_latency-prio.patch
-Patch0012: 0012-libmultipath-fix-null-dereference-int-alloc_path_gro.patch
-Patch0013: 0013-libmutipath-don-t-use-malformed-uevents.patch
-Patch0014: 0014-multipath-fix-max-array-size-in-print_cmd_valid.patch
-Patch0015: 0015-multipathd-function-return-value-tweaks.patch
-Patch0016: 0016-multipathd-minor-fixes.patch
-Patch0017: 0017-multipathd-remove-useless-check-and-fix-format.patch
-Patch0018: 0018-multipathd-fix-memory-leak-on-error-in-configure.patch
-Patch0019: 0019-libmultipath-Don-t-blank-intialized-paths.patch
-Patch0020: 0020-libmultipath-Fixup-updating-paths.patch
-Patch0021: 0021-multipath-tweak-logging-style.patch
-Patch0022: 0022-multipathd-check-for-NULL-udevice-in-cli_add_path.patch
-Patch0023: 0023-libmultipath-remove-max_fds-code-duplication.patch
-Patch0024: 0024-multipathd-set-return-code-for-multipathd-commands.patch
-Patch0025: 0025-mpathpersist-fix-registration-rollback-issue.patch
-Patch0026: 0026-RH-fixup-udev-rules-for-redhat.patch
-Patch0027: 0027-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0028: 0028-RH-don-t-start-without-a-config-file.patch
-Patch0029: 0029-RH-use-rpm-optflags-if-present.patch
-Patch0030: 0030-RH-add-mpathconf.patch
-Patch0031: 0031-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0032: 0032-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0033: 0033-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0001: 0001-multipath-tweak-logging-style.patch
+Patch0002: 0002-multipathd-check-for-NULL-udevice-in-cli_add_path.patch
+Patch0003: 0003-libmultipath-remove-max_fds-code-duplication.patch
+Patch0004: 0004-multipathd-set-return-code-for-multipathd-commands.patch
+Patch0005: 0005-mpathpersist-fix-registration-rollback-issue.patch
+Patch0006: 0006-libmultipath-timeout-on-unresponsive-tur-thread.patch
+Patch0007: 0007-RH-fixup-udev-rules-for-redhat.patch
+Patch0008: 0008-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0009: 0009-RH-don-t-start-without-a-config-file.patch
+Patch0010: 0010-RH-use-rpm-optflags-if-present.patch
+Patch0011: 0011-RH-add-mpathconf.patch
+Patch0012: 0012-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0013: 0013-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0014: 0014-RH-reset-default-find_mutipaths-value-to-off.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -125,7 +106,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-b80318b
+%setup -q -n multipath-tools-0.7.8
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -140,25 +121,6 @@ device-mapper-multipath's libdmmp C API library
 %patch0012 -p1
 %patch0013 -p1
 %patch0014 -p1
-%patch0015 -p1
-%patch0016 -p1
-%patch0017 -p1
-%patch0018 -p1
-%patch0019 -p1
-%patch0020 -p1
-%patch0021 -p1
-%patch0022 -p1
-%patch0023 -p1
-%patch0024 -p1
-%patch0025 -p1
-%patch0026 -p1
-%patch0027 -p1
-%patch0028 -p1
-%patch0029 -p1
-%patch0030 -p1
-%patch0031 -p1
-%patch0032 -p1
-%patch0033 -p1
 cp %{SOURCE1} .
 
 %build
@@ -274,6 +236,15 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Oct 10 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.8-1
+- Update Source to upstream version 0.7.8
+  * Previous patches 0001-0020 are included in this version
+- Rename files
+  * Previous patches 0021-0025 are now patches 0001-0005
+  * Previous patches 0026-0033 are now patches 0007-0014
+- Add 0006-libmultipath-timeout-on-unresponsive-tur-thread.patch
+  * has been submitted upstream
+
 * Tue Oct  9 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-7.gitb80318b
 - Update Source to latest upstream commit
 - Rename files
