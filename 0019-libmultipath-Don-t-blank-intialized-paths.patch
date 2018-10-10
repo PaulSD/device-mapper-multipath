@@ -15,10 +15,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
-index 3e0db7f..33815dc 100644
+index 301093f..b267f07 100644
 --- a/libmultipath/discovery.c
 +++ b/libmultipath/discovery.c
-@@ -1991,9 +1991,9 @@ blank:
+@@ -2004,9 +2004,9 @@ blank:
  	/*
  	 * Recoverable error, for example faulty or offline path
  	 */

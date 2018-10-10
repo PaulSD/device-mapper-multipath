@@ -12,22 +12,24 @@ check if the thread completed, and if so, it returns the proper value.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
- libmultipath/checkers/tur.c | 15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
+ libmultipath/checkers/tur.c | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
 
 diff --git a/libmultipath/checkers/tur.c b/libmultipath/checkers/tur.c
-index 9f6ef51..4e2c7a8 100644
+index 983ba4c..86c0cdc 100644
 --- a/libmultipath/checkers/tur.c
 +++ b/libmultipath/checkers/tur.c
-@@ -276,12 +276,19 @@ int libcheck_check(struct checker * c)
+@@ -276,13 +276,20 @@ int libcheck_check(struct checker * c)
  	if (ct->thread) {
  		if (tur_check_async_timeout(c)) {
  			int running = uatomic_xchg(&ct->running, 0);
 -			if (running)
 +			if (running) {
  				pthread_cancel(ct->thread);
--			condlog(3, "%s: tur checker timeout", ct->devt);
-+				condlog(3, "%s: tur checker timeout", ct->devt);
+-			condlog(3, "%d:%d : tur checker timeout",
+-				major(ct->devt), minor(ct->devt));
++				condlog(3, "%d:%d : tur checker timeout",
++					major(ct->devt), minor(ct->devt));
 +				MSG(c, MSG_TUR_TIMEOUT);
 +				tur_status = PATH_TIMEOUT;
 +			} else {
@@ -41,8 +43,8 @@ index 9f6ef51..4e2c7a8 100644
 -			MSG(c, MSG_TUR_TIMEOUT);
 -			tur_status = PATH_TIMEOUT;
  		} else if (uatomic_read(&ct->running) != 0) {
- 			condlog(3, "%s: tur checker not finished", ct->devt);
- 			tur_status = PATH_PENDING;
+ 			condlog(3, "%d:%d : tur checker not finished",
+ 				major(ct->devt), minor(ct->devt));
 -- 
 2.7.4
 

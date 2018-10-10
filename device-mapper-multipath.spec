@@ -1,43 +1,48 @@
 Name:    device-mapper-multipath
 Version: 0.7.7
-Release: 6.git1a8625a%{?dist}
+Release: 7.gitb80318b%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=ef6d98b;sf=tgz" -o multipath-tools-ef6d98b.tgz
-Source0: multipath-tools-1a8625a.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=b80318b;sf=tgz" -o multipath-tools-b80318b.tgz
+Source0: multipath-tools-b80318b.tgz
 Source1: multipath.conf
-Patch0001: 0001-libmultipath-fix-tur-checker-timeout.patch
-Patch0002: 0002-libmultipath-fix-tur-checker-double-locking.patch
-Patch0003: 0003-libmultipath-fix-tur-memory-misuse.patch
-Patch0004: 0004-libmultipath-cleanup-tur-locking.patch
-Patch0005: 0005-libmultipath-fix-tur-checker-timeout-issue.patch
-Patch0006: 0006-libmultipath-fix-set_int-error-path.patch
-Patch0007: 0007-libmultipath-fix-length-issues-in-get_vpd_sgio.patch
-Patch0008: 0008-libmultipath-_install_keyword-cleanup.patch
-Patch0009: 0009-libmultipath-remove-unused-code.patch
-Patch0010: 0010-libmultipath-fix-memory-issue-in-path_latency-prio.patch
-Patch0011: 0011-libmultipath-fix-null-dereference-int-alloc_path_gro.patch
-Patch0012: 0012-libmutipath-don-t-use-malformed-uevents.patch
-Patch0013: 0013-multipath-fix-max-array-size-in-print_cmd_valid.patch
-Patch0014: 0014-multipathd-function-return-value-tweaks.patch
-Patch0015: 0015-multipathd-minor-fixes.patch
-Patch0016: 0016-multipathd-remove-useless-check-and-fix-format.patch
-Patch0017: 0017-multipathd-fix-memory-leak-on-error-in-configure.patch
-Patch0018: 0018-libmultipath-Don-t-blank-intialized-paths.patch
-Patch0019: 0019-libmultipath-Fixup-updating-paths.patch
-Patch0020: 0020-multipath-tweak-logging-style.patch
-Patch0021: 0021-RH-fixup-udev-rules-for-redhat.patch
-Patch0022: 0022-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0023: 0023-RH-don-t-start-without-a-config-file.patch
-Patch0024: 0024-RH-use-rpm-optflags-if-present.patch
-Patch0025: 0025-RH-add-mpathconf.patch
-Patch0026: 0026-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0027: 0027-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0028: 0028-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0001: 0001-kpartx-Use-absolute-paths-to-create-mappings.patch
+Patch0002: 0002-libmultipath-fix-tur-checker-timeout.patch
+Patch0003: 0003-libmultipath-fix-tur-checker-double-locking.patch
+Patch0004: 0004-libmultipath-fix-tur-memory-misuse.patch
+Patch0005: 0005-libmultipath-cleanup-tur-locking.patch
+Patch0006: 0006-libmultipath-fix-tur-checker-timeout-issue.patch
+Patch0007: 0007-libmultipath-fix-set_int-error-path.patch
+Patch0008: 0008-libmultipath-fix-length-issues-in-get_vpd_sgio.patch
+Patch0009: 0009-libmultipath-_install_keyword-cleanup.patch
+Patch0010: 0010-libmultipath-remove-unused-code.patch
+Patch0011: 0011-libmultipath-fix-memory-issue-in-path_latency-prio.patch
+Patch0012: 0012-libmultipath-fix-null-dereference-int-alloc_path_gro.patch
+Patch0013: 0013-libmutipath-don-t-use-malformed-uevents.patch
+Patch0014: 0014-multipath-fix-max-array-size-in-print_cmd_valid.patch
+Patch0015: 0015-multipathd-function-return-value-tweaks.patch
+Patch0016: 0016-multipathd-minor-fixes.patch
+Patch0017: 0017-multipathd-remove-useless-check-and-fix-format.patch
+Patch0018: 0018-multipathd-fix-memory-leak-on-error-in-configure.patch
+Patch0019: 0019-libmultipath-Don-t-blank-intialized-paths.patch
+Patch0020: 0020-libmultipath-Fixup-updating-paths.patch
+Patch0021: 0021-multipath-tweak-logging-style.patch
+Patch0022: 0022-multipathd-check-for-NULL-udevice-in-cli_add_path.patch
+Patch0023: 0023-libmultipath-remove-max_fds-code-duplication.patch
+Patch0024: 0024-multipathd-set-return-code-for-multipathd-commands.patch
+Patch0025: 0025-mpathpersist-fix-registration-rollback-issue.patch
+Patch0026: 0026-RH-fixup-udev-rules-for-redhat.patch
+Patch0027: 0027-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0028: 0028-RH-don-t-start-without-a-config-file.patch
+Patch0029: 0029-RH-use-rpm-optflags-if-present.patch
+Patch0030: 0030-RH-add-mpathconf.patch
+Patch0031: 0031-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0032: 0032-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0033: 0033-RH-reset-default-find_mutipaths-value-to-off.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -120,7 +125,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-1a8625a
+%setup -q -n multipath-tools-b80318b
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -149,6 +154,11 @@ device-mapper-multipath's libdmmp C API library
 %patch0026 -p1
 %patch0027 -p1
 %patch0028 -p1
+%patch0029 -p1
+%patch0030 -p1
+%patch0031 -p1
+%patch0032 -p1
+%patch0033 -p1
 cp %{SOURCE1} .
 
 %build
@@ -264,6 +274,18 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Oct  9 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-7.gitb80318b
+- Update Source to latest upstream commit
+- Rename files
+  * Previous patches 0001-0020 are now patches 0002-0021
+  * Previous patches 0021-0028 are now patches 0026-0033
+- Add 0001-kpartx-Use-absolute-paths-to-create-mappings.patch
+- Add 0022-multipathd-check-for-NULL-udevice-in-cli_add_path.patch
+- Add 0023-libmultipath-remove-max_fds-code-duplication.patch
+- Add 0024-multipathd-set-return-code-for-multipathd-commands.patch
+- Add 0025-mpathpersist-fix-registration-rollback-issue.patch
+  * The above 5 patches have been submitted upstream
+
 * Thu Sep 27 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.7-6.git1a8625a
 - Update Source to latest upstream commit
   * Previous patches 0001-0011 are included in this commit

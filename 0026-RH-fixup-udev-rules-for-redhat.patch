@@ -65,10 +65,10 @@ index 0828a8f..b9bbb3c 100644
  	$(RM) $(DESTDIR)$(man5dir)/$(EXEC).conf.5.gz
  
 diff --git a/multipath/main.c b/multipath/main.c
-index d5aad95..8086b76 100644
+index 05b7bf0..ffa5b22 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
-@@ -403,7 +403,7 @@ static int find_multipaths_check_timeout(const struct path *pp, long tmo,
+@@ -401,7 +401,7 @@ static int find_multipaths_check_timeout(const struct path *pp, long tmo,
  	struct timespec now, ftimes[2], tdiff;
  	struct stat st;
  	long fd;

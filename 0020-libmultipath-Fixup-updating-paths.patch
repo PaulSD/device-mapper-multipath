@@ -33,10 +33,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 14 insertions(+), 10 deletions(-)
 
 diff --git a/multipathd/main.c b/multipathd/main.c
-index 61ca455..d6d122a 100644
+index 04dce04..af33239 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -1207,6 +1207,15 @@ uev_update_path (struct uevent *uev, struct vectors * vecs)
+@@ -1208,6 +1208,15 @@ uev_update_path (struct uevent *uev, struct vectors * vecs)
  		struct multipath *mpp = pp->mpp;
  		char wwid[WWID_SIZE];
  
@@ -52,7 +52,7 @@ index 61ca455..d6d122a 100644
  		strcpy(wwid, pp->wwid);
  		get_uid(pp, pp->state, uev->udev);
  
-@@ -1215,9 +1224,8 @@ uev_update_path (struct uevent *uev, struct vectors * vecs)
+@@ -1216,9 +1225,8 @@ uev_update_path (struct uevent *uev, struct vectors * vecs)
  				uev->kernel, wwid, pp->wwid,
  				(disable_changed_wwids ? "disallowing" :
  				 "continuing"));
@@ -64,7 +64,7 @@ index 61ca455..d6d122a 100644
  				if (!pp->wwid_changed) {
  					pp->wwid_changed = 1;
  					pp->tick = 1;
-@@ -1225,11 +1233,9 @@ uev_update_path (struct uevent *uev, struct vectors * vecs)
+@@ -1226,11 +1234,9 @@ uev_update_path (struct uevent *uev, struct vectors * vecs)
  						dm_fail_path(pp->mpp->alias, pp->dev_t);
  				}
  				goto out;
@@ -78,7 +78,7 @@ index 61ca455..d6d122a 100644
  			udev_device_unref(pp->udev);
  			pp->udev = udev_device_ref(uev->udev);
  			conf = get_multipath_config();
-@@ -1240,9 +1246,7 @@ uev_update_path (struct uevent *uev, struct vectors * vecs)
+@@ -1241,9 +1247,7 @@ uev_update_path (struct uevent *uev, struct vectors * vecs)
  			pthread_cleanup_pop(1);
  		}
  

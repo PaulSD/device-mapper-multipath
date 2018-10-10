@@ -35,10 +35,10 @@ index 8136d15..0433b49 100644
  		condlog(level, "libdevmapper: %s(%i): ", file, line);
  		log_safe(level + 3, f, ap);
 diff --git a/multipathd/main.c b/multipathd/main.c
-index d6d122a..3c1d89f 100644
+index af33239..5f0193b 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -2983,6 +2983,7 @@ main (int argc, char *argv[])
+@@ -2984,6 +2984,7 @@ main (int argc, char *argv[])
  			logsink = -1;
  			break;
  		case 'k':
@@ -46,7 +46,7 @@ index d6d122a..3c1d89f 100644
  			conf = load_config(DEFAULT_CONFIGFILE);
  			if (!conf)
  				exit(1);
-@@ -3012,6 +3013,7 @@ main (int argc, char *argv[])
+@@ -3013,6 +3014,7 @@ main (int argc, char *argv[])
  		char * s = cmd;
  		char * c = s;
  

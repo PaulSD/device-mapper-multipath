@@ -12,10 +12,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/multipathd/main.c b/multipathd/main.c
-index 3c2fe7b..61ca455 100644
+index 463b1b8..04dce04 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -2277,7 +2277,7 @@ configure (struct vectors * vecs)
+@@ -2278,7 +2278,7 @@ configure (struct vectors * vecs)
  	ret = path_discovery(vecs->pathvec, DI_ALL);
  	if (ret < 0) {
  		condlog(0, "configure failed at path discovery");
@@ -24,7 +24,7 @@ index 3c2fe7b..61ca455 100644
  	}
  
  	vector_foreach_slot (vecs->pathvec, pp, i){
-@@ -2294,7 +2294,7 @@ configure (struct vectors * vecs)
+@@ -2295,7 +2295,7 @@ configure (struct vectors * vecs)
  	}
  	if (map_discovery(vecs)) {
  		condlog(0, "configure failed at map discovery");
@@ -33,7 +33,7 @@ index 3c2fe7b..61ca455 100644
  	}
  
  	/*
-@@ -2308,7 +2308,7 @@ configure (struct vectors * vecs)
+@@ -2309,7 +2309,7 @@ configure (struct vectors * vecs)
  		force_reload = FORCE_RELOAD_YES;
  	if (ret) {
  		condlog(0, "configure failed while coalescing paths");
@@ -42,7 +42,7 @@ index 3c2fe7b..61ca455 100644
  	}
  
  	/*
-@@ -2317,7 +2317,7 @@ configure (struct vectors * vecs)
+@@ -2318,7 +2318,7 @@ configure (struct vectors * vecs)
  	 */
  	if (coalesce_maps(vecs, mpvec)) {
  		condlog(0, "configure failed while coalescing maps");
@@ -51,7 +51,7 @@ index 3c2fe7b..61ca455 100644
  	}
  
  	dm_lib_release();
-@@ -2353,6 +2353,10 @@ configure (struct vectors * vecs)
+@@ -2354,6 +2354,10 @@ configure (struct vectors * vecs)
  			i--;
  	}
  	return 0;

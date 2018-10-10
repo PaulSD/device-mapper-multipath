@@ -14,7 +14,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/multipathd/main.c b/multipathd/main.c
-index cc493c1..125a805 100644
+index ba796ab..cd96304 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
 @@ -429,7 +429,7 @@ int update_multipath (struct vectors *vecs, char *mapname, int reset)
@@ -26,7 +26,7 @@ index cc493c1..125a805 100644
  				int oldstate = pp->state;
  				int checkint;
  
-@@ -1096,7 +1096,7 @@ ev_remove_path (struct path *pp, struct vectors * vecs, int need_do_map)
+@@ -1097,7 +1097,7 @@ ev_remove_path (struct path *pp, struct vectors * vecs, int need_do_map)
  			/*
  			 * flush_map will fail if the device is open
  			 */

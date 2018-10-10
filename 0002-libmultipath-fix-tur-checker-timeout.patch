@@ -5,45 +5,44 @@ Subject: [PATCH] libmultipath: fix tur checker timeout
 
 The code previously was timing out mode if ct->thread was 0 but
 ct->running wasn't. This combination never happens.  The idea was to
-timeout if for some reason the path checker tried to kill the thread,
+timeout if for some reason the path checker tried to cancel the thread,
 but it didn't die.  The correct thing to check for this is ct->holders.
 ct->holders will always be at least one when libcheck_check() is called,
 since libcheck_free() won't get called until the device is no longer
 being checked. So, if ct->holders is 2, that means that the tur thread
 is has not shut down yet.
 
-Also, instead of returning PATH_TIMEOUT whenever the thread hasn't died,
-it should only time out if the thread didn't successfully get a value,
-which means the previous state was already PATH_TIMEOUT.
+Also, instead of timing out, the tur checker will switch to synchronous
+mode.  The chance of this code path happening is very low.  I simply
+exists because the old thread must not interfere with a new thread
+starting up. But if something does go very wrong, and a thread does get
+stuck, this solution will keep the checker from just ignoring the device
+forever.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
- libmultipath/checkers/tur.c | 15 +++++++++------
- 1 file changed, 9 insertions(+), 6 deletions(-)
+ libmultipath/checkers/tur.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/libmultipath/checkers/tur.c b/libmultipath/checkers/tur.c
-index bf8486d..275541f 100644
+index bf8486d..3c5e236 100644
 --- a/libmultipath/checkers/tur.c
 +++ b/libmultipath/checkers/tur.c
-@@ -355,12 +355,15 @@ int libcheck_check(struct checker * c)
+@@ -355,12 +355,13 @@ int libcheck_check(struct checker * c)
  		}
  		pthread_mutex_unlock(&ct->lock);
  	} else {
 -		if (uatomic_read(&ct->running) != 0) {
 -			/* pthread cancel failed. continue in sync mode */
--			pthread_mutex_unlock(&ct->lock);
--			condlog(3, "%s: tur thread not responding",
--				tur_devt(devt, sizeof(devt), ct));
--			return PATH_TIMEOUT;
 +		if (uatomic_read(&ct->holders) > 1) {
-+			/* pthread cancel failed. If it didn't get the path
-+			   state already, timeout */
-+			if (ct->state == PATH_PENDING) {
-+				pthread_mutex_unlock(&ct->lock);
-+				condlog(3, "%s: tur thread not responding",
-+					tur_devt(devt, sizeof(devt), ct));
-+				return PATH_TIMEOUT;
-+			}
++			/* The thread has been cancelled but hasn't
++			 * quilt. Fail back to synchronous mode */
+ 			pthread_mutex_unlock(&ct->lock);
+-			condlog(3, "%s: tur thread not responding",
++			condlog(3, "%s: tur checker failing back to sync",
+ 				tur_devt(devt, sizeof(devt), ct));
+-			return PATH_TIMEOUT;
++			return tur_check(c->fd, c->timeout, copy_msg_to_checker, c);
  		}
  		/* Start new TUR checker */
  		ct->state = PATH_UNCHECKED;

@@ -15,7 +15,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 9 insertions(+), 5 deletions(-)
 
 diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
-index 0b1855d..3e0db7f 100644
+index f973d4b..301093f 100644
 --- a/libmultipath/discovery.c
 +++ b/libmultipath/discovery.c
 @@ -1116,17 +1116,21 @@ get_vpd_sgio (int fd, int pg, char * str, int maxlen)

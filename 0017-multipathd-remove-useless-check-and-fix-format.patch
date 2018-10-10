@@ -14,10 +14,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/multipathd/main.c b/multipathd/main.c
-index 125a805..3c2fe7b 100644
+index cd96304..463b1b8 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -1978,14 +1978,14 @@ check_path (struct vectors * vecs, struct path * pp, int ticks)
+@@ -1979,14 +1979,14 @@ check_path (struct vectors * vecs, struct path * pp, int ticks)
  			return 1;
  		}
  
