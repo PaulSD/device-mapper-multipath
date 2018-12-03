@@ -16,13 +16,14 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 35 insertions(+), 6 deletions(-)
 
 diff --git a/libmultipath/dict.c b/libmultipath/dict.c
-index bf4701e..9d63d26 100644
+index a81c051..fbef142 100644
 --- a/libmultipath/dict.c
 +++ b/libmultipath/dict.c
 @@ -58,6 +58,21 @@ set_str(vector strvec, void *ptr)
+ 	return 0;
  }
  
- static int
++static int
 +set_regex(vector strvec, void *ptr)
 +{
 +	char **str_ptr = (char **)ptr;
@@ -37,11 +38,10 @@ index bf4701e..9d63d26 100644
 +	return 0;
 +}
 +
-+static int
+ static int
  set_yes_no(vector strvec, void *ptr)
  {
- 	char * buff;
-@@ -1336,7 +1351,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
+@@ -1347,7 +1362,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -50,7 +50,7 @@ index bf4701e..9d63d26 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1352,7 +1367,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
+@@ -1363,7 +1378,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -59,7 +59,7 @@ index bf4701e..9d63d26 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1455,16 +1470,16 @@ device_handler(struct config *conf, vector strvec)
+@@ -1466,16 +1481,16 @@ device_handler(struct config *conf, vector strvec)
  	return 0;
  }
  
@@ -117,5 +117,5 @@ index 62906e9..b791705 100644
  extern struct keyword * find_keyword(vector keywords, vector v, char * name);
  int snprint_keyword(char *buff, int len, char *fmt, struct keyword *kw,
 -- 
-2.7.4
+2.17.2
 

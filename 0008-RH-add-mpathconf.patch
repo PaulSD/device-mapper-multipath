@@ -14,17 +14,17 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/config.c |   2 +
  multipath/Makefile    |   5 +
- multipath/mpathconf   | 464 ++++++++++++++++++++++++++++++++++++++++++++++++++
- multipath/mpathconf.8 | 119 +++++++++++++
+ multipath/mpathconf   | 464 ++++++++++++++++++++++++++++++++++++++++++
+ multipath/mpathconf.8 | 119 +++++++++++
  4 files changed, 590 insertions(+)
  create mode 100644 multipath/mpathconf
  create mode 100644 multipath/mpathconf.8
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 6a9340a..bfd07e3 100644
+index 2a9c668..654f330 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -748,6 +748,8 @@ load_config (char * file)
+@@ -746,6 +746,8 @@ load_config (char * file)
  		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
  	} else {
  		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
@@ -663,5 +663,5 @@ index 0000000..5b7ae0c
 +.SH AUTHOR
 +Benjamin Marzinski <bmarzins@redhat.com>
 -- 
-2.7.4
+2.17.2
 

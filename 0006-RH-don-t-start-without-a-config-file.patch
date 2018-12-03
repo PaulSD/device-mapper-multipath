@@ -20,7 +20,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 20 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 0aef186..6a9340a 100644
+index 5af7af5..2a9c668 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
 @@ -26,6 +26,7 @@
@@ -31,7 +31,7 @@ index 0aef186..6a9340a 100644
  
  static int
  hwe_strmatch (const struct hwentry *hwe1, const struct hwentry *hwe2)
-@@ -745,6 +746,20 @@ load_config (char * file)
+@@ -743,6 +744,20 @@ load_config (char * file)
  			goto out;
  		}
  		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
@@ -65,7 +65,7 @@ index 7d0cd9a..d7fb8e2 100644
  /*
   * In kernel, fast_io_fail == 0 means immediate failure on rport delete.
 diff --git a/multipath/multipath.rules b/multipath/multipath.rules
-index d658073..b3f54d7 100644
+index 9df11a9..0486bf7 100644
 --- a/multipath/multipath.rules
 +++ b/multipath/multipath.rules
 @@ -9,6 +9,7 @@ IMPORT{cmdline}="nompath"
@@ -102,5 +102,5 @@ index ba24983..17434ce 100644
  Conflicts=shutdown.target
  ConditionKernelCommandLine=!nompath
 -- 
-2.7.4
+2.17.2
 

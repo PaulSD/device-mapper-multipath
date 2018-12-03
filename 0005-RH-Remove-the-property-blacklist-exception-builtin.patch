@@ -76,5 +76,5 @@ index 6333366..3dab26b 100644
  .B protocol
  Regular expression for the protocol of a device to be excluded/included.
 -- 
-2.7.4
+2.17.2
 

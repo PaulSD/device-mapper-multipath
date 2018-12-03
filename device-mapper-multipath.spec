@@ -1,5 +1,5 @@
 Name:    device-mapper-multipath
-Version: 0.7.8
+Version: 0.7.9
 Release: 1%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
@@ -7,23 +7,20 @@ URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.7.8;sf=tgz" -o multipath-tools-0.7.8.tgz
-Source0: multipath-tools-0.7.8.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.7.9;sf=tgz" -o multipath-tools-0.7.9.tgz
+Source0: multipath-tools-0.7.9.tgz
 Source1: multipath.conf
-Patch0001: 0001-multipath-tweak-logging-style.patch
-Patch0002: 0002-multipathd-check-for-NULL-udevice-in-cli_add_path.patch
-Patch0003: 0003-libmultipath-remove-max_fds-code-duplication.patch
-Patch0004: 0004-multipathd-set-return-code-for-multipathd-commands.patch
-Patch0005: 0005-mpathpersist-fix-registration-rollback-issue.patch
-Patch0006: 0006-libmultipath-timeout-on-unresponsive-tur-thread.patch
-Patch0007: 0007-RH-fixup-udev-rules-for-redhat.patch
-Patch0008: 0008-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0009: 0009-RH-don-t-start-without-a-config-file.patch
-Patch0010: 0010-RH-use-rpm-optflags-if-present.patch
-Patch0011: 0011-RH-add-mpathconf.patch
-Patch0012: 0012-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0013: 0013-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0014: 0014-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0001: 0001-multipathd-fix-mpp-hwe-handling-when-paths-are-freed.patch
+Patch0002: 0002-libmultipath-cleanup-pthread_cleanup_pop-call.patch
+Patch0003: 0003-libmultipath-fix-false-removes-in-dmevents-polling-c.patch
+Patch0004: 0004-RH-fixup-udev-rules-for-redhat.patch
+Patch0005: 0005-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0006: 0006-RH-don-t-start-without-a-config-file.patch
+Patch0007: 0007-RH-use-rpm-optflags-if-present.patch
+Patch0008: 0008-RH-add-mpathconf.patch
+Patch0009: 0009-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0010: 0010-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0011: 0011-RH-reset-default-find_mutipaths-value-to-off.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -106,7 +103,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-0.7.8
+%setup -q -n multipath-tools-0.7.9
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -118,9 +115,6 @@ device-mapper-multipath's libdmmp C API library
 %patch0009 -p1
 %patch0010 -p1
 %patch0011 -p1
-%patch0012 -p1
-%patch0013 -p1
-%patch0014 -p1
 cp %{SOURCE1} .
 
 %build
@@ -236,6 +230,16 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Dec  3 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.9-1
+- Update Source to upstream version 0.7.9
+  * Previous patches 0001-0006 are included in this version
+- Rename files
+  * Previous patches 0007-0014 are now patches 0004-0011
+- Add 0001-multipathd-fix-mpp-hwe-handling-when-paths-are-freed.patch
+- Add 0002-libmultipath-cleanup-pthread_cleanup_pop-call.patch
+- Add 0003-libmultipath-fix-false-removes-in-dmevents-polling-c.patch
+  * The above 3 patches have been submitted upstream
+
 * Wed Oct 10 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.8-1
 - Update Source to upstream version 0.7.8
   * Previous patches 0001-0020 are included in this version

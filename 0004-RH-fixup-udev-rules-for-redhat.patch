@@ -65,7 +65,7 @@ index 0828a8f..b9bbb3c 100644
  	$(RM) $(DESTDIR)$(man5dir)/$(EXEC).conf.5.gz
  
 diff --git a/multipath/main.c b/multipath/main.c
-index 05b7bf0..ffa5b22 100644
+index 98fee1c..856202a 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -401,7 +401,7 @@ static int find_multipaths_check_timeout(const struct path *pp, long tmo,
@@ -78,5 +78,5 @@ index 05b7bf0..ffa5b22 100644
  	clock_gettime(CLOCK_REALTIME, &now);
  
 -- 
-2.7.4
+2.17.2
 
