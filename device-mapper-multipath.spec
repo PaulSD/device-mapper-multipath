@@ -1,26 +1,24 @@
 Name:    device-mapper-multipath
 Version: 0.7.9
-Release: 1%{?dist}
+Release: 2.git17a6101%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.7.9;sf=tgz" -o multipath-tools-0.7.9.tgz
-Source0: multipath-tools-0.7.9.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=17a6101;sf=tgz" -o multipath-tools-17a6101.tgz
+Source0: multipath-tools-17a6101.tgz
 Source1: multipath.conf
-Patch0001: 0001-multipathd-fix-mpp-hwe-handling-when-paths-are-freed.patch
-Patch0002: 0002-libmultipath-cleanup-pthread_cleanup_pop-call.patch
-Patch0003: 0003-libmultipath-fix-false-removes-in-dmevents-polling-c.patch
-Patch0004: 0004-RH-fixup-udev-rules-for-redhat.patch
-Patch0005: 0005-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0006: 0006-RH-don-t-start-without-a-config-file.patch
-Patch0007: 0007-RH-use-rpm-optflags-if-present.patch
-Patch0008: 0008-RH-add-mpathconf.patch
-Patch0009: 0009-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0010: 0010-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0011: 0011-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0001: 0001-libmultipath-dm_is_mpath-cleanup.patch
+Patch0002: 0002-RH-fixup-udev-rules-for-redhat.patch
+Patch0003: 0003-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0004: 0004-RH-don-t-start-without-a-config-file.patch
+Patch0005: 0005-RH-use-rpm-optflags-if-present.patch
+Patch0006: 0006-RH-add-mpathconf.patch
+Patch0007: 0007-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0008: 0008-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0009: 0009-RH-reset-default-find_mutipaths-value-to-off.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -103,7 +101,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-0.7.9
+%setup -q -n multipath-tools-17a6101
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -113,8 +111,6 @@ device-mapper-multipath's libdmmp C API library
 %patch0007 -p1
 %patch0008 -p1
 %patch0009 -p1
-%patch0010 -p1
-%patch0011 -p1
 cp %{SOURCE1} .
 
 %build
@@ -230,6 +226,14 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Jan 15 2019 Benjamin Marzinski <bmarzins@redhat.com> 0.7.9-2.git17a6101
+- Update Source to latest upstream commit
+  * Previous patches 0001-0003 are included in this version
+- Rename files
+  * Previous patches 0004-0011 are now patches 0002-0009
+- Add 0001-libmultipath-dm_is_mpath-cleanup.patch
+  * This patch has been submitted upstream
+
 * Mon Dec  3 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.9-1
 - Update Source to upstream version 0.7.9
   * Previous patches 0001-0006 are included in this version
