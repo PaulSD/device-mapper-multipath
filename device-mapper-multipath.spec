@@ -184,9 +184,7 @@ fi
 %dir %{_libmpathdir}
 %{_libmpathdir}/*
 
-%post libs -p /sbin/ldconfig
-
-%postun libs -p /sbin/ldconfig
+%ldconfig_scriptlets libs
 
 %files devel
 %doc README
@@ -212,9 +210,7 @@ fi
 %doc README
 %{_libdir}/libdmmp.so.*
 
-%post -n libdmmp -p /sbin/ldconfig
-
-%postun -n libdmmp -p /sbin/ldconfig
+%ldconfig_scriptlets -n libdmmp
 
 %files -n libdmmp-devel
 %doc README
