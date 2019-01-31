@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.7.9
-Release: 3.git17a6101%{?dist}
+Release: 4.git2df6110%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -8,17 +8,22 @@ URL:     http://christophe.varoqui.free.fr/
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
 # curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=17a6101;sf=tgz" -o multipath-tools-17a6101.tgz
-Source0: multipath-tools-17a6101.tgz
+Source0: multipath-tools-2df6110.tgz
 Source1: multipath.conf
-Patch0001: 0001-libmultipath-dm_is_mpath-cleanup.patch
-Patch0002: 0002-RH-fixup-udev-rules-for-redhat.patch
-Patch0003: 0003-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0004: 0004-RH-don-t-start-without-a-config-file.patch
-Patch0005: 0005-RH-use-rpm-optflags-if-present.patch
-Patch0006: 0006-RH-add-mpathconf.patch
-Patch0007: 0007-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0008: 0008-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0009: 0009-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0001: 0001-BZ-1668693-disable-user_friendly_names-for-NetApp.patch
+Patch0002: 0002-libmultipath-handle-existing-paths-in-marginal_path-.patch
+Patch0003: 0003-multipathd-cleanup-marginal-paths-checking-timers.patch
+Patch0004: 0004-libmultipath-fix-marginal-paths-queueing-errors.patch
+Patch0005: 0005-libmultipath-fix-marginal_paths-nr_active-check.patch
+Patch0006: 0006-RH-fixup-udev-rules-for-redhat.patch
+Patch0007: 0007-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0008: 0008-RH-don-t-start-without-a-config-file.patch
+Patch0009: 0009-RH-use-rpm-optflags-if-present.patch
+Patch0010: 0010-RH-add-mpathconf.patch
+Patch0011: 0011-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0012: 0012-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0013: 0013-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0014: 0014-RH-Fix-nvme-compilation-warning.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -101,7 +106,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-17a6101
+%setup -q -n multipath-tools-2df6110
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -111,6 +116,11 @@ device-mapper-multipath's libdmmp C API library
 %patch0007 -p1
 %patch0008 -p1
 %patch0009 -p1
+%patch0010 -p1
+%patch0011 -p1
+%patch0012 -p1
+%patch0013 -p1
+%patch0014 -p1
 cp %{SOURCE1} .
 
 %build
@@ -222,6 +232,22 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Jan 31 2019 Benjamin Marzinski <bmarzins@redhat.com> - 0.7.9-4.git2df6110
+- Update Source to latest upstream commit
+  * previous patch 0001-libmultipath-dm_is_mpath-cleanup.patch is included
+    in this commit
+- Rename files
+  * Previous patches 0002-0009 are now patches 0006-0013
+- Add 0001-BZ-1668693-disable-user_friendly_names-for-NetApp.patch
+- Add 0002-libmultipath-handle-existing-paths-in-marginal_path-.patch
+- Add 0003-multipathd-cleanup-marginal-paths-checking-timers.patch
+- Add 0004-libmultipath-fix-marginal-paths-queueing-errors.patch
+- Add 0005-libmultipath-fix-marginal_paths-nr_active-check.patch
+  * The above 5 patches have been submitted upstream
+- Add 0014-RH-Fix-nvme-compilation-warning.patch
+  * This change is only necessary because of Red Hat compilation
+    differences.
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.7.9-3.git17a6101
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 

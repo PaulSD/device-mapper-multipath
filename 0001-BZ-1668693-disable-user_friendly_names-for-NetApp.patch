@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 24 Jan 2019 14:09:23 -0600
+Subject: [PATCH] BZ 1668693: disable user_friendly_names for NetApp
+
+NetApp has tools that rely on devices using WWID names. To avoid
+breaking these, NetApp devices should continue to use WWID names, even
+if the default config is set to enable user_friendly_names. If users
+want to use user_friendly_names on NetApp devices, the must specifically
+override the device config.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/hwtable.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index d3a8d9b..8776411 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -719,6 +719,7 @@ static struct hwentry default_hw[] = {
+ 		.flush_on_last_del = FLUSH_ENABLED,
+ 		.dev_loss      = MAX_DEV_LOSS_TMO,
+ 		.prio_name     = PRIO_ONTAP,
++		.user_friendly_names = USER_FRIENDLY_NAMES_OFF,
+ 	},
+ 	{
+ 		/*
+-- 
+2.17.2
+

@@ -86,7 +86,7 @@ index 0c6ee54..e32a0b0 100644
  enum {
  	WWID_IS_NOT_FAILED = 0,
 diff --git a/multipath/main.c b/multipath/main.c
-index f3265ee..37b8e31 100644
+index 5abb118..1481e7f 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -133,7 +133,7 @@ usage (char * progname)
@@ -107,7 +107,7 @@ index f3265ee..37b8e31 100644
  		"  -c      check if a device should be a path in a multipath device\n"
  		"  -C      check if a multipath device has usable paths\n"
  		"  -q      allow queue_if_no_path when multipathd is not running\n"
-@@ -879,7 +881,7 @@ main (int argc, char *argv[])
+@@ -870,7 +872,7 @@ main (int argc, char *argv[])
  		exit(RTVL_FAIL);
  	multipath_conf = conf;
  	conf->retrigger_tries = 0;
@@ -116,7 +116,7 @@ index f3265ee..37b8e31 100644
  		switch(arg) {
  		case 1: printf("optarg : %s\n",optarg);
  			break;
-@@ -949,6 +951,10 @@ main (int argc, char *argv[])
+@@ -940,6 +942,10 @@ main (int argc, char *argv[])
  		case 'T':
  			cmd = CMD_DUMP_CONFIG;
  			break;
