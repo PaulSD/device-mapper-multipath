@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.7.9
-Release: 4.git2df6110%{?dist}
+Release: 5.git2df6110%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -15,15 +15,17 @@ Patch0002: 0002-libmultipath-handle-existing-paths-in-marginal_path-.patch
 Patch0003: 0003-multipathd-cleanup-marginal-paths-checking-timers.patch
 Patch0004: 0004-libmultipath-fix-marginal-paths-queueing-errors.patch
 Patch0005: 0005-libmultipath-fix-marginal_paths-nr_active-check.patch
-Patch0006: 0006-RH-fixup-udev-rules-for-redhat.patch
-Patch0007: 0007-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0008: 0008-RH-don-t-start-without-a-config-file.patch
-Patch0009: 0009-RH-use-rpm-optflags-if-present.patch
-Patch0010: 0010-RH-add-mpathconf.patch
-Patch0011: 0011-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0012: 0012-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0013: 0013-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0014: 0014-RH-Fix-nvme-compilation-warning.patch
+Patch0006: 0006-multipathd-avoid-null-pointer-dereference-in-LOG_MSG.patch
+Patch0007: 0007-multipath-blacklist-zram-devices.patch
+Patch0008: 0008-RH-fixup-udev-rules-for-redhat.patch
+Patch0009: 0009-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0010: 0010-RH-don-t-start-without-a-config-file.patch
+Patch0011: 0011-RH-use-rpm-optflags-if-present.patch
+Patch0012: 0012-RH-add-mpathconf.patch
+Patch0013: 0013-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0014: 0014-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0015: 0015-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0016: 0016-RH-Fix-nvme-compilation-warning.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -121,6 +123,8 @@ device-mapper-multipath's libdmmp C API library
 %patch0012 -p1
 %patch0013 -p1
 %patch0014 -p1
+%patch0015 -p1
+%patch0016 -p1
 cp %{SOURCE1} .
 
 %build
@@ -232,6 +236,14 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Jan 31 2019 Benjamin Marzinski <bmarzins@redhat.com> - 0.7.9-5.git2df6110
+- Rename files
+  * Previous patch 0006-0014 are now patches 0008-0016
+- Add 0006-multipathd-avoid-null-pointer-dereference-in-LOG_MSG.patch
+- Add 0007-multipath-blacklist-zram-devices.patch
+  * The above 2 patches have been submitted upstream
+- Resolves: bz #1672761
+
 * Thu Jan 31 2019 Benjamin Marzinski <bmarzins@redhat.com> - 0.7.9-4.git2df6110
 - Update Source to latest upstream commit
   * previous patch 0001-libmultipath-dm_is_mpath-cleanup.patch is included
