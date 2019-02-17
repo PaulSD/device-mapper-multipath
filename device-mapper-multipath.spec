@@ -27,6 +27,8 @@ Patch0014: 0014-RH-warn-on-invalid-regex-instead-of-failing.patch
 Patch0015: 0015-RH-reset-default-find_mutipaths-value-to-off.patch
 Patch0016: 0016-RH-Fix-nvme-compilation-warning.patch
 
+Patch100: device-mapper-multipath-fix-systemd-detection.diff
+
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
@@ -108,23 +110,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%setup -q -n multipath-tools-2df6110
-%patch0001 -p1
-%patch0002 -p1
-%patch0003 -p1
-%patch0004 -p1
-%patch0005 -p1
-%patch0006 -p1
-%patch0007 -p1
-%patch0008 -p1
-%patch0009 -p1
-%patch0010 -p1
-%patch0011 -p1
-%patch0012 -p1
-%patch0013 -p1
-%patch0014 -p1
-%patch0015 -p1
-%patch0016 -p1
+%autosetup -n multipath-tools-2df6110 -p1
 cp %{SOURCE1} .
 
 %build
