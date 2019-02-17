@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.7.9
-Release: 5.git2df6110%{?dist}
+Release: 6.git2df6110%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -236,6 +236,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Sun Feb 17 2019 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 0.7.9-6.git2df6110
+- Rebuild for readline 8.0
+
 * Thu Jan 31 2019 Benjamin Marzinski <bmarzins@redhat.com> - 0.7.9-5.git2df6110
 - Rename files
   * Previous patch 0006-0014 are now patches 0008-0016
