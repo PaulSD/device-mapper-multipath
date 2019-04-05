@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
-Version: 0.7.9
-Release: 6.git2df6110%{?dist}
+Version: 0.8.0
+Release: 1%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -8,26 +8,35 @@ URL:     http://christophe.varoqui.free.fr/
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
 # curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=17a6101;sf=tgz" -o multipath-tools-17a6101.tgz
-Source0: multipath-tools-2df6110.tgz
+Source0: multipath-tools-0.8.0.tgz
 Source1: multipath.conf
 Patch0001: 0001-BZ-1668693-disable-user_friendly_names-for-NetApp.patch
 Patch0002: 0002-libmultipath-handle-existing-paths-in-marginal_path-.patch
 Patch0003: 0003-multipathd-cleanup-marginal-paths-checking-timers.patch
 Patch0004: 0004-libmultipath-fix-marginal-paths-queueing-errors.patch
 Patch0005: 0005-libmultipath-fix-marginal_paths-nr_active-check.patch
-Patch0006: 0006-multipathd-avoid-null-pointer-dereference-in-LOG_MSG.patch
-Patch0007: 0007-multipath-blacklist-zram-devices.patch
-Patch0008: 0008-RH-fixup-udev-rules-for-redhat.patch
-Patch0009: 0009-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0010: 0010-RH-don-t-start-without-a-config-file.patch
-Patch0011: 0011-RH-use-rpm-optflags-if-present.patch
-Patch0012: 0012-RH-add-mpathconf.patch
-Patch0013: 0013-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0014: 0014-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0015: 0015-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0016: 0016-RH-Fix-nvme-compilation-warning.patch
-
-Patch100: device-mapper-multipath-fix-systemd-detection.diff
+Patch0006: 0006-multipathd-Fix-miscounting-active-paths.patch
+Patch0007: 0007-multipathd-ignore-failed-wwid-recheck.patch
+Patch0008: 0008-libmutipath-continue-to-use-old-state-on-PATH_PENDIN.patch
+Patch0009: 0009-multipathd-use-update_path_groups-instead-of-reload_.patch
+Patch0010: 0010-multipath.conf-add-missing-options-to-man-page.patch
+Patch0011: 0011-libmultipath-add-get_uid-fallback-code-for-NVMe-devi.patch
+Patch0012: 0012-libmulitpath-cleanup-uid_fallback-code.patch
+Patch0013: 0013-multipathd-handle-changed-wwids-by-removal-and-addit.patch
+Patch0014: 0014-multipathd-remove-wwid_changed-path-attribute.patch
+Patch0015: 0015-multipathd-ignore-disable_changed_wwids.patch
+Patch0016: 0016-multipathd-Don-t-use-fallback-code-after-getting-wwi.patch
+Patch0017: 0017-libmultipath-silence-dm_is_mpath-error-messages.patch
+Patch0018: 0018-RH-fixup-udev-rules-for-redhat.patch
+Patch0019: 0019-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0020: 0020-RH-don-t-start-without-a-config-file.patch
+Patch0021: 0021-RH-use-rpm-optflags-if-present.patch
+Patch0022: 0022-RH-add-mpathconf.patch
+Patch0023: 0023-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0024: 0024-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0025: 0025-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0026: 0026-RH-Fix-nvme-compilation-warning.patch
+Patch0027: 0027-Fix-systemd-version-detection.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -110,7 +119,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%autosetup -n multipath-tools-2df6110 -p1
+%autosetup -n multipath-tools-0.8.0 -p1
 cp %{SOURCE1} .
 
 %build
@@ -222,6 +231,29 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Apr  4 2019 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.0-1
+- Update Source to upstream version 0.8.0
+  * Previous patches 0006 & 0007 are included in this commit
+- Rename files
+  * Previous patches 0008-0016 & 0100 are now patches 0018-0027
+- Add 0006-multipathd-Fix-miscounting-active-paths.patch
+- Add 0007-multipathd-ignore-failed-wwid-recheck.patch
+  * multipathd will no longer disable paths if it is unable to
+    get their wwid on a change event
+- Add 0008-libmutipath-continue-to-use-old-state-on-PATH_PENDIN.patch
+- Add 0009-multipathd-use-update_path_groups-instead-of-reload_.patch
+- Add 0010-multipath.conf-add-missing-options-to-man-page.patch
+- Add 0011-libmultipath-add-get_uid-fallback-code-for-NVMe-devi.patch
+- Add 0012-libmulitpath-cleanup-uid_fallback-code.patch
+- Add 0013-multipathd-handle-changed-wwids-by-removal-and-addit.patch
+  * if a path device changes wwid, it will now be removed and re-added
+    to the correct multipath device.
+- Add 0014-multipathd-remove-wwid_changed-path-attribute.patch
+- Add 0015-multipathd-ignore-disable_changed_wwids.patch
+- Add 0016-multipathd-Don-t-use-fallback-code-after-getting-wwi.patch
+- Add 0017-libmultipath-silence-dm_is_mpath-error-messages.patch
+  * The above 12 patches have been submitted upstream
+
 * Sun Feb 17 2019 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 0.7.9-6.git2df6110
 - Rebuild for readline 8.0
 

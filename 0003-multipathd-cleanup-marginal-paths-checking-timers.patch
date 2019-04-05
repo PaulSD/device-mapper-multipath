@@ -52,10 +52,10 @@ index 1cb3ffe..416e13a 100644
  }
  
 diff --git a/multipathd/main.c b/multipathd/main.c
-index 491832b..cac9050 100644
+index fb520b6..fe6d8ef 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -2075,7 +2075,8 @@ check_path (struct vectors * vecs, struct path * pp, int ticks)
+@@ -2079,7 +2079,8 @@ check_path (struct vectors * vecs, struct path * pp, int ticks)
  		return 1;
  	}
  

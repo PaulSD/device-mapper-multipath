@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 28 Mar 2019 17:49:38 -0500
+Subject: [PATCH] libmultipath: silence dm_is_mpath error messages
+
+When "multipath -F" is run, dm_is_mpath was printing error messages
+about partition devices, because they had already been removed, when
+it checked.  Lower the error logging level so this doesn't happen on
+the default verbosity.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/devmapper.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/devmapper.c b/libmultipath/devmapper.c
+index 3294bd4..2e79667 100644
+--- a/libmultipath/devmapper.c
++++ b/libmultipath/devmapper.c
+@@ -746,7 +746,7 @@ out_task:
+ 	dm_task_destroy(dmt);
+ out:
+ 	if (r < 0)
+-		condlog(2, "%s: dm command failed in %s", name, __FUNCTION__);
++		condlog(3, "%s: dm command failed in %s: %s", name, __FUNCTION__, strerror(errno));
+ 	return r;
+ }
+ 
+-- 
+2.17.2
+

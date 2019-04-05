@@ -86,7 +86,7 @@ index 0c6ee54..e32a0b0 100644
  enum {
  	WWID_IS_NOT_FAILED = 0,
 diff --git a/multipath/main.c b/multipath/main.c
-index 5abb118..1481e7f 100644
+index 69141db..e7771c0 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -133,7 +133,7 @@ usage (char * progname)

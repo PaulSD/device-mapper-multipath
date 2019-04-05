@@ -159,10 +159,10 @@ index bbf31b4..53d6d7d 100644
  
  #endif /* _IO_ERR_STAT_H */
 diff --git a/multipathd/main.c b/multipathd/main.c
-index cac9050..0e3ac2c 100644
+index fe6d8ef..43830e8 100644
 --- a/multipathd/main.c
 +++ b/multipathd/main.c
-@@ -2076,7 +2076,7 @@ check_path (struct vectors * vecs, struct path * pp, int ticks)
+@@ -2080,7 +2080,7 @@ check_path (struct vectors * vecs, struct path * pp, int ticks)
  	}
  
  	if ((newstate == PATH_UP || newstate == PATH_GHOST) &&

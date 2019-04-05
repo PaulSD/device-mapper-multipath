@@ -1,0 +1,56 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Tue, 26 Feb 2019 12:22:59 -0600
+Subject: [PATCH] multipath.conf: add missing options to man page
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipath/multipath.conf.5 | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
+index 0fe8461..864d7eb 100644
+--- a/multipath/multipath.conf.5
++++ b/multipath/multipath.conf.5
+@@ -1468,6 +1468,8 @@ section:
+ .TP
+ .B uid_attribute
+ .TP
++.B getuid_callout
++.TP
+ .B path_selector
+ .TP
+ .B path_checker
+@@ -1494,6 +1496,8 @@ section:
+ .TP
+ .B flush_on_last_del
+ .TP
++.B user_friendly_names
++.TP
+ .B retain_attached_hw_handler
+ .TP
+ .B detect_prio
+@@ -1525,6 +1529,8 @@ section:
+ .B max_sectors_kb
+ .TP
+ .B ghost_delay
++.TP
++.B all_tg_pt
+ .RE
+ .PD
+ .LP
+@@ -1604,7 +1610,11 @@ the values are taken from the \fIdevices\fR or \fIdefaults\fR sections:
+ .TP
+ .B skip_kpartx
+ .TP
++.B max_sectors_kb
++.TP
+ .B ghost_delay
++.TP
++.B all_tg_pt
+ .RE
+ .PD
+ .LP
+-- 
+2.17.2
+
