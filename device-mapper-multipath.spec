@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -37,6 +37,7 @@ Patch0024: 0024-RH-warn-on-invalid-regex-instead-of-failing.patch
 Patch0025: 0025-RH-reset-default-find_mutipaths-value-to-off.patch
 Patch0026: 0026-RH-Fix-nvme-compilation-warning.patch
 Patch0027: 0027-Fix-systemd-version-detection.patch
+Patch0028: 0028-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -231,6 +232,10 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Apr 12 2019 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.0-2
+- Add 0028-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+  * try to get ANA state from sysfs first, with the ioctl as a fallback
+
 * Thu Apr  4 2019 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.0-1
 - Update Source to upstream version 0.8.0
   * Previous patches 0006 & 0007 are included in this commit
