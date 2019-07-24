@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -232,6 +232,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Fri Apr 12 2019 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.0-2
 - Add 0028-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
   * try to get ANA state from sysfs first, with the ioctl as a fallback
