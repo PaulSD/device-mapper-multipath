@@ -1,4 +1,4 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From cff4e6981d8b168cabd81b3de6f9f97735de7e1a Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
 Date: Thu, 11 Apr 2019 13:25:42 -0500
 Subject: [PATCH] RH: attempt to get ANA info via sysfs first
@@ -13,7 +13,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 29 insertions(+), 2 deletions(-)
 
 diff --git a/libmultipath/prioritizers/ana.c b/libmultipath/prioritizers/ana.c
-index 990d935..d84571b 100644
+index 2673d9d9..f34ade28 100644
 --- a/libmultipath/prioritizers/ana.c
 +++ b/libmultipath/prioritizers/ana.c
 @@ -24,6 +24,7 @@

@@ -1,4 +1,4 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From bba3bc3cfd910921ab5887acdc9503610e7efa18 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
 Date: Fri, 17 Oct 2014 11:20:34 -0500
 Subject: [PATCH] RH: add wwids from kernel cmdline mpath.wwids with -A
@@ -22,10 +22,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 60 insertions(+), 3 deletions(-)
 
 diff --git a/libmultipath/wwids.c b/libmultipath/wwids.c
-index 53e7951..39e08cd 100644
+index ef748125..349da8b7 100644
 --- a/libmultipath/wwids.c
 +++ b/libmultipath/wwids.c
-@@ -443,3 +443,47 @@ int op ## _wwid(const char *wwid) \
+@@ -444,3 +444,47 @@ int op ## _wwid(const char *wwid) \
  declare_failed_wwid_op(is_failed, false)
  declare_failed_wwid_op(mark_failed, true)
  declare_failed_wwid_op(unmark_failed, true)
@@ -74,7 +74,7 @@ index 53e7951..39e08cd 100644
 +	return ret;
 +}
 diff --git a/libmultipath/wwids.h b/libmultipath/wwids.h
-index 0c6ee54..e32a0b0 100644
+index 0c6ee54d..e32a0b0e 100644
 --- a/libmultipath/wwids.h
 +++ b/libmultipath/wwids.h
 @@ -17,6 +17,7 @@ int remember_wwid(char *wwid);
@@ -86,19 +86,19 @@ index 0c6ee54..e32a0b0 100644
  enum {
  	WWID_IS_NOT_FAILED = 0,
 diff --git a/multipath/main.c b/multipath/main.c
-index 69141db..e7771c0 100644
+index 4f4d8e89..22aff7be 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
-@@ -133,7 +133,7 @@ usage (char * progname)
- {
- 	fprintf (stderr, VERSION_STRING);
- 	fprintf (stderr, "Usage:\n");
--	fprintf (stderr, "  %s [-a|-c|-w|-W] [-d] [-r] [-i] [-v lvl] [-p pol] [-b fil] [-q] [dev]\n", progname);
-+	fprintf (stderr, "  %s [-a|-A|-c|-w|-W] [-d] [-r] [-i] [-v lvl] [-p pol] [-b fil] [-q] [dev]\n", progname);
- 	fprintf (stderr, "  %s -l|-ll|-f [-v lvl] [-b fil] [-R num] [dev]\n", progname);
- 	fprintf (stderr, "  %s -F [-v lvl] [-R num]\n", progname);
- 	fprintf (stderr, "  %s [-t|-T]\n", progname);
-@@ -147,6 +147,8 @@ usage (char * progname)
+@@ -138,7 +138,7 @@ usage (char * progname)
+ 	fprintf (stderr, "  %s [-v level] [-R retries] -F\n", progname);
+ 	fprintf (stderr, "  %s [-v level] [-l|-ll] [device]\n", progname);
+ 	fprintf (stderr, "  %s [-v level] [-a|-w] device\n", progname);
+-	fprintf (stderr, "  %s [-v level] -W\n", progname);
++	fprintf (stderr, "  %s [-v level] [-A|-W]\n", progname);
+ 	fprintf (stderr, "  %s [-v level] [-i] [-c|-C] device\n", progname);
+ 	fprintf (stderr, "  %s [-v level] [-i] [-u|-U]\n", progname);
+ 	fprintf (stderr, "  %s [-h|-t|-T]\n", progname);
+@@ -151,6 +151,8 @@ usage (char * progname)
  		"  -f      flush a multipath device map\n"
  		"  -F      flush all multipath device maps\n"
  		"  -a      add a device wwid to the wwids file\n"
@@ -107,7 +107,7 @@ index 69141db..e7771c0 100644
  		"  -c      check if a device should be a path in a multipath device\n"
  		"  -C      check if a multipath device has usable paths\n"
  		"  -q      allow queue_if_no_path when multipathd is not running\n"
-@@ -870,7 +872,7 @@ main (int argc, char *argv[])
+@@ -905,7 +907,7 @@ main (int argc, char *argv[])
  		exit(RTVL_FAIL);
  	multipath_conf = conf;
  	conf->retrigger_tries = 0;
@@ -116,7 +116,7 @@ index 69141db..e7771c0 100644
  		switch(arg) {
  		case 1: printf("optarg : %s\n",optarg);
  			break;
-@@ -940,6 +942,10 @@ main (int argc, char *argv[])
+@@ -975,6 +977,10 @@ main (int argc, char *argv[])
  		case 'T':
  			cmd = CMD_DUMP_CONFIG;
  			break;
@@ -128,7 +128,7 @@ index 69141db..e7771c0 100644
  			usage(argv[0]);
  			exit(RTVL_OK);
 diff --git a/multipath/multipath.8 b/multipath/multipath.8
-index 9cdd05a..8befc45 100644
+index 9cdd05a3..8befc45a 100644
 --- a/multipath/multipath.8
 +++ b/multipath/multipath.8
 @@ -63,7 +63,7 @@ multipath \- Device mapper target autoconfig.
@@ -153,7 +153,7 @@ index 9cdd05a..8befc45 100644
  Remove the WWID for the specified device from the WWIDs file.
  .
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
-index 17434ce..0fbcc46 100644
+index 17434cef..0fbcc46b 100644
 --- a/multipathd/multipathd.service
 +++ b/multipathd/multipathd.service
 @@ -15,6 +15,7 @@ Type=notify
