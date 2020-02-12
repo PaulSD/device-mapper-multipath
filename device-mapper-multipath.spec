@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -40,6 +40,7 @@ Patch0027: 0027-RH-warn-on-invalid-regex-instead-of-failing.patch
 Patch0028: 0028-RH-reset-default-find_mutipaths-value-to-off.patch
 Patch0029: 0029-RH-Fix-nvme-compilation-warning.patch
 Patch0030: 0030-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0031: 0031-multipath-fix-issues-found-by-compiling-with-gcc-10.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -234,6 +235,11 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Feb 12 2020  Benjamin Marzinski <bmarzins@redhat.com> - 0.8.2-3
+- Add 0031-multipath-fix-issues-found-by-compiling-with-gcc-10.patch
+  * Patch submitted upstream
+- Resolves bz #1799276
+
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
