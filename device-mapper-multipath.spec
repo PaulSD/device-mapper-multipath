@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -235,6 +235,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Apr 13 2020 Björn Esser <besser82@fedoraproject.org> - 0.8.2-4
+- Fix macro escaping in %%changelog
+
 * Wed Feb 12 2020  Benjamin Marzinski <bmarzins@redhat.com> - 0.8.2-3
 - Add 0031-multipath-fix-issues-found-by-compiling-with-gcc-10.patch
   * Patch submitted upstream
@@ -419,7 +422,8 @@ fi
   * mpathpersist now accepts --param-alltgpt
 - Add 0005-libmutipath-remove-unused-IDE-bus-type.patch
 - Add 0006-multipathd-add-new-protocol-path-wildcard.patch
-  * multipathd show paths format now accepts %P for the path protocol/transport
+  * multipathd show paths format now accepts %%P for the path
+    protocol/transport
 - Add 0007-libmultipath-add-protocol-blacklist-option.patch
   * You can now use the "protocol" blacklist section parameter to blacklist
     by protocol/transport
