@@ -1,47 +1,38 @@
 Name:    device-mapper-multipath
-Version: 0.8.2
-Release: 6%{?dist}
+Version: 0.8.4
+Release: 1%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.8.2;sf=tgz" -o multipath-tools-0.8.2.tgz
-Source0: multipath-tools-0.8.2.tgz
+# curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.8.4;sf=tgz" -o multipath-tools-0.8.4.tgz
+Source0: multipath-tools-0.8.4.tgz
 Source1: multipath.conf
-Patch0001: 0001-libmultipath-make-vector_foreach_slot_backwards-work.patch
-Patch0002: 0002-libmultipath-add-marginal-paths-and-groups-infrastru.patch
-Patch0003: 0003-tests-add-path-grouping-policy-unit-tests.patch
-Patch0004: 0004-libmultipath-add-wrapper-function-around-pgpolicyfn.patch
-Patch0005: 0005-tests-update-pgpolicy-tests-to-work-with-group_paths.patch
-Patch0006: 0006-libmultipath-fix-double-free-in-pgpolicyfn-error-pat.patch
-Patch0007: 0007-libmultipath-consolidate-group_by_-functions.patch
-Patch0008: 0008-libmultipath-make-pgpolicyfn-take-a-paths-vector.patch
-Patch0009: 0009-libmultipath-make-group_paths-handle-marginal-paths.patch
-Patch0010: 0010-tests-add-tests-for-grouping-marginal-paths.patch
-Patch0011: 0011-libmultipath-add-marginal_pathgroups-config-option.patch
-Patch0012: 0012-libmutipath-deprecate-delay_-_checks.patch
-Patch0013: 0013-multipathd-use-marginal_pathgroups.patch
-Patch0014: 0014-multipath-update-man-pages.patch
-Patch0015: 0015-multipath.conf-add-enable_foreign-parameter.patch
-Patch0016: 0016-multipath.conf.5-document-foreign-library-support.patch
-Patch0017: 0017-mpathpersist-remove-broken-unused-code.patch
-Patch0018: 0018-libmultipath-EMC-PowerMax-NVMe-device-config.patch
-Patch0019: 0019-mpathpersist-fix-leaks.patch
-Patch0020: 0020-libmultipath-fix-mpcontext-initialization.patch
-Patch0021: 0021-RH-fixup-udev-rules-for-redhat.patch
-Patch0022: 0022-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0023: 0023-RH-don-t-start-without-a-config-file.patch
-Patch0024: 0024-RH-use-rpm-optflags-if-present.patch
-Patch0025: 0025-RH-add-mpathconf.patch
-Patch0026: 0026-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0027: 0027-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0028: 0028-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0029: 0029-RH-Fix-nvme-compilation-warning.patch
-Patch0030: 0030-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0031: 0031-multipath-fix-issues-found-by-compiling-with-gcc-10.patch
-Patch0032: 0032-add-support-for-upcoming-json-c-0.14.0.patch
+Patch0001:0001-libmultipath-assign-variable-to-make-gcc-happy.patch 
+Patch0002: 0002-libmutipath-don-t-close-fd-on-dm_lib_release.patch
+Patch0003: 0003-libmultipath-allow-force-reload-with-no-active-paths.patch
+Patch0004: 0004-libmpathpersist-depend-on-libmultipath.patch
+Patch0005: 0005-multipath-tools-Makefile-more-dependency-fixes-for-p.patch
+Patch0006: 0006-multipath-tools-Makefile.inc-set-Wno-error-clobbered.patch
+Patch0007: 0007-libmultipath-discovery.c-use-z-qualifier-for-size_t.patch
+Patch0008: 0008-libmultipath-eliminate-more-signed-unsigned-comparis.patch
+Patch0009: 0009-libmultipath-set_uint-fix-parsing-for-32bit.patch
+Patch0010: 0010-multipath-tools-Makefile-add-install-dependency.patch
+Patch0011: 0011-libdmmp-Add-support-for-upcoming-json-c-0.14.0.patch
+Patch0012: 0012-libmultipath-fix-condlog-NULL-argument-in-uevent_get.patch
+Patch0013: 0013-RH-fixup-udev-rules-for-redhat.patch
+Patch0014: 0014-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0015: 0015-RH-don-t-start-without-a-config-file.patch
+Patch0016: 0016-RH-use-rpm-optflags-if-present.patch
+Patch0017: 0017-RH-add-mpathconf.patch
+Patch0018: 0018-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0019: 0019-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0020: 0020-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0021: 0021-RH-Fix-nvme-compilation-warning.patch
+Patch0022: 0022-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0023: 0023-RH-work-around-gcc-10-format-truncation-issue.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -124,7 +115,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%autosetup -n multipath-tools-0.8.2 -p1
+%autosetup -n multipath-tools-0.8.4 -p1
 cp %{SOURCE1} .
 
 %build
@@ -236,6 +227,25 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri May 29 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-1
+- Update Source to upstream version 0.8.2
+  * Previoud patches 0001-0020 & 0031 are included in this commit
+- Rename files
+  * Previous patches 0021-0032 are now patches 0012-0022
+- Add 0001-libmultipath-assign-variable-to-make-gcc-happy.patch
+- Add 0002-libmutipath-don-t-close-fd-on-dm_lib_release.patch
+- Add 0003-libmultipath-allow-force-reload-with-no-active-paths.patch
+- Add 0004-libmpathpersist-depend-on-libmultipath.patch
+- Add 0005-multipath-tools-Makefile-more-dependency-fixes-for-p.patch
+- Add 0006-multipath-tools-Makefile.inc-set-Wno-error-clobbered.patch
+- Add 0007-libmultipath-discovery.c-use-z-qualifier-for-size_t.patch
+- Add 0008-libmultipath-eliminate-more-signed-unsigned-comparis.patch
+- Add 0009-libmultipath-set_uint-fix-parsing-for-32bit.patch
+- Add 0010-multipath-tools-Makefile-add-install-dependency.patch
+- Add 0012-libmultipath-fix-condlog-NULL-argument-in-uevent_get.patch
+- Add 0023-RH-work-around-gcc-10-format-truncation-issue.patch
+  * The above 10 patches have been submitted upstream
+
 * Tue Apr 21 2020 Björn Esser <besser82@fedoraproject.org> - 0.8.2-6
 - Rebuild (json-c)
 

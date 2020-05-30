@@ -1,0 +1,42 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Tue, 17 Mar 2020 17:28:24 -0500
+Subject: [PATCH] libmultipath: assign variable to make gcc happy
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+There is nothing wrong with is_queueing not being set at the start
+of __set_no_path_retry(), it will always get set before it is accessed,
+but gcc 8.2.1 is failing with
+
+structs_vec.c: In function ‘__set_no_path_retry’:
+structs_vec.c:339:7: error: ‘is_queueing’ may be used uninitialized in
+this function [-Werror=maybe-uninitialized]
+  bool is_queueing;
+       ^~~~~~~~~~~
+
+so, assign a value to make it happy.
+
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/structs_vec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/structs_vec.c b/libmultipath/structs_vec.c
+index 3dbbaa0f..077f2e42 100644
+--- a/libmultipath/structs_vec.c
++++ b/libmultipath/structs_vec.c
+@@ -336,7 +336,7 @@ static void leave_recovery_mode(struct multipath *mpp)
+ 
+ void __set_no_path_retry(struct multipath *mpp, bool check_features)
+ {
+-	bool is_queueing;
++	bool is_queueing = false; /* assign a value to make gcc happy */
+ 
+ 	check_features = check_features && mpp->features != NULL;
+ 	if (check_features)
+-- 
+2.17.2
+

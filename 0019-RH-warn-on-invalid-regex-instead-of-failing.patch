@@ -1,4 +1,4 @@
-From 779d51dcaff09fc8910d5a71e74d735f573ece9e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
 Date: Mon, 6 Nov 2017 21:39:28 -0600
 Subject: [PATCH] RH: warn on invalid regex instead of failing
@@ -16,10 +16,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 35 insertions(+), 6 deletions(-)
 
 diff --git a/libmultipath/dict.c b/libmultipath/dict.c
-index 1b3d0373..695c8404 100644
+index 0e9ea387..184d4b22 100644
 --- a/libmultipath/dict.c
 +++ b/libmultipath/dict.c
-@@ -58,6 +58,21 @@ set_str(vector strvec, void *ptr)
+@@ -103,6 +103,21 @@ set_str(vector strvec, void *ptr)
  	return 0;
  }
  
@@ -41,7 +41,7 @@ index 1b3d0373..695c8404 100644
  static int
  set_yes_no(vector strvec, void *ptr)
  {
-@@ -1422,7 +1437,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
+@@ -1504,7 +1519,7 @@ ble_ ## option ## _handler (struct config *conf, vector strvec)		\
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -50,7 +50,7 @@ index 1b3d0373..695c8404 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1438,7 +1453,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
+@@ -1520,7 +1535,7 @@ ble_ ## option ## _ ## name ## _handler (struct config *conf, vector strvec) \
  	if (!conf->option)						\
  		return 1;						\
  									\
@@ -59,7 +59,7 @@ index 1b3d0373..695c8404 100644
  	if (!buff)							\
  		return 1;						\
  									\
-@@ -1541,16 +1556,16 @@ device_handler(struct config *conf, vector strvec)
+@@ -1623,16 +1638,16 @@ device_handler(struct config *conf, vector strvec)
  	return 0;
  }
  
@@ -81,7 +81,7 @@ index 1b3d0373..695c8404 100644
  
  declare_hw_handler(hwhandler, set_str)
 diff --git a/libmultipath/parser.c b/libmultipath/parser.c
-index e00c5fff..15495d26 100644
+index d478b177..a184511b 100644
 --- a/libmultipath/parser.c
 +++ b/libmultipath/parser.c
 @@ -382,6 +382,19 @@ oom:

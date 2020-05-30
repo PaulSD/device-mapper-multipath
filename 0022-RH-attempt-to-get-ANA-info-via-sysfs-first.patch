@@ -1,4 +1,4 @@
-From cff4e6981d8b168cabd81b3de6f9f97735de7e1a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
 Date: Thu, 11 Apr 2019 13:25:42 -0500
 Subject: [PATCH] RH: attempt to get ANA info via sysfs first
@@ -13,7 +13,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 29 insertions(+), 2 deletions(-)
 
 diff --git a/libmultipath/prioritizers/ana.c b/libmultipath/prioritizers/ana.c
-index 2673d9d9..f34ade28 100644
+index b5c7873d..e139360c 100644
 --- a/libmultipath/prioritizers/ana.c
 +++ b/libmultipath/prioritizers/ana.c
 @@ -24,6 +24,7 @@
@@ -40,11 +40,11 @@ index 2673d9d9..f34ade28 100644
  };
  
  static const char *anas_string[] = {
-@@ -106,6 +109,27 @@ static int get_ana_state(__u32 nsid, __u32 anagrpid, void *ana_log,
+@@ -107,6 +110,27 @@ static int get_ana_state(__u32 nsid, __u32 anagrpid, void *ana_log,
  	return -ANA_ERR_GETANAS_NOTFOUND;
  }
  
-+int get_ana_info_sysfs(struct path *pp)
++static int get_ana_info_sysfs(struct path *pp)
 +{
 +	char state[32];
 +
@@ -65,19 +65,19 @@ index 2673d9d9..f34ade28 100644
 +	return -ANA_ERR_INVALID_STATE;
 +}
 +
- int get_ana_info(struct path * pp, unsigned int timeout)
+ static int get_ana_info(struct path * pp)
  {
  	int	rc;
-@@ -208,8 +232,11 @@ int getprio(struct path *pp, char *args, unsigned int timeout)
+@@ -210,8 +234,11 @@ int getprio(struct path *pp, __attribute__((unused)) char *args,
  
  	if (pp->fd < 0)
  		rc = -ANA_ERR_NO_INFORMATION;
 -	else
--		rc = get_ana_info(pp, timeout);
+-		rc = get_ana_info(pp);
 +	else {
 +		rc = get_ana_info_sysfs(pp);
 +		if (rc < 0)
-+			rc = get_ana_info(pp, timeout);
++			rc = get_ana_info(pp);
 +	}
  
  	switch (rc) {

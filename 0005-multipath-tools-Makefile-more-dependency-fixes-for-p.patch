@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 12 May 2020 00:39:21 +0200
+Subject: [PATCH] multipath-tools: Makefile: more dependency fixes for parallel
+ build
+
+Extend the late fixes from Christian.
+
+Cc: Christian Hesse <mail@eworm.de>
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index ba1d73ba..fec3b73b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -28,8 +28,9 @@ all:	$(BUILDDIRS)
+ $(BUILDDIRS):
+ 	$(MAKE) -C $@
+ 
+-libmpathpersist multipath multipathd mpathpersist: libmultipath
+-mpathpersist:  libmpathpersist
++libmultipath libdmmp: libmpathcmd
++libmpathpersist multipath multipathd: libmultipath
++mpathpersist multipathd:  libmpathpersist
+ 
+ $(BUILDDIRS.clean):
+ 	$(MAKE) -C ${@:.clean=} clean
+-- 
+2.17.2
+

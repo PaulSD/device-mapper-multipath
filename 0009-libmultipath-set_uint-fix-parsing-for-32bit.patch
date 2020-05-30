@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 12 May 2020 00:39:27 +0200
+Subject: [PATCH] libmultipath: set_uint: fix parsing for 32bit
+
+On architectures where sizeof(long) == sizeof(int), the code wouldn't
+work as intended. Use strtoul instead. As strtoul happily parses
+negative numbers as input, require the number to begin with a digit.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/dict.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/libmultipath/dict.c b/libmultipath/dict.c
+index 3e25e74f..0e9ea387 100644
+--- a/libmultipath/dict.c
++++ b/libmultipath/dict.c
+@@ -60,19 +60,22 @@ static int
+ set_uint(vector strvec, void *ptr)
+ {
+ 	unsigned int *uint_ptr = (unsigned int *)ptr;
+-	char *buff, *eptr;
+-	long res;
++	char *buff, *eptr, *p;
++	unsigned long res;
+ 	int rc;
+ 
+ 	buff = set_value(strvec);
+ 	if (!buff)
+ 		return 1;
+ 
+-	res = strtol(buff, &eptr, 10);
++	p = buff;
++	while (isspace(*p))
++		p++;
++	res = strtoul(p, &eptr, 10);
+ 	if (eptr > buff)
+ 		while (isspace(*eptr))
+ 			eptr++;
+-	if (*buff == '\0' || *eptr != '\0' || res < 0 || res > UINT_MAX) {
++	if (*buff == '\0' || *eptr != '\0' || !isdigit(*p) || res > UINT_MAX) {
+ 		condlog(1, "%s: invalid value for %s: \"%s\"",
+ 			__func__, (char*)VECTOR_SLOT(strvec, 0), buff);
+ 		rc = 1;
+-- 
+2.17.2
+

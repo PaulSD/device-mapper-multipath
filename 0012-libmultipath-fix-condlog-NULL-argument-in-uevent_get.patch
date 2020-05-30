@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Fri, 29 May 2020 15:13:59 -0500
+Subject: [PATCH] libmultipath: fix condlog NULL argument in uevent_get_env_var
+
+uevent_get_env_var() could call condlog with p == NULL. On gcc 10,
+this triggers warnings like:
+
+In file included from uevent.c:47:
+In function 'uevent_get_env_var',
+    inlined from 'uevent_get_wwid' at uevent.c:170:8:
+debug.h:13:2: error: '%s' directive argument is null
+[-Werror=format-overflow=]
+   13 |  dlog(logsink, prio, fmt "\n", ##args)
+      |  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uevent.c:132:2: note: in expansion of macro 'condlog'
+  132 |  condlog(4, "%s: %s -> '%s'", __func__, attr, p);
+      |  ^~~~~~~
+uevent.c: In function 'uevent_get_wwid':
+uevent.c:132:25: note: format string is defined here
+  132 |  condlog(4, "%s: %s -> '%s'", __func__, attr, p);
+      |                         ^~
+
+If p is NULL, use "(null)" instead.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/uevent.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/uevent.c b/libmultipath/uevent.c
+index d38e8a7f..e0d13b11 100644
+--- a/libmultipath/uevent.c
++++ b/libmultipath/uevent.c
+@@ -129,7 +129,7 @@ static const char* uevent_get_env_var(const struct uevent *uev,
+ 		}
+ 	}
+ 
+-	condlog(4, "%s: %s -> '%s'", __func__, attr, p);
++	condlog(4, "%s: %s -> '%s'", __func__, attr, p ?: "(null)");
+ 	return p;
+ 
+ invalid:
+-- 
+2.17.2
+

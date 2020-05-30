@@ -1,4 +1,4 @@
-From 4e4c589657eecfe5d37636ce91eb2945f63fc0a6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
 Date: Wed, 15 Oct 2014 10:39:30 -0500
 Subject: [PATCH] RH: don't start without a config file
@@ -20,7 +20,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 20 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 20e3b8bf..c36bc69c 100644
+index b4d87689..b36778b0 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
 @@ -26,6 +26,7 @@
@@ -31,7 +31,7 @@ index 20e3b8bf..c36bc69c 100644
  
  static int
  hwe_strmatch (const struct hwentry *hwe1, const struct hwentry *hwe2)
-@@ -743,6 +744,20 @@ load_config (char * file)
+@@ -778,6 +779,20 @@ load_config (char * file)
  			goto out;
  		}
  		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
@@ -53,7 +53,7 @@ index 20e3b8bf..c36bc69c 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index ffec3103..6dbf553d 100644
+index ceecff2d..3368d8c9 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -9,6 +9,7 @@

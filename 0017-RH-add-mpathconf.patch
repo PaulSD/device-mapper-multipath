@@ -1,4 +1,4 @@
-From 64b336a47365eb0ee91a917d6b98c6c695775a36 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
 Date: Thu, 16 Oct 2014 15:49:01 -0500
 Subject: [PATCH] RH: add mpathconf
@@ -14,17 +14,17 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/config.c |   2 +
  multipath/Makefile    |   5 +
- multipath/mpathconf   | 464 ++++++++++++++++++++++++++++++++++++++++++
- multipath/mpathconf.8 | 119 +++++++++++
- 4 files changed, 590 insertions(+)
+ multipath/mpathconf   | 555 ++++++++++++++++++++++++++++++++++++++++++
+ multipath/mpathconf.8 | 135 ++++++++++
+ 4 files changed, 697 insertions(+)
  create mode 100644 multipath/mpathconf
  create mode 100644 multipath/mpathconf.8
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index c36bc69c..fcd17dd4 100644
+index b36778b0..26f8e050 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -746,6 +746,8 @@ load_config (char * file)
+@@ -781,6 +781,8 @@ load_config (char * file)
  		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
  	} else {
  		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
@@ -69,10 +69,10 @@ index b9bbb3cf..e720c7f6 100644
  	$(RM) core *.o $(EXEC) *.gz
 diff --git a/multipath/mpathconf b/multipath/mpathconf
 new file mode 100644
-index 00000000..e8391347
+index 00000000..f34003c9
 --- /dev/null
 +++ b/multipath/mpathconf
-@@ -0,0 +1,464 @@
+@@ -0,0 +1,555 @@
 +#!/bin/bash
 +#
 +# Copyright (C) 2010 Red Hat, Inc. All rights reserved.
@@ -92,7 +92,7 @@ index 00000000..e8391347
 +# This program was largely ripped off from lvmconf
 +#
 +
-+unset ENABLE FIND FRIENDLY MODULE MULTIPATHD HAVE_DISABLE HAVE_WWID_DISABLE HAVE_FIND HAVE_BLACKLIST HAVE_EXCEPTIONS HAVE_DEFAULTS HAVE_FRIENDLY HAVE_MULTIPATHD HAVE_MODULE HAVE_OUTFILE SHOW_STATUS CHANGED_CONFIG WWID_LIST
++unset ENABLE FIND FRIENDLY PROPERTY FOREIGN MODULE MULTIPATHD HAVE_DISABLE HAVE_WWID_DISABLE HAVE_FIND HAVE_BLACKLIST HAVE_EXCEPTIONS HAVE_DEFAULTS HAVE_FRIENDLY HAVE_PROPERTY HAVE_FOREIGN HAVE_MULTIPATHD HAVE_MODULE HAVE_OUTFILE SHOW_STATUS CHANGED_CONFIG WWID_LIST
 +
 +DEFAULT_CONFIG="# device-mapper-multipath configuration file
 +
@@ -107,6 +107,7 @@ index 00000000..e8391347
 +defaults {
 +	user_friendly_names yes
 +	find_multipaths yes
++	enable_foreign \"^$\"
 +}
 +
 +blacklist_exceptions {
@@ -129,6 +130,8 @@ index 00000000..e8391347
 +	echo "Only allow certain wwids (instead of enable): --allow <WWID>"
 +	echo "Set user_friendly_names (Default y): --user_friendly_names <y|n>"
 +	echo "Set find_multipaths (Default y): --find_multipaths <y|n>"
++	echo "Set default property blacklist (Default y): --property_blacklist <y|n>"
++	echo "Set enable_foreign to show foreign devices (Default n): --enable_foreign <y|n>"
 +	echo "Load the dm-multipath modules on enable (Default y): --with_module <y|n>"
 +	echo "start/stop/reload multipathd (Default n): --with_multipathd <y|n>"
 +	echo "select output file (Default /etc/multipath.conf): --outfile <FILE>"
@@ -230,6 +233,24 @@ index 00000000..e8391347
 +					exit 1
 +				fi
 +				;;
++			--property_blacklist)
++				if [ -n "$2" ]; then
++					PROPERTY=$2
++					shift 2
++				else
++					usage
++					exit 1
++				fi
++				;;
++			--enable_foreign)
++				if [ -n "$2" ]; then
++					FOREIGN=$2
++					shift 2
++				else
++					usage
++					exit 1
++				fi
++				;;
 +			--with_module)
 +				if [ -n "$2" ]; then
 +					MODULE=$2
@@ -267,10 +288,11 @@ index 00000000..e8391347
 +
 +function validate_args
 +{
-+	if [ "$ENABLE" = "0" ] && [ -n "$FRIENDLY" -o -n "$FIND" -o -n "$MODULE" ]; then
++	if [ "$ENABLE" = "0" ] && [ -n "$FRIENDLY" -o -n "$FIND" -o -n "$PROPERTY" -o -n "$MODULE" ]; then
 +		echo "ignoring extra parameters on disable"
 +		FRIENDLY=""
 +		FIND=""
++		PROPERTY=""
 +		MODULE=""
 +	fi
 +	if [ -n "$FRIENDLY" ] && [ "$FRIENDLY" != "y" -a "$FRIENDLY" != "n" ]; then
@@ -281,7 +303,15 @@ index 00000000..e8391347
 +		echo "--find_multipaths must be either 'y' or 'n'"
 +		exit 1
 +	fi
-+	if [ -z "$ENABLE" -a -z "$FIND" -a -z "$FRIENDLY" ]; then
++	if [ -n "$PROPERTY" ] && [ "$PROPERTY" != "y" -a "$PROPERTY" != "n" ]; then
++		echo "--property_blacklist must be either 'y' or 'n'"
++		exit 1
++	fi
++	if [ -n "$FOREIGN" ] && [ "$FOREIGN" != "y" -a "$FOREIGN" != "n" ]; then
++		echo "--enable_foreign must be either 'y' or 'n'"
++		exit 1
++	fi
++	if [ -z "$ENABLE" -a -z "$FIND" -a -z "$FRIENDLY" -a -z "$PROPERTY" ]; then
 +		SHOW_STATUS=1
 +	fi
 +	if [ -n "$MODULE" ] && [ "$MODULE" != "y" -a "$MODULE" != "n" ]; then
@@ -382,6 +412,21 @@ index 00000000..e8391347
 +	elif sed -n '/^defaults[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*user_friendly_names[[:space:]]*\(no\|0\)" ; then
 +		HAVE_FRIENDLY=0
 +	fi
++	if sed -n '/^defaults[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*#[[:space:]]*enable_foreign" ; then
++		HAVE_FOREIGN=0
++	elif sed -n '/^defaults[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*enable_foreign[[:space:]]*\"\^\$\"" ; then
++		HAVE_FOREIGN=1
++	elif sed -n '/^defaults[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*enable_foreign" ; then
++		HAVE_FOREIGN=2
++	fi
++fi
++
++if [ "$HAVE_EXCEPTIONS" = "1" ]; then
++	if sed -n '/^blacklist_exceptions[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*property[[:space:]]*\"(SCSI_IDENT_|ID_WWN)\"" ; then
++                HAVE_PROPERTY=1
++        elif sed -n '/^blacklist_exceptions[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*#[[:space:]]*property[[:space:]]*\"(SCSI_IDENT_|ID_WWN)\"" ; then
++                HAVE_PROPERTY=0
++        fi
 +fi
 +
 +if [ -n "$SHOW_STATUS" ]; then
@@ -399,6 +444,18 @@ index 00000000..e8391347
 +		echo "user_friendly_names is disabled"
 +	else
 +		echo "user_friendly_names is enabled"
++	fi
++	if [ -z "$HAVE_PROPERTY" -o "$HAVE_PROPERTY" = 0 ]; then
++		echo "default property blacklist is disabled"
++	else
++		echo "default property blacklist is enabled"
++	fi
++	if [ -z "$HAVE_FOREIGN" -o "$HAVE_FOREIGN" = 0 ]; then
++		echo "enable_foreign is not set (all foreign multipath devices will be shown)"
++	elif [ "$HAVE_FOREIGN" = 1 ]; then
++		echo "enable_foreign is set (no foreign multipath devices will be shown)"
++	else
++		echo "enable_foreign is set (foreign multipath devices may not be shown)"
 +	fi
 +	if [ -n "$HAVE_MODULE" ]; then
 +		if [ "$HAVE_MODULE" = 1 ]; then
@@ -507,6 +564,40 @@ index 00000000..e8391347
 +	fi
 +fi
 +
++if [ "$PROPERTY" = "n" ]; then
++	if [ "$HAVE_PROPERTY" = 1 ]; then
++		sed -i '/^blacklist_exceptions[[:space:]]*{/,/^}/ s/^[[:space:]]*property[[:space:]]*\"(SCSI_IDENT_|ID_WWN)\"/#	property \"(SCSI_IDENT_|ID_WWN)\"/' $TMPFILE
++		CHANGED_CONFIG=1
++	fi
++elif [ "$PROPERTY" = "y" ]; then
++	if [ -z "$HAVE_PROPERTY" ]; then
++		sed -i '/^blacklist_exceptions[[:space:]]*{/ a\
++	property "(SCSI_IDENT_|ID_WWN)"
++' $TMPFILE
++		CHANGED_CONFIG=1
++	elif [ "$HAVE_PROPERTY" = 0 ]; then
++		sed -i '/^blacklist_exceptions[[:space:]]*{/,/^}/ s/^[[:space:]]*#[[:space:]]*property[[:space:]]*\"(SCSI_IDENT_|ID_WWN)\"/	property \"(SCSI_IDENT_|ID_WWN)\"/' $TMPFILE
++		CHANGED_CONFIG=1
++	fi
++fi
++
++if [ "$FOREIGN" = "y" ]; then
++	if [ "$HAVE_FOREIGN" = 1 -o "$HAVE_FOREIGN" = 2 ]; then
++		sed -i '/^defaults[[:space:]]*{/,/^}/ s/^[[:space:]]*enable_foreign/#	enable_foreign/' $TMPFILE
++		CHANGED_CONFIG=1
++	fi
++elif [ "$FOREIGN" = "n" ]; then
++	if [ -z "$HAVE_FOREIGN" ]; then
++		sed -i '/^defaults[[:space:]]*{/ a\
++	enable_foreign "^$"
++' $TMPFILE
++		CHANGED_CONFIG=1
++	elif [ "$HAVE_FOREIGN" = 0 -o "$HAVE_FOREIGN" = 2 ]; then
++		sed -i '/^defaults[[:space:]]*{/,/^}/ s/^[[:space:]]*#\?[[:space:]]*enable_foreign.*$/	enable_foreign "^$"/' $TMPFILE
++		CHANGED_CONFIG=1
++	fi
++fi
++
 +if [ -f "$OUTPUTFILE" ]; then
 +	cp $OUTPUTFILE $OUTPUTFILE.old
 +	if [ $? != 0 ]; then
@@ -539,10 +630,10 @@ index 00000000..e8391347
 +fi
 diff --git a/multipath/mpathconf.8 b/multipath/mpathconf.8
 new file mode 100644
-index 00000000..5b7ae0c3
+index 00000000..b82961d6
 --- /dev/null
 +++ b/multipath/mpathconf.8
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,135 @@
 +.TH MPATHCONF 8 "June 2010" "" "Linux Administrator's Manual"
 +.SH NAME
 +mpathconf - A tool for configuring device-mapper-multipath
@@ -614,7 +705,7 @@ index 00000000..5b7ae0c3
 +mpathconf will not be able to revert back to its previous state. Because
 +of this, \fB--outfile\fP is required when using \fB--allow\fP.
 +.TP
-+.B --user_friendly_name \fP { \fBy\fP | \fBn\fP }
++.B --user_friendly_names \fP { \fBy\fP | \fBn\fP }
 +If set to \fBy\fP, this adds the line
 +.B user_friendly_names yes
 +to the
@@ -628,7 +719,23 @@ index 00000000..5b7ae0c3
 +to the
 +.B /etc/multipath.conf
 +defaults section. If set to \fBn\fP, this removes the line, if present. This
-+command can be used aldong with any other command.
++command can be used along with any other command.
++.TP
++.B --property_blacklist \fP { \fBy\fP | \fBn\fP }
++If set to \fBy\fP, this adds the line
++.B property "(SCSI_IDENT_|ID_WWN)"
++to the
++.B /etc/multipath.conf
++blacklist_exceptions section. If set to \fBn\fP, this removes the line, if
++present. This command can be used along with any other command.
++.TP
++.B --enable_foreign\fP { \fBy\fP | \fBn\fP }
++If set to \fBn\fP, this adds the line
++.B enable_foreign "^$"
++to the
++.B /etc/multipath.conf
++defaults section. if set to \fBy\fP, this removes the line, if present. This
++command can be used along with any other command.
 +.TP
 +.B --outfile \fB<filename>\fP
 +Write the resulting multipath configuration to \fB<filename>\fP instead of
