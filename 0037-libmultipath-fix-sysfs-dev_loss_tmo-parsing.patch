@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 2 Jul 2020 19:38:24 -0500
+Subject: [PATCH] libmultipath: fix sysfs dev_loss_tmo parsing
+
+dev_loss_tmo is a u32 value. However the kernel sysfs code prints it as
+a signed integer. This means that if dev_loss_tmo is above INT_MAX, the
+sysfs value will be a negative number. Parsing this was causing
+sysfs_set_rport_tmo() to fail.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+---
+ libmultipath/discovery.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index ffec5162..83a41a4a 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -583,7 +583,7 @@ sysfs_set_rport_tmo(struct multipath *mpp, struct path *pp)
+ 	struct udev_device *rport_dev = NULL;
+ 	char value[16], *eptr;
+ 	char rport_id[32];
+-	unsigned long long tmo = 0;
++	unsigned int tmo;
+ 	int ret;
+ 
+ 	sprintf(rport_id, "rport-%d:%d-%d",
+@@ -607,8 +607,8 @@ sysfs_set_rport_tmo(struct multipath *mpp, struct path *pp)
+ 			"error %d", rport_id, -ret);
+ 		goto out;
+ 	}
+-	tmo = strtoull(value, &eptr, 0);
+-	if (value == eptr || tmo == ULLONG_MAX) {
++	tmo = strtoul(value, &eptr, 0);
++	if (value == eptr) {
+ 		condlog(0, "%s: Cannot parse dev_loss_tmo "
+ 			"attribute '%s'", rport_id, value);
+ 		goto out;
+-- 
+2.17.2
+

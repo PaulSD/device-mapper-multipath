@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -10,29 +10,66 @@ URL:     http://christophe.varoqui.free.fr/
 # curl "https://git.opensvc.com/?p=multipath-tools/.git;a=snapshot;h=refs/tags/0.8.4;sf=tgz" -o multipath-tools-0.8.4.tgz
 Source0: multipath-tools-0.8.4.tgz
 Source1: multipath.conf
-Patch0001:0001-libmultipath-assign-variable-to-make-gcc-happy.patch 
-Patch0002: 0002-libmutipath-don-t-close-fd-on-dm_lib_release.patch
-Patch0003: 0003-libmultipath-allow-force-reload-with-no-active-paths.patch
-Patch0004: 0004-libmpathpersist-depend-on-libmultipath.patch
-Patch0005: 0005-multipath-tools-Makefile-more-dependency-fixes-for-p.patch
-Patch0006: 0006-multipath-tools-Makefile.inc-set-Wno-error-clobbered.patch
-Patch0007: 0007-libmultipath-discovery.c-use-z-qualifier-for-size_t.patch
-Patch0008: 0008-libmultipath-eliminate-more-signed-unsigned-comparis.patch
-Patch0009: 0009-libmultipath-set_uint-fix-parsing-for-32bit.patch
-Patch0010: 0010-multipath-tools-Makefile-add-install-dependency.patch
-Patch0011: 0011-libdmmp-Add-support-for-upcoming-json-c-0.14.0.patch
-Patch0012: 0012-libmultipath-fix-condlog-NULL-argument-in-uevent_get.patch
-Patch0013: 0013-RH-fixup-udev-rules-for-redhat.patch
-Patch0014: 0014-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0015: 0015-RH-don-t-start-without-a-config-file.patch
-Patch0016: 0016-RH-use-rpm-optflags-if-present.patch
-Patch0017: 0017-RH-add-mpathconf.patch
-Patch0018: 0018-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0019: 0019-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0020: 0020-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0021: 0021-RH-Fix-nvme-compilation-warning.patch
-Patch0022: 0022-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0023: 0023-RH-work-around-gcc-10-format-truncation-issue.patch
+Patch0001: 0001-libmpathpersist-limit-PRIN-allocation-length-to-8192.patch
+Patch0002: 0002-libmpathpersist-format_transportids-avoid-PROUT-over.patch
+Patch0003: 0003-libmpathpersist-mpath_format_readfullstatus-use-real.patch
+Patch0004: 0004-libmultipath-assign-variable-to-make-gcc-happy.patch
+Patch0005: 0005-libmutipath-don-t-close-fd-on-dm_lib_release.patch
+Patch0006: 0006-libmultipath-allow-force-reload-with-no-active-paths.patch
+Patch0007: 0007-kpartx.rules-honor-DM_UDEV_DISABLE_OTHER_RULES_FLAG.patch
+Patch0008: 0008-kpartx.rules-check-for-skip_kpartx-on-synthetic-ueve.patch
+Patch0009: 0009-libmpathpersist-depend-on-libmultipath.patch
+Patch0010: 0010-multipath-tools-Makefile-more-dependency-fixes-for-p.patch
+Patch0011: 0011-multipath-tools-Makefile.inc-separate-out-OPTFLAGS.patch
+Patch0012: 0012-multipath-tools-Makefile.inc-allow-user-settings-for.patch
+Patch0013: 0013-multipath-tools-Makefile.inc-set-Wno-error-clobbered.patch
+Patch0014: 0014-libmultipath-discovery.c-use-z-qualifier-for-size_t.patch
+Patch0015: 0015-libmultipath-eliminate-more-signed-unsigned-comparis.patch
+Patch0016: 0016-libmultipath-set_uint-fix-parsing-for-32bit.patch
+Patch0017: 0017-multipath-tools-tests-Makefile-add-lmpathcmd-to-LIBD.patch
+Patch0018: 0018-multipath-tools-tests-Makefile-Fix-OBJDEPS-for-hwtab.patch
+Patch0019: 0019-multipath-tools-tests-test-lib.c-drop-__wrap_is_clai.patch
+Patch0020: 0020-multipath-tools-tests-directio-fix-Wmaybe-uninitaliz.patch
+Patch0021: 0021-libmultipath-move-libsg-into-libmultipath.patch
+Patch0022: 0022-multipath-tools-Makefile-add-install-dependency.patch
+Patch0023: 0023-libmultipath-make-libmp_dm_init-optional.patch
+Patch0024: 0024-libmultipath-make-sysfs_is_multipathed-able-to-retur.patch
+Patch0025: 0025-multipath-centralize-validation-code.patch
+Patch0026: 0026-Unit-tests-for-is_path_valid.patch
+Patch0027: 0027-libmultipath-simplify-failed-wwid-code.patch
+Patch0028: 0028-libmultipath-use-atomic-linkat-in-mark_failed_wwid.patch
+Patch0029: 0029-fix-boolean-value-with-json-c-0.14.patch
+Patch0030: 0030-libmultipath-fix-condlog-NULL-argument-in-uevent_get.patch
+Patch0031: 0031-libmultipath-set-enable_foreign-to-NONE-by-default.patch
+Patch0032: 0032-multipath-add-e-option-to-enable-foreign-libraries.patch
+Patch0033: 0033-libmultipath-remove-_blacklist_exceptions-functions.patch
+Patch0034: 0034-libmultipath-fix-parser-issue-with-comments-in-strin.patch
+Patch0035: 0035-libmultipath-invert-regexes-that-start-with-exclamat.patch
+Patch0036: 0036-multipath-Fix-compiler-warnings-when-built-without-s.patch
+Patch0037: 0037-libmultipath-fix-sysfs-dev_loss_tmo-parsing.patch
+Patch0038: 0038-kpartx-read-devices-with-direct-IO.patch
+Patch0039: 0039-kpartx-handle-alternate-bsd-disklabel-location.patch
+Patch0040: 0040-libmultipath-fix-checker-detection-for-nvme-devices.patch
+Patch0041: 0041-libmultipath-make-dm_get_map-status-return-codes-sym.patch
+Patch0042: 0042-multipathd-fix-check_path-errors-with-removed-map.patch
+Patch0043: 0043-libmultipath-make-dm_flush_maps-only-return-0-on-suc.patch
+Patch0044: 0044-multipathd-add-del-maps-multipathd-command.patch
+Patch0045: 0045-multipath-make-flushing-maps-work-like-other-command.patch
+Patch0046: 0046-multipath-delegate-flushing-maps-to-multipathd.patch
+Patch0047: 0047-multipath-add-option-to-skip-multipathd-delegation.patch
+Patch0048: 0048-Makefile.inc-trim-extra-information-from-systemd-ver.patch
+Patch0049: 0049-kpartx-fix-Wsign-compare-error.patch
+Patch0050: 0050-RH-fixup-udev-rules-for-redhat.patch
+Patch0051: 0051-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0052: 0052-RH-don-t-start-without-a-config-file.patch
+Patch0053: 0053-RH-use-rpm-optflags-if-present.patch
+Patch0054: 0054-RH-add-mpathconf.patch
+Patch0055: 0055-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0056: 0056-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0057: 0057-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0058: 0058-RH-Fix-nvme-compilation-warning.patch
+Patch0059: 0059-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0060: 0060-RH-work-around-gcc-10-format-truncation-issue.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -227,8 +264,24 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Jul  8 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-2
+- Rebased on top of Martin Wilck's queue of ACKed upstream commits
+  * https://github.com/openSUSE/multipath-tools/tree/upstream-queue
+  * All previous patches have been reordered, with the exception of
+    0011-libdmmp-Add-support-for-upcoming-json-c-0.14.0.patch
+    which has been replaced with
+    0029-fix-boolean-value-with-json-c-0.14.patch
+- Modify 0054-RH-add-mpathconf.patch
+  * remove default enable_foreign and property blacklist_exceptions
+    settings, and deal with the builtin default change from
+    0031-libmultipath-set-enable_foreign-to-NONE-by-default.patch.
+    Fixes bz #1853668
+- Add 0048-Makefile.inc-trim-extra-information-from-systemd-ver.patch
+- Add 0049-kpartx-fix-Wsign-compare-error.patch
+  * The above two patches have been submitted upstream
+
 * Fri May 29 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-1
-- Update Source to upstream version 0.8.2
+- Update Source to upstream version 0.8.4
   * Previoud patches 0001-0020 & 0031 are included in this commit
 - Rename files
   * Previous patches 0021-0032 are now patches 0012-0022
@@ -509,7 +562,7 @@ fi
 - Rename files
   * Previous patches 0007-0014 are now patches 0008-0015
 
-* Tue Apr 02 2018 Björn Esser <besser82@fedoraproject.org> - 0.7.6-1.git1cb704b
+* Mon Apr 02 2018 Benjamin Marzinski <bmarzins@redhat.com> 0.7.6-1.git1cb704b
 - Update Source to the latest upstream commit
   * Previous patches 0001-0014 are included in this commit
   * Previous patches 0015-0022 are now patches 0007-0014

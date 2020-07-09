@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Mon, 11 May 2020 16:00:04 +0200
+Subject: [PATCH] multipath-tools: Makefile.inc: allow user settings for
+ LDFLAGS
+
+This allows e.g. setting LDFLAGS="-m32 -Wl,-b,elf32-i386" to compile
+for a 32bit target on a 64bit system.
+
+Note that, like CFLAGS, the variable needs to be set in the environment,
+not on the "make" command line.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 7a59db85..671dd1ca 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -104,7 +104,7 @@ CFLAGS		:= $(CFLAGS) $(OPTFLAGS) $(WARNFLAGS) -pipe \
+ BIN_CFLAGS	= -fPIE -DPIE
+ LIB_CFLAGS	= -fPIC
+ SHARED_FLAGS	= -shared
+-LDFLAGS		= -Wl,-z,relro -Wl,-z,now
++LDFLAGS		:= $(LDFLAGS) -Wl,-z,relro -Wl,-z,now
+ BIN_LDFLAGS	= -pie
+ 
+ # Check whether a function with name $1 has been declared in header file $2.
+-- 
+2.17.2
+

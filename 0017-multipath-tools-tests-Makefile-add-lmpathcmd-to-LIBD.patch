@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Mon, 11 May 2020 18:24:19 +0200
+Subject: [PATCH] multipath-tools tests/Makefile: add -lmpathcmd to LIBDEPS
+
+Make sure the linker finds libmpathcmd.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ tests/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/Makefile b/tests/Makefile
+index 77ff3249..028c9ea7 100644
+--- a/tests/Makefile
++++ b/tests/Makefile
+@@ -10,7 +10,7 @@ W_MISSING_INITIALIZERS := $(call TEST_MISSING_INITIALIZERS)
+ 
+ CFLAGS += $(BIN_CFLAGS) -I$(multipathdir) -I$(mpathcmddir) \
+ 	-Wno-unused-parameter $(W_MISSING_INITIALIZERS)
+-LIBDEPS += -L$(multipathdir) -lmultipath -lcmocka
++LIBDEPS += -L$(multipathdir) -L$(mpathcmddir) -lmultipath -lmpathcmd -lcmocka
+ 
+ TESTS := uevent parser util dmevents hwtable blacklist unaligned vpd pgpolicy \
+ 	 alias directio
+-- 
+2.17.2
+

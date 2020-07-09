@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Mon, 6 Jul 2020 13:21:12 -0500
+Subject: [PATCH] Makefile.inc: trim extra information from systemd version
+
+Some systemd versions print extra information in the
+"pkg-config --modversion" output, which confuses make. Trim this
+off.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index e7256e3a..8ea3352d 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -37,7 +37,7 @@ endif
+ 
+ ifndef SYSTEMD
+ 	ifeq ($(shell pkg-config --modversion libsystemd >/dev/null 2>&1 && echo 1), 1)
+-		SYSTEMD = $(shell pkg-config --modversion libsystemd)
++		SYSTEMD = $(shell pkg-config --modversion libsystemd | awk '{print $$1}')
+ 	else
+ 		ifeq ($(shell systemctl --version >/dev/null 2>&1 && echo 1), 1)
+ 			SYSTEMD = $(shell systemctl --version 2> /dev/null | \
+-- 
+2.17.2
+
