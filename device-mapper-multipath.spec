@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -160,11 +160,10 @@ cp %{SOURCE1} .
 %define _libdir /usr/%{_lib}
 %define _libmpathdir %{_libdir}/multipath
 %define _pkgconfdir %{_libdir}/pkgconfig
-make %{?_smp_mflags} LIB=%{_lib}
+%make_build LIB=%{_lib}
 
 %install
-make install \
-	DESTDIR=%{buildroot} \
+%make_install \
 	bindir=%{_sbindir} \
 	syslibdir=%{_libdir} \
 	usrlibdir=%{_libdir} \
@@ -264,6 +263,10 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Jul 13 2020 Tom Stellard <tstellar@redhat.com> - 0.8.4-3
+- Use make macros
+- https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
+
 * Wed Jul  8 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-2
 - Rebased on top of Martin Wilck's queue of ACKed upstream commits
   * https://github.com/openSUSE/multipath-tools/tree/upstream-queue
