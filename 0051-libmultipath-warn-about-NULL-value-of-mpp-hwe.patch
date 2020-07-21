@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Mon, 13 Jul 2020 13:07:42 +0200
+Subject: [PATCH] libmultipath: warn about NULL value of mpp->hwe
+
+mpp->hwe is only accessed in propsel.c. It may become unset if
+all paths of the mpp have been deleted. Access to mpp->hwe in this
+case should be avoided.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/propsel.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/libmultipath/propsel.c b/libmultipath/propsel.c
+index d362beb4..68228272 100644
+--- a/libmultipath/propsel.c
++++ b/libmultipath/propsel.c
+@@ -65,7 +65,9 @@ do {									\
+ 	__do_set_from_vec(struct hwentry, var, (src)->hwe, dest)
+ 
+ #define do_set_from_hwe(var, src, dest, msg)				\
+-	if (__do_set_from_hwe(var, src, dest)) {			\
++	if (!src->hwe) {						\
++		condlog(0, "BUG: do_set_from_hwe called with hwe == NULL"); \
++	} else if (__do_set_from_hwe(var, src, dest)) {			\
+ 		origin = msg;						\
+ 		goto out;						\
+ 	}
+-- 
+2.17.2
+

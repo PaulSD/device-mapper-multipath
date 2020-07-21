@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -57,19 +57,31 @@ Patch0044: 0044-multipathd-add-del-maps-multipathd-command.patch
 Patch0045: 0045-multipath-make-flushing-maps-work-like-other-command.patch
 Patch0046: 0046-multipath-delegate-flushing-maps-to-multipathd.patch
 Patch0047: 0047-multipath-add-option-to-skip-multipathd-delegation.patch
-Patch0048: 0048-Makefile.inc-trim-extra-information-from-systemd-ver.patch
-Patch0049: 0049-kpartx-fix-Wsign-compare-error.patch
-Patch0050: 0050-RH-fixup-udev-rules-for-redhat.patch
-Patch0051: 0051-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0052: 0052-RH-don-t-start-without-a-config-file.patch
-Patch0053: 0053-RH-use-rpm-optflags-if-present.patch
-Patch0054: 0054-RH-add-mpathconf.patch
-Patch0055: 0055-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0056: 0056-RH-warn-on-invalid-regex-instead-of-failing.patch
-Patch0057: 0057-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0058: 0058-RH-Fix-nvme-compilation-warning.patch
-Patch0059: 0059-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0060: 0060-RH-work-around-gcc-10-format-truncation-issue.patch
+Patch0048: 0048-libmultipath-add-device-to-hwtable.c.patch
+Patch0049: 0049-master-libmultipath-fix-use-after-free-when-iscsi-lo.patch
+Patch0050: 0050-libmultipath-warn-if-freeing-path-that-holds-mpp-hwe.patch
+Patch0051: 0051-libmultipath-warn-about-NULL-value-of-mpp-hwe.patch
+Patch0052: 0052-libmultipath-fix-mpp-hwe-handling-in-sync_paths.patch
+Patch0053: 0053-Makefile.inc-trim-extra-information-from-systemd-ver.patch
+Patch0054: 0054-kpartx-fix-Wsign-compare-error.patch
+Patch0055: 0055-libmultipath-remove-code-duplication-in-path-countin.patch
+Patch0056: 0056-libmultipath-count-pending-paths-as-active-on-loads.patch
+Patch0057: 0057-libmultipath-deal-with-flushing-no-maps.patch
+Patch0058: 0058-multipath-deal-with-delegation-failures-correctly.patch
+Patch0059: 0059-RH-fixup-udev-rules-for-redhat.patch
+Patch0060: 0060-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0061: 0061-RH-don-t-start-without-a-config-file.patch
+Patch0062: 0062-RH-use-rpm-optflags-if-present.patch
+Patch0063: 0063-RH-add-mpathconf.patch
+Patch0064: 0064-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0065: 0065-RH-warn-on-invalid-regex-instead-of-failing.patch
+Patch0066: 0066-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0067: 0067-RH-Fix-nvme-compilation-warning.patch
+Patch0068: 0068-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0069: 0069-RH-work-around-gcc-10-format-truncation-issue.patch
+Patch0070: 0070-multipath-add-libmpathvalid-library.patch
+Patch0071: 0071-libmultipath-add-uid-failback-for-dasd-devices.patch
+Patch0072: 0072-libmultipath-add-ignore_udev_uid-option.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -222,6 +234,7 @@ fi
 %{_libdir}/libmultipath.so.*
 %{_libdir}/libmpathpersist.so.*
 %{_libdir}/libmpathcmd.so.*
+%{_libdir}/libmpathvalid.so.*
 %dir %{_libmpathdir}
 %{_libmpathdir}/*
 
@@ -231,8 +244,10 @@ fi
 %doc README
 %{_libdir}/libmpathpersist.so
 %{_libdir}/libmpathcmd.so
+%{_libdir}/libmpathvalid.so
 %{_includedir}/mpath_cmd.h
 %{_includedir}/mpath_persist.h
+%{_includedir}/mpath_valid.h
 %{_mandir}/man3/mpath_persistent_reserve_in.3.gz
 %{_mandir}/man3/mpath_persistent_reserve_out.3.gz
 
@@ -263,6 +278,24 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Jul 21 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-4
+- Rebased on top of additional commits staged for upstream
+  * Previous patches 0048-0060 are now patches 0053-0054 & 0059-0069
+- Add 0048-libmultipath-add-device-to-hwtable.c.patch
+- Add 0049-master-libmultipath-fix-use-after-free-when-iscsi-lo.patch
+- Add 0050-libmultipath-warn-if-freeing-path-that-holds-mpp-hwe.patch
+- Add 0051-libmultipath-warn-about-NULL-value-of-mpp-hwe.patch
+- Add 0052-libmultipath-fix-mpp-hwe-handling-in-sync_paths.patch
+- Add 0055-libmultipath-remove-code-duplication-in-path-countin.patch
+- Add 0056-libmultipath-count-pending-paths-as-active-on-loads.patch
+- Add 0057-libmultipath-deal-with-flushing-no-maps.patch
+- Add 0058-multipath-deal-with-delegation-failures-correctly.patch
+- Add 0070-multipath-add-libmpathvalid-library.patch
+  * adds the libmpathvalid.so library to determine if devices are
+    valid multipath paths.
+- Add 0071-libmultipath-add-uid-failback-for-dasd-devices.patch
+- Add 0072-libmultipath-add-ignore_udev_uid-option.patch
+
 * Mon Jul 13 2020 Tom Stellard <tstellar@redhat.com> - 0.8.4-3
 - Use make macros
 - https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
