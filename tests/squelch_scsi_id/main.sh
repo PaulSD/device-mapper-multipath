@@ -21,7 +21,7 @@ source ../include/ec.sh || exit 200
 
 function main (){
     local exit_status=1
-
+    
     Multipath_installation || Fail "fail to install device-mapper-multipath"
     Print_kernel_info
     Print_multipath_pkginfo

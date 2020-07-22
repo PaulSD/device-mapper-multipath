@@ -13,7 +13,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.  If not, see <http://www.gnu.cp /etc/multipath.conf /etc/multipath.conf.$$org/licenses/>.
 
 # Author: Lin Li   <lilin@redhat.com>
 
@@ -28,8 +28,8 @@ trun "mpathconf --enable --with_multipathd y --user_friendly_names y"
 trun "cp /etc/multipath.conf /etc/multipath.conf.$$"
 trun "multipath -F"
 
-trun "modprobe scsi_debug dev_size_mb=256 num_tgts=1 vpd_use_hostno=0 \
-add_host=2 delay=20 max_luns=2 no_lun_0=1"
+trun "modprobe scsi_debug num_tgts=1 vpd_use_hostno=0 add_host=2 delay=20 \
+max_luns=2 no_lun_0=1"
 trun "multipath"
 # wwid shown slowly on s390x by the script framework, but normally when run by multipath command directly
 # so extend sleep time 
@@ -43,14 +43,19 @@ mpath=$(get_mpath_disk_by_scsi_device $disk)
 # user_friendly_names = yes and mpath=test
 #cur_dir=/mnt/tests/kernel/storage/multipath/user_friendly_names/
 #cur_dir=/home/test/scratch/device-mapper-multipath/user_friendly_names
-trun "cat multipath.conf.yes | sed 's/your_wwid/$wwid/g' > /etc/multipath.conf"
+trun "cat multipath.conf.yes | sed "s/your_wwid/$wwid/g" > /etc/multipath.conf"
+trun "cat -n /etc/multipath.conf"
 trun "multipath -r"
-tok "multipath -ll | grep -w '^test'"
+echo ">>> Verify 'test ($wwid)' is present ..."
+trun "multipath -ll"
+tok "multipath -ll | egrep \"^test\""
 
 # user_friendly_names = no
 trun "cat multipath.conf.no > /etc/multipath.conf"
 trun "multipath -r"
-tok "multipath -ll | grep -w '^$wwid'"
+echo ">>> Verify 'test' is gone but '$wwid' present ..."
+trun "multipath -ll"
+tok "multipath -ll | egrep \"^$wwid\""
 sleep 10
 tok "multipath -F $wwid"
 sleep 10

@@ -5,16 +5,38 @@
 # Tests suitable for classic environment
 - hosts: localhost
   roles:
+  - role: standard-test-basic
+    tags:
+    - classic
+    tests:
+     - medium_error_scsi_debug:
+        run: ./main.sh
+        timeout: 15m
+     - squelch_scsi_id:
+        run: ./main.sh
+        timeout: 15m
+     - multipathd_oom:
+        run: ./main.sh
+        timeout: 15m
+     - user_friendly_names:
+        run: ./main.sh
+        timeout: 15m
+     - kpartx_4k_aligned:
+        run: ./main.sh
+        timeout: 15m
+     - bindings:
+        run: ./main.sh
+        timeout: 15m
+    required_packages:
+     - device-mapper-multipath
+     - perl
+
   - role: standard-test-beakerlib
     tags:
     - classic
     tests:
-     - medium_error_scsi_debug
-     - squelch_scsi_id
-     - multipathd_oom
-     - user_friendly_names
-     - multipath_conf_syntax
-     - kpartx_4k_aligned
-     - bindings  
+     - multipath_conf_syntax:
+        timeout: 15m
     required_packages:
      - device-mapper-multipath
+     - perl

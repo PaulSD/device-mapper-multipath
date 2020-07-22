@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.4
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -278,6 +278,11 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Jul 21 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-5
+- Update CI tests to match RHEL
+  * This commit also pulls in changes from Lin Li <lilin@redhat.com>
+    and Bruno Goncalves <bgoncalv@redhat.com>
+
 * Tue Jul 21 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-4
 - Rebased on top of additional commits staged for upstream
   * Previous patches 0048-0060 are now patches 0053-0054 & 0059-0069

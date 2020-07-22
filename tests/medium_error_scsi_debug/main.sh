@@ -19,37 +19,44 @@
 
 function cleanup()
 {
+    sleep 5
+    udevadm settle
     multipath -F
-    service multipathd stop 
-    sleep 15
+    sleep 5
     modprobe -r scsi_debug    
-    rt=$?
-    while [ $rt -ne 0 ]
-    do
-	sleep 15
-	modprobe -r scsi_debug
-        rt=$?
-    done
+
+    return 0
 }
 
 yum -y install device-mapper device-mapper-multipath
 mpathconf --enable
-modprobe scsi_debug  dev_size_mb=1024 num_tgts=1 vpd_use_hostno=0 add_host=2 delay=20  max_luns=2 no_lun_0=1 opts=2 every_nth=1
+service multipathd stop
+modprobe scsi_debug num_tgts=1 vpd_use_hostno=0 add_host=2 delay=20  max_luns=2 no_lun_0=1 opts=2
 sleep 5
-service multipathd restart
-sleep 10
-disk1=`multipath -ll | grep -A 5 scsi_debug | grep -oE "sd." | head -1`
-if [ -z "$disk1" ]; then
+multipath > /dev/null
+sleep 5
+mpathdev=`multipath -l | grep scsi_debug | awk '{print $1}' | head -1`
+if [ -z "$mpathdev" ]; then
+	echo "------- FAIL, no multipath device created -----"
 	cleanup
 	exit 1
 fi
+before_active=`multipath -l $mpathdev | grep "active undef" | wc -l`
 
-IO_error=`dd if=/dev/zero of=/dev/$disk1 bs=1024 count=262144 2>&1 | grep -o "Input/output error" `
+IO_error=`dd if=/dev/zero of=/dev/mapper/$mpathdev bs=1024 seek=2330 count=10 2>&1 | grep -o "Input/output error" `
 if [ -n "$IO_error" ];then
-	echo "------- PASS,  a medium error, correctly generate an I/O error and do not get infinitely retried -----"
-	cleanup
+	after_active=`multipath -l $mpathdev | grep "active undef" | wc -l`
+	if [ "$before_active" -eq "$after_active" ]; then
+		echo "------- PASS,  a medium error, correctly generated an I/O error and did not fail paths -----"
+		cleanup
+		exit 0
+	else
+		echo "------- FAIL, paths failed -----"
+		cleanup
+		exit 1
+	fi
 else
-	echo "------- FAIL, not generate an I/O error -----"
+	echo "------- FAIL, did not generate an I/O error -----"
 	cleanup
-	exit -1
+	exit 1
 fi

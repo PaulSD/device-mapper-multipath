@@ -18,81 +18,79 @@
 # Author: Lin Li   <lilin@redhat.com>
 
 source ../include/ec.sh || exit 200
+tlog "running $0"
 
-tlog "start running"
-Result=FAILED
-MulDevice=`rpm -qa|grep device-mapper-multipath | wc -l`
-if [ $MulDevice != 2 ]; then
-	tlog "multi-device is not install"
-	exit 1
-fi
-tlog "multi-device is installed"
-trun "mpathconf --enable --find_multipaths n --with_module y --with_multipathd y"
-trun "echo '' > /var/log/messages"
+cleanup ()
+{
+    trun "multipathd disablequeueing maps"
+    trun "service multipathd stop"
+    sleep 5
+    trun "udevadm settle"
+    trun "multipath -F"
+    sleep 5
+    trun "modprobe -r scsi_debug"
+}
+
+assert ()
+{
+    local cmd="$*"
+    _trun_ "$cmd" 0
+    if test $? -eq 0; then
+        tpass_ "$cmd" ;
+    else
+        tfail_ "$cmd" ;
+	cleanup ;
+        tend ;
+    fi
+}
+
+rpm -q device-mapper-multipath || yum install -y device-mapper-multipath
+tlog "device-mapper-multipath is installed"
+# cleanup existing devices
+trun "rm /etc/multipath.conf"
+trun "mpathconf --enable --with_module y"
+sed -i '/^defaults[[:space:]]*{/ a\
+	max_polling_interval 10
+' /etc/multipath.conf
+trun "service multipathd stop"
 trun "multipath -F"
+sleep 5
 trun "modprobe -r scsi_debug"
-trun "dmsetup remove_all"
-OriginalDev=`multipathd show paths | grep "running" | awk '{print $2}'`
-OLD_IFS="$IFS"
-IFS=" "
-OriginalDevList=($OriginalDev)
-IFS="$OLD_IFS"
 
+#trun "service multipathd restart"
+trun "service multipathd start"
+trun "modprobe scsi_debug vpd_use_hostno=0 add_host=2"
+sleep 5
+mpathdev=`multipath -l | grep scsi_debug | awk '{print $1}' | head -1`
+tlog "using multipathd device ${mpathdev}"
+trun "multipath -ll ${mpathdev}"
+pathcount=`multipathd show paths raw format "%m %t" | grep ${mpathdev} | grep "active" | wc -l`
+tlog "Checking if active path count equals 2"
+assert "[[ $pathcount -eq 2 ]]"
 
-#trun "service multipathd restart" 
-OriPathCount=`multipathd show paths | grep -i "running" |grep -v grep|wc -l`
-tlog "Original MultPathDevice = ${OriPathCount}"
-trun "modprobe scsi_debug vpd_use_hostno=0 add_host=2 dev_size_mb=1024"
-trun "multipath -ll"
-sleep 1s
-OriPathCount=`multipathd show paths | grep -i "running" |grep -v grep|wc -l`
-tlog "After add tow virturl device, MultPathDevice = ${OriPathCount}"
-
-if [ $OriPathCount -eq  0 ];then
-	tlog "Virtual MultiPath is Fail"
-	exit 1
-fi
-
-tlog "offline one MultiPathDevice"
-DeviceName=`multipath -ll | grep -i "sd[a|b|c|d|e|f|g|h]" | awk -F" " '{print $3}' | tail -1`
-trun "echo 'offline' > /sys/block/${DeviceName}/device/state"
-sleep 1s
-trun "multipath -ll"
-sleep 1s
-trun "multipath -r"
-sleep 1s
+tlog "offline one path device"
+pathname=`multipathd show paths raw format "%d %m" | grep ${mpathdev} | head -1 | awk '{print $1}'`
+tlog "path to offline: ${pathname}"
+trun "echo 'offline' > /sys/block/${pathname}/device/state"
+tlog "waiting for multipathd to fail path"
+sleep 15
 trun "multipathd show paths"
-sleep 5s
-MulPathCount=`multipathd show paths | grep -i "running" |grep -v grep|wc -l`
-let "RightPathCout=$OriPathCount-1"
-if [ $MulPathCount != $RightPathCout ]; then
-	Result=FAIL
-	tlog "second check fail MulPathCount=$MulPathCount  RightPathCout=$RightPathCout"
-	tlog "running result $Result"
-	exit 1
-fi
-tlog "second check is OK MulPathCount=$MulPathCount"
+pathcount=`multipathd show paths raw format "%m %t" | grep ${mpathdev} | grep "active" | wc -l`
+tlog "Checking if active path count equals 1"
+assert "[[ $pathcount -eq 1 ]]"
 
-tlog "running one Multipath"
-trun "echo 'running' > /sys/block/${DeviceName}/device/state"
-sleep 1s
-trun "multipath -ll"
-sleep 4s
+tlog "restore ${pathname}"
+trun "echo 'running' > /sys/block/${pathname}/device/state"
+sleep 10
 #verified
-Condition1=`grep "reinstate failed" /var/log/messages | wc -l`
-Condition2=`grep "segfault" /var/log/messages | wc -l`
-trun "service multipathd status > tmp_file"
-Condition3=`grep " DM message failed" tmp_file | wc -l`
+multipathd_state=`service multipathd status | grep "Active: active (running)" | wc -l`
+tlog "Checking if multipathd service is running"
+assert "[[ $multipathd_state -eq 1 ]]"
+pathcount=`multipathd show paths raw format "%m %t" | grep ${mpathdev} | grep "active" | wc -l`
+tlog "Checking if active path count equals 2"
+assert "[[ $pathcount -eq 2 ]]"
+path_state=`multipathd show paths raw format "%d %t %T %o" | grep ${pathname} | grep "active ready running" | wc -l`
+tlog "Checking state of ${pathname}"
+assert "[[ $path_state -eq 1 ]]"
 
-trun "multipath -F"
-trun "modprobe -r scsi_debug"
-trun "dmsetup remove_all"
-
-trun "rm -f tmp_file"
-tlog "Condition1=${Condition1}  Condition2=${Condition2} Condition3=${Condition3}"
-RESULT=PASS
-[[ $Condition1 -eq 1 ]]&&[[ $Condition2 -eq 1 ]]&&[[ $Condition3 -eq 1 ]]&&RESULT=FAIL
-echo "Test Result =  $RESULT"
-[[ $RESULT = "FAIL" ]]&&exit 1
-exit 0
-
+tend

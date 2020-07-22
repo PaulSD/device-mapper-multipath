@@ -50,39 +50,46 @@ multipaths {
 }
 _EOF_
 	rlRun "multipath 2>&1 | grep 'missing closing quotes on line'" 0 "test missing closing quote on alias"
-	rlRun "multipath -r |grep mypath" 0 "mpath rename to mypath"
+	rlRun "multipath -r"
+	rlRun "multipath -ll |grep mypath" 0 "check if mpath rename to mypath successfully"
 
 	# test no value for alias
 	rlRun "sed -i 's/alias.*$/alias/g' /etc/multipath.conf"
 	rlRun "multipath 2>&1 | grep \"missing value for option 'alias' on line\"" 0 "test no value for alias"
-	rlRun "multipath -r |grep mpath*" 0 "mpath rename to mpath* from mypath"
+	rlRun "multipath -r"
+	rlRun "multipath -ll |grep mpath*" 0 "check if mpath rename to mpath* from mypath successfully"
 
 	# test missing starting quote on alias
 	rlRun "sed -i 's/alias.*$/alias mypath\"/g' /etc/multipath.conf"
 	rlRun "multipath 2>&1 |grep 'ignoring extra data starting with'" 0 "test missing starting quote on alias"
-	rlRun "multipath -r |grep mypath" 0 "mpath rename to mypath"
+	rlRun "multipath -r"
+	rlRun "multipath -ll |grep mypath" 0 "check if mpath rename to mypath successfully"
 
 	# test wrong quote on alias
 	rlRun "sed -i 's/alias.*$/alias <mypath>/g' /etc/multipath.conf"
 	rlRun "multipath 2>&1 | grep config" 1 "no warning"	
-	rlRun "multipath -r |grep '<mypath>'" 0 "mpath rename to <mypath>"
+	rlRun "multipath -r"
+	rlRun "multipath -ll |grep '<mypath>'" 0 "check if mpath rename to <mypath> successfully"
 
 	# test value has a space
 	rlRun "sed -i 's/alias.*$/alias mypath test/g' /etc/multipath.conf"
 	rlRun "multipath 2>&1 |grep 'ignoring extra data starting with'" 0 "test value has a space"
-	rlRun "multipath -r |grep mypath" 0 "mpath rename to mypath"
+        rlRun "multipath -r"
+	rlRun "multipath -ll |grep mypath" 0 "check if mpath rename to mypath successfully"
 
 	# test wrong alias keyword
 	rlRun "sed -i 's/alias.*$/alia mypath/g' /etc/multipath.conf"
 	rlRun "multipath 2>&1 |grep 'invalid keyword: alia'" 0 "invalid keyword: alia"
-	rlRun "multipath -r |grep mpath*" 0 "mpath rename to mpath* from mypath"
+        rlRun "multipath -r"
+	rlRun "multipath -ll |grep mpath*" 0 "check if mpath rename to mpath* from mypath successfully"
 	rlRun "sed -i 's/alia.*$/alias mypath/g' /etc/multipath.conf"
 
 	# test no space between the section name and the open bracket that followed it	
 	# fix issue about if a section doesn't have a space between the section name and the open bracket, that section isn't read in.
 	rlRun "sed -i 's/multipaths.*/multipaths{/g' /etc/multipath.conf"
 	rlRun "multipath 2>&1 | grep config" 1 "no warning"
-	rlRun "multipath -r |grep mypath" 0 "mpath rename to mypath"
+	rlRun "multipath -r"
+	rlRun "multipath -ll |grep mypath" 0 "check if mpath rename to mypath successfully"
 
 	# test wrong section keywords
 	rlRun "sed -i 's/multipaths.*/ultipaths {/g' /etc/multipath.conf"
@@ -95,6 +102,7 @@ _EOF_
     rlPhaseEnd
 
     rlPhaseStartCleanup
+        rlRun "udevadm settle"
         rlRun "multipath -F" 0 "Flush all unused multipath device maps"
         rlServiceStop multipathd
         rlRun "modprobe -r scsi_debug" 0 "Remove scsi_debug"

@@ -31,8 +31,8 @@ sleep 5
 trun "multipath -F"
 sleep 5
 terr "modprobe -r scsi_debug"
-terr "modprobe scsi_debug dev_size_mb=1024 num_tgts=1 vpd_use_hostno=0 \
-add_host=2 delay=20 max_luns=2 no_lun_0=1"
+terr "modprobe scsi_debug num_tgts=1 vpd_use_hostno=0 add_host=2 delay=20 \
+max_luns=2 no_lun_0=1"
 sleep 60 
 
 disk_path=$(get_scsi_debug_devices)

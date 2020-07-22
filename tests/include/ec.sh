@@ -174,13 +174,7 @@ AA
     fi
 #setup scsi_debug
     echo "INFO: Loading scsi_debug module for simulation of mpath"
-    local dev_size=100
-    if [ "CHK$(uname -m)" == "CHKi386" ] \
-        || [ "CHK$(uname -m)" == "CHKi686" ]; then
-#i386 platform cannot allocate 100 MiB in kernel space
-        dev_size=10
-    fi
-    modprobe scsi_debug dev_size_mb=${dev_size} \
+    modprobe scsi_debug \
         num_tgts=1 vpd_use_hostno=0 \
         add_host=4 delay=20 \
         max_luns=2 no_lun_0=1 2>&1 1>/dev/null
