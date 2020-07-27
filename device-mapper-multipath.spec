@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.4
-Release: 5%{?dist}
+Release: 6%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -278,6 +278,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.4-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
 * Tue Jul 21 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-5
 - Update CI tests to match RHEL
   * This commit also pulls in changes from Lin Li <lilin@redhat.com>
