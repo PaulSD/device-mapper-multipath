@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 11 Aug 2020 21:08:27 +0200
+Subject: [PATCH] libmultipath: orphan_paths(): avoid BUG message
+
+Since c44d769, we print a BUG message when we orphan a path that
+holds the mpp->hwe pointer. But if this called via orphan_paths(),
+this is expected and we shouldn't warn.
+
+Fixes: c44d769 ("libmultipath: warn if freeing path that holds mpp->hwe")
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/structs_vec.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/libmultipath/structs_vec.c b/libmultipath/structs_vec.c
+index ede14297..d70bb6ad 100644
+--- a/libmultipath/structs_vec.c
++++ b/libmultipath/structs_vec.c
+@@ -114,6 +114,8 @@ void orphan_paths(vector pathvec, struct multipath *mpp, const char *reason)
+ 	int i;
+ 	struct path * pp;
+ 
++	/* Avoid BUG message from orphan_path() */
++	mpp->hwe = NULL;
+ 	vector_foreach_slot (pathvec, pp, i) {
+ 		if (pp->mpp == mpp) {
+ 			orphan_path(pp, reason);
+-- 
+2.17.2
+

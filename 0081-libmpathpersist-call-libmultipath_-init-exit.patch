@@ -1,0 +1,98 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 24 Sep 2020 15:37:14 +0200
+Subject: [PATCH] libmpathpersist: call libmultipath_{init,exit}()
+
+Have libmpathpersist_{init,exit} do the udev initialization, too.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmpathpersist/mpath_persist.c | 13 +++++++++----
+ libmpathpersist/mpath_persist.h |  9 ++++++---
+ 2 files changed, 15 insertions(+), 7 deletions(-)
+
+diff --git a/libmpathpersist/mpath_persist.c b/libmpathpersist/mpath_persist.c
+index 9dfc98cd..d1538195 100644
+--- a/libmpathpersist/mpath_persist.c
++++ b/libmpathpersist/mpath_persist.c
+@@ -48,6 +48,10 @@ int libmpathpersist_init(void)
+ 	struct config *conf;
+ 	int rc = 0;
+ 
++	if (libmultipath_init()) {
++		condlog(0, "Failed to initialize libmultipath.");
++		return 1;
++	}
+ 	if (init_config(DEFAULT_CONFIGFILE)) {
+ 		condlog(0, "Failed to initialize multipath config.");
+ 		return 1;
+@@ -74,24 +78,25 @@ mpath_lib_init (void)
+ 
+ static void libmpathpersist_cleanup(void)
+ {
+-	dm_lib_release();
+-	dm_lib_exit();
+ 	cleanup_prio();
+ 	cleanup_checkers();
++	libmultipath_exit();
++	dm_lib_release();
++	dm_lib_exit();
+ }
+ 
+ int
+ mpath_lib_exit (struct config *conf)
+ {
+-	libmpathpersist_cleanup();
+ 	free_config(conf);
++	libmpathpersist_cleanup();
+ 	return 0;
+ }
+ 
+ int libmpathpersist_exit(void)
+ {
+-	libmpathpersist_cleanup();
+ 	uninit_config();
++	libmpathpersist_cleanup();
+ 	return 0;
+ }
+ 
+diff --git a/libmpathpersist/mpath_persist.h b/libmpathpersist/mpath_persist.h
+index 91606efc..5435eae4 100644
+--- a/libmpathpersist/mpath_persist.h
++++ b/libmpathpersist/mpath_persist.h
+@@ -176,7 +176,8 @@ struct prout_param_descriptor {		/* PROUT parameter descriptor */
+  *	Initialize device mapper multipath configuration. This function must be invoked first
+  *	before performing reservation management functions.
+  *	Either this function or mpath_lib_init() may be used.
+- *	Use this function to work with libmultipath's internal "struct config".
++ *	Use this function to work with libmultipath's internal "struct config"
++ *	and "struct udev". The latter will be initialized automatically.
+  *	Call libmpathpersist_exit() for cleanup.
+  * RESTRICTIONS:
+  *
+@@ -189,7 +190,8 @@ extern int libmpathpersist_init (void);
+  *	Initialize device mapper multipath configuration. This function must be invoked first
+  *	before performing reservation management functions.
+  *	Either this function or libmpathpersist_init() may be used.
+- *	Use this function to work with an application-specific "struct config".
++ *	Use this function to work with an application-specific "struct config"
++ *	and "struct udev". The latter must be initialized by the application.
+  *	Call mpath_lib_exit() for cleanup.
+  * RESTRICTIONS:
+  *
+@@ -211,9 +213,10 @@ extern int mpath_lib_exit (struct config *conf);
+ 
+ /*
+  * DESCRIPTION :
+- *	Release device mapper multipath configuration. This function must be invoked after
++ *	Release device mapper multipath configuration a. This function must be invoked after
+  *	performing reservation management functions.
+  *	Use this after initialization with libmpathpersist_init().
++ *	Calling libmpathpersist_init() after libmpathpersist_exit() will fail.
+  * RESTRICTIONS:
+  *
+  * RETURNS: 0->Success, 1->Failed.
+-- 
+2.17.2
+

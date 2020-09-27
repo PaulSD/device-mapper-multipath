@@ -1,0 +1,142 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 24 Sep 2020 15:37:09 +0200
+Subject: [PATCH] libmpathpersist: allow using libmultipath
+ {get,put}_multipath_config
+
+Provide an alternative init function libmpathpersist_init() which
+avoids allocating a new struct config, simply using libmultipath's
+internal implementation.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmpathpersist/mpath_persist.c | 42 ++++++++++++++++++++++++++++-----
+ libmpathpersist/mpath_persist.h | 28 ++++++++++++++++++++++
+ 2 files changed, 64 insertions(+), 6 deletions(-)
+
+diff --git a/libmpathpersist/mpath_persist.c b/libmpathpersist/mpath_persist.c
+index a132f4e9..9dfc98cd 100644
+--- a/libmpathpersist/mpath_persist.c
++++ b/libmpathpersist/mpath_persist.c
+@@ -37,6 +37,27 @@
+ 
+ extern struct udev *udev;
+ 
++static void adapt_config(struct config *conf)
++{
++	conf->force_sync = 1;
++	set_max_fds(conf->max_fds);
++}
++
++int libmpathpersist_init(void)
++{
++	struct config *conf;
++	int rc = 0;
++
++	if (init_config(DEFAULT_CONFIGFILE)) {
++		condlog(0, "Failed to initialize multipath config.");
++		return 1;
++	}
++	conf = libmp_get_multipath_config();
++	adapt_config(conf);
++	libmp_put_multipath_config(conf);
++	return rc;
++}
++
+ struct config *
+ mpath_lib_init (void)
+ {
+@@ -47,21 +68,30 @@ mpath_lib_init (void)
+ 		condlog(0, "Failed to initialize multipath config.");
+ 		return NULL;
+ 	}
+-	conf->force_sync = 1;
+-	set_max_fds(conf->max_fds);
+-
++	adapt_config(conf);
+ 	return conf;
+ }
+ 
+-int
+-mpath_lib_exit (struct config *conf)
++static void libmpathpersist_cleanup(void)
+ {
+ 	dm_lib_release();
+ 	dm_lib_exit();
+ 	cleanup_prio();
+ 	cleanup_checkers();
++}
++
++int
++mpath_lib_exit (struct config *conf)
++{
++	libmpathpersist_cleanup();
+ 	free_config(conf);
+-	conf = NULL;
++	return 0;
++}
++
++int libmpathpersist_exit(void)
++{
++	libmpathpersist_cleanup();
++	uninit_config();
+ 	return 0;
+ }
+ 
+diff --git a/libmpathpersist/mpath_persist.h b/libmpathpersist/mpath_persist.h
+index 7cf4faf9..91606efc 100644
+--- a/libmpathpersist/mpath_persist.h
++++ b/libmpathpersist/mpath_persist.h
+@@ -175,6 +175,22 @@ struct prout_param_descriptor {		/* PROUT parameter descriptor */
+  * DESCRIPTION :
+  *	Initialize device mapper multipath configuration. This function must be invoked first
+  *	before performing reservation management functions.
++ *	Either this function or mpath_lib_init() may be used.
++ *	Use this function to work with libmultipath's internal "struct config".
++ *	Call libmpathpersist_exit() for cleanup.
++ * RESTRICTIONS:
++ *
++ * RETURNS: 0->Success, 1->Failed.
++ */
++extern int libmpathpersist_init (void);
++
++/*
++ * DESCRIPTION :
++ *	Initialize device mapper multipath configuration. This function must be invoked first
++ *	before performing reservation management functions.
++ *	Either this function or libmpathpersist_init() may be used.
++ *	Use this function to work with an application-specific "struct config".
++ *	Call mpath_lib_exit() for cleanup.
+  * RESTRICTIONS:
+  *
+  * RETURNS: struct config ->Success, NULL->Failed.
+@@ -186,12 +202,24 @@ extern struct config * mpath_lib_init (void);
+  * DESCRIPTION :
+  *	Release device mapper multipath configuration. This function must be invoked after
+  *	performing reservation management functions.
++ *	Use this after initialization with mpath_lib_init().
+  * RESTRICTIONS:
+  *
+  * RETURNS: 0->Success, 1->Failed.
+  */
+ extern int mpath_lib_exit (struct config *conf);
+ 
++/*
++ * DESCRIPTION :
++ *	Release device mapper multipath configuration. This function must be invoked after
++ *	performing reservation management functions.
++ *	Use this after initialization with libmpathpersist_init().
++ * RESTRICTIONS:
++ *
++ * RETURNS: 0->Success, 1->Failed.
++ */
++extern int libmpathpersist_exit (void);
++
+ 
+ /*
+  * DESCRIPTION :
+-- 
+2.17.2
+

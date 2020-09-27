@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.4
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -82,6 +82,21 @@ Patch0069: 0069-RH-work-around-gcc-10-format-truncation-issue.patch
 Patch0070: 0070-multipath-add-libmpathvalid-library.patch
 Patch0071: 0071-libmultipath-add-uid-failback-for-dasd-devices.patch
 Patch0072: 0072-libmultipath-add-ignore_udev_uid-option.patch
+Patch0073: 0073-libmultipath-util-constify-function-arguments.patch
+Patch0074: 0074-libmultipath-constify-file-argument-in-config-parser.patch
+Patch0075: 0075-libmultipath-provide-defaults-for-get-put-_multipath.patch
+Patch0076: 0076-libmpathpersist-allow-using-libmultipath-get-put-_mu.patch
+Patch0077: 0077-multipath-use-get_put-_multipath_config-from-libmult.patch
+Patch0078: 0078-mpathpersist-use-get-put-_multipath_config-from-libm.patch
+Patch0079: 0079-libmultipath-add-udev-and-logsink-symbols.patch
+Patch0080: 0080-multipath-remove-logsink-and-udev.patch
+Patch0081: 0081-libmpathpersist-call-libmultipath_-init-exit.patch
+Patch0082: 0082-mpathpersist-remove-logsink-and-udev.patch
+Patch0083: 0083-multipathd-remove-logsink-and-udev.patch
+Patch0084: 0084-libmpathvalid-use-default-_multipath_config-udev-and.patch
+Patch0085: 0085-Revert-libmultipath-add-ignore_udev_uid-option.patch
+Patch0086: 0086-libmultipath-change-log-level-for-null-uid_attribute.patch
+Patch0087: 0087-libmultipath-orphan_paths-avoid-BUG-message.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -278,6 +293,26 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Sun Sep 27 2020 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.4-7
+- Add 0073-libmultipath-util-constify-function-arguments.patch
+- Add 0074-libmultipath-constify-file-argument-in-config-parser.patch
+- Add 0075-libmultipath-provide-defaults-for-get-put-_multipath.patch
+- Add 0076-libmpathpersist-allow-using-libmultipath-get-put-_mu.patch
+- Add 0077-multipath-use-get_put-_multipath_config-from-libmult.patch
+- Add 0078-mpathpersist-use-get-put-_multipath_config-from-libm.patch
+- Add 0079-libmultipath-add-udev-and-logsink-symbols.patch
+- Add 0080-multipath-remove-logsink-and-udev.patch
+- Add 0081-libmpathpersist-call-libmultipath_-init-exit.patch
+- Add 0082-mpathpersist-remove-logsink-and-udev.patch
+- Add 0083-multipathd-remove-logsink-and-udev.patch
+  * Pull in upsteam library changes
+- Add 0084-libmpathvalid-use-default-_multipath_config-udev-and.patch
+- Add 0085-Revert-libmultipath-add-ignore_udev_uid-option.patch
+- Add 0086-libmultipath-change-log-level-for-null-uid_attribute.patch
+- Add 0087-libmultipath-orphan_paths-avoid-BUG-message.patch
+  * update libmpathvalid to use upstream library changes. changes
+    submitted upstream
+
 * Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.4-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
