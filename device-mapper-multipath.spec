@@ -124,6 +124,7 @@ BuildRequires: readline-devel, ncurses-devel
 BuildRequires: systemd-units, systemd-devel
 BuildRequires: json-c-devel, perl-interpreter, pkgconfig, gcc
 BuildRequires: userspace-rcu-devel
+BuildRequires: make
 
 %description
 %{name} provides tools to manage multipath devices by
