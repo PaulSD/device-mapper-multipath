@@ -1,0 +1,42 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Wed, 23 Sep 2020 16:10:19 +0200
+Subject: [PATCH] multipathd: move pid destruction into separate function
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipathd/main.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 07973e85..fc1f8d7f 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -2892,6 +2892,12 @@ set_oom_adj (void)
+ 	condlog(0, "couldn't adjust oom score");
+ }
+ 
++static void cleanup_pidfile(void)
++{
++	condlog(3, "unlink pidfile");
++	unlink(DEFAULT_PIDFILE);
++}
++
+ static void cleanup_conf(void) {
+ 	struct config *conf;
+ 
+@@ -3199,9 +3205,7 @@ child (__attribute__((unused)) void *param)
+ 	dm_lib_exit();
+ 
+ 	/* We're done here */
+-	condlog(3, "unlink pidfile");
+-	unlink(DEFAULT_PIDFILE);
+-
++	cleanup_pidfile();
+ 	condlog(2, "--------shut down-------");
+ 
+ 	if (logsink == 1)
+-- 
+2.17.2
+

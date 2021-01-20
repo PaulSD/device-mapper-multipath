@@ -1,0 +1,152 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Sat, 26 Sep 2020 00:39:22 +0200
+Subject: [PATCH] libmultipath: simplify dlog()
+
+By checking the log level in condlog() directly, we can simplify
+dlog(). Also, it's now possible to limit the log level at compile
+time by setting MAX_VERBOSITY, enabling the compiler to optimize
+away log messages with higher loglevel.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/debug.c     | 30 +++++++++++++-----------------
+ libmultipath/debug.h     | 20 ++++++++++++++++----
+ libmultipath/devmapper.c |  4 +++-
+ tests/test-log.c         |  4 ++--
+ tests/test-log.h         |  3 ++-
+ 5 files changed, 36 insertions(+), 25 deletions(-)
+
+diff --git a/libmultipath/debug.c b/libmultipath/debug.c
+index f9b77552..429f2699 100644
+--- a/libmultipath/debug.c
++++ b/libmultipath/debug.c
+@@ -18,29 +18,25 @@
+ int logsink;
+ int libmp_verbosity = DEFAULT_VERBOSITY;
+ 
+-void dlog (int sink, int prio, const char * fmt, ...)
++void dlog(int prio, const char * fmt, ...)
+ {
+ 	va_list ap;
+ 
+ 	va_start(ap, fmt);
++	if (logsink != LOGSINK_SYSLOG) {
++		if (logsink == LOGSINK_STDERR_WITH_TIME) {
++			time_t t = time(NULL);
++			struct tm *tb = localtime(&t);
++			char buff[16];
+ 
+-	if (prio <= libmp_verbosity) {
+-		if (sink != LOGSINK_SYSLOG) {
+-			if (sink == LOGSINK_STDERR_WITH_TIME) {
+-				time_t t = time(NULL);
+-				struct tm *tb = localtime(&t);
+-				char buff[16];
+-
+-				strftime(buff, sizeof(buff),
+-					 "%b %d %H:%M:%S", tb);
+-				buff[sizeof(buff)-1] = '\0';
+-
+-				fprintf(stderr, "%s | ", buff);
+-			}
+-			vfprintf(stderr, fmt, ap);
++			strftime(buff, sizeof(buff),
++				 "%b %d %H:%M:%S", tb);
++			buff[sizeof(buff)-1] = '\0';
++			fprintf(stderr, "%s | ", buff);
+ 		}
+-		else
+-			log_safe(prio + 3, fmt, ap);
++		vfprintf(stderr, fmt, ap);
+ 	}
++	else
++		log_safe(prio + 3, fmt, ap);
+ 	va_end(ap);
+ }
+diff --git a/libmultipath/debug.h b/libmultipath/debug.h
+index b6ce70a7..705a5d73 100644
+--- a/libmultipath/debug.h
++++ b/libmultipath/debug.h
+@@ -1,5 +1,7 @@
+-void dlog (int sink, int prio, const char * fmt, ...)
+-	__attribute__((format(printf, 3, 4)));
++#ifndef _DEBUG_H
++#define _DEBUG_H
++void dlog (int prio, const char *fmt, ...)
++	__attribute__((format(printf, 2, 3)));
+ 
+ 
+ #include <pthread.h>
+@@ -10,11 +12,21 @@ void dlog (int sink, int prio, const char * fmt, ...)
+ extern int logsink;
+ extern int libmp_verbosity;
+ 
+-#define condlog(prio, fmt, args...) \
+-	dlog(logsink, prio, fmt "\n", ##args)
++#ifndef MAX_VERBOSITY
++#define MAX_VERBOSITY 4
++#endif
+ 
+ enum {
+ 	LOGSINK_STDERR_WITH_TIME = 0,
+ 	LOGSINK_STDERR_WITHOUT_TIME = -1,
+ 	LOGSINK_SYSLOG = 1,
+ };
++
++#define condlog(prio, fmt, args...)					\
++	do {								\
++		int __p = (prio);					\
++									\
++		if (__p <= MAX_VERBOSITY && __p <= libmp_verbosity)	\
++			dlog(__p, fmt "\n", ##args);			\
++	} while (0)
++#endif /* _DEBUG_H */
+diff --git a/libmultipath/devmapper.c b/libmultipath/devmapper.c
+index f8b180e1..4977b311 100644
+--- a/libmultipath/devmapper.c
++++ b/libmultipath/devmapper.c
+@@ -276,7 +276,9 @@ static int dm_tgt_prereq (unsigned int *ver)
+ 
+ static void _init_versions(void)
+ {
+-	dlog(logsink, 3, VERSION_STRING);
++	/* Can't use condlog here because of how VERSION_STRING is defined */
++	if (3 <= libmp_verbosity)
++		dlog(3, VERSION_STRING);
+ 	init_dm_library_version();
+ 	init_dm_drv_version();
+ 	init_dm_mpath_version();
+diff --git a/tests/test-log.c b/tests/test-log.c
+index 1c901cba..14f25b9b 100644
+--- a/tests/test-log.c
++++ b/tests/test-log.c
+@@ -7,8 +7,8 @@
+ #include "log.h"
+ #include "test-log.h"
+ 
+-__attribute__((format(printf, 3, 0)))
+-void __wrap_dlog (int sink, int prio, const char * fmt, ...)
++__attribute__((format(printf, 2, 0)))
++void __wrap_dlog (int prio, const char * fmt, ...)
+ {
+ 	char buff[MAX_MSG_SIZE];
+ 	va_list ap;
+diff --git a/tests/test-log.h b/tests/test-log.h
+index 2c878c63..6d22cd23 100644
+--- a/tests/test-log.h
++++ b/tests/test-log.h
+@@ -1,7 +1,8 @@
+ #ifndef _TEST_LOG_H
+ #define _TEST_LOG_H
+ 
+-void __wrap_dlog (int sink, int prio, const char * fmt, ...);
++__attribute__((format(printf, 2, 0)))
++void __wrap_dlog (int prio, const char * fmt, ...);
+ void expect_condlog(int prio, char *string);
+ 
+ #endif
+-- 
+2.17.2
+

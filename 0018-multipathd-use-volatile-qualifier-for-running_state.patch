@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 15 Sep 2020 12:44:59 +0200
+Subject: [PATCH] multipathd: use volatile qualifier for running_state
+
+While we access running_state only under the config_lock,
+we sometimes do in a loop. Use the volatile qualifier to make
+sure compilers can't optimize away the loads.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipathd/main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/multipathd/main.c b/multipathd/main.c
+index e3f2328d..d081b3e9 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -126,7 +126,7 @@ int poll_dmevents = 0;
+ int poll_dmevents = 1;
+ #endif
+ /* Don't access this variable without holding config_lock */
+-enum daemon_status running_state = DAEMON_INIT;
++volatile enum daemon_status running_state = DAEMON_INIT;
+ pid_t daemon_pid;
+ pthread_mutex_t config_lock = PTHREAD_MUTEX_INITIALIZER;
+ pthread_cond_t config_cond;
+-- 
+2.17.2
+

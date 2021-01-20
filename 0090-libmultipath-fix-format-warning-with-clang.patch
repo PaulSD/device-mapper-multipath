@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 18 Dec 2020 23:34:35 +0100
+Subject: [PATCH] libmultipath: fix format warning with clang
+
+Reported-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Tested-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/log.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libmultipath/log.c b/libmultipath/log.c
+index 6498c88c..10fa32cd 100644
+--- a/libmultipath/log.c
++++ b/libmultipath/log.c
+@@ -125,6 +125,7 @@ void log_reset (char *program_name)
+ 	pthread_cleanup_pop(1);
+ }
+ 
++__attribute__((format(printf, 2, 0)))
+ static int _log_enqueue(int prio, const char * fmt, va_list ap)
+ {
+ 	int len, fwd;
+-- 
+2.17.2
+

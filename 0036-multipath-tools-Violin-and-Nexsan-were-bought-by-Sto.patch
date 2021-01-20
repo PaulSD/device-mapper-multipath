@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Date: Wed, 16 Dec 2020 23:17:40 +0100
+Subject: [PATCH] multipath-tools: Violin and Nexsan were bought by StorCentric
+
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Cc: Martin Wilck <mwilck@suse.com>
+Cc: Benjamin Marzinski <bmarzins@redhat.com>
+Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
+Cc: DM-DEVEL ML <dm-devel@redhat.com>
+Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/hwtable.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index c1d6f7ae..a54cc0a3 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -1113,8 +1113,9 @@ static struct hwentry default_hw[] = {
+ 		.pgpolicy      = MULTIBUS,
+ 	},
+ 	/*
+-	 * Imation/Nexsan
++	 * StorCentric
+ 	 */
++		/* Nexsan */
+ 	{
+ 		/* E-Series */
+ 		.vendor        = "NEXSAN",
+@@ -1143,9 +1144,7 @@ static struct hwentry default_hw[] = {
+ 		.prio_name     = PRIO_ALUA,
+ 		.no_path_retry = 30,
+ 	},
+-	/*
+-	 * Violin Systems
+-	 */
++		/* Violin Systems */
+ 	{
+ 		/* 3000 / 6000 Series */
+ 		.vendor        = "VIOLIN",
+-- 
+2.17.2
+

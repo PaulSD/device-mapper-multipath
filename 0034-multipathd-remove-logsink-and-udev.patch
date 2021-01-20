@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Wed, 23 Sep 2020 11:28:22 +0200
+Subject: [PATCH] multipathd: remove logsink and udev
+
+We can use the symbols from libmultipath now.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipathd/main.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 00b66ba4..c5c374b7 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -115,7 +115,6 @@ struct mpath_event_param
+ 	struct multipath *mpp;
+ };
+ 
+-int logsink;
+ int uxsock_timeout;
+ int verbosity;
+ int bindings_read_only;
+@@ -151,8 +150,6 @@ int should_exit(void)
+  */
+ struct vectors * gvecs;
+ 
+-struct udev * udev;
+-
+ struct config *multipath_conf;
+ 
+ /* Local variables */
+@@ -3123,8 +3120,6 @@ child (__attribute__((unused)) void *param)
+ 	conf = rcu_dereference(multipath_conf);
+ 	rcu_assign_pointer(multipath_conf, NULL);
+ 	call_rcu(&conf->rcu, rcu_free_config);
+-	udev_unref(udev);
+-	udev = NULL;
+ 	pthread_attr_destroy(&waiter_attr);
+ 	pthread_attr_destroy(&io_err_stat_attr);
+ #ifdef _DEBUG_
+@@ -3228,7 +3223,9 @@ main (int argc, char *argv[])
+ 
+ 	pthread_cond_init_mono(&config_cond);
+ 
+-	udev = udev_new();
++	libmultipath_init();
++	if (atexit(libmultipath_exit))
++		condlog(3, "failed to register exit handler for libmultipath");
+ 	libmp_udev_set_sync_support(0);
+ 
+ 	while ((arg = getopt(argc, argv, ":dsv:k::Bniw")) != EOF ) {
+-- 
+2.17.2
+

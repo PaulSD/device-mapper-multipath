@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Wed, 16 Sep 2020 16:06:17 +0200
+Subject: [PATCH] multipath: remove logsink and udev
+
+We can use libmultipath's symbols now.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipath/main.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/multipath/main.c b/multipath/main.c
+index 4bbfce9a..9ae46ed5 100644
+--- a/multipath/main.c
++++ b/multipath/main.c
+@@ -66,9 +66,6 @@
+ #include "valid.h"
+ #include "alias.h"
+ 
+-int logsink;
+-struct udev *udev;
+-
+ /*
+  * Return values of configure(), check_path_valid(), and main().
+  */
+@@ -810,7 +807,7 @@ main (int argc, char *argv[])
+ 	int retries = -1;
+ 	bool enable_foreign = false;
+ 
+-	udev = udev_new();
++	libmultipath_init();
+ 	logsink = 0;
+ 	if (init_config(DEFAULT_CONFIGFILE))
+ 		exit(RTVL_FAIL);
+@@ -1068,7 +1065,7 @@ out_free_config:
+ 	 */
+ 	put_multipath_config(conf);
+ 	uninit_config();
+-	udev_unref(udev);
++	libmultipath_exit();
+ 	if (dev)
+ 		FREE(dev);
+ #ifdef _DEBUG_
+-- 
+2.17.2
+

@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Thu, 17 Dec 2020 16:51:01 -0600
+Subject: [PATCH] multipathd: remove redundant vector_free() int configure
+
+remove_maps(vecs) already calls vector_free(vecs->mpvec)
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+---
+ multipathd/main.c | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/multipathd/main.c b/multipathd/main.c
+index b6a5f5b7..2eab4854 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -2634,14 +2634,10 @@ configure (struct vectors * vecs)
+ 	}
+ 
+ 	/*
+-	 * purge dm of old maps
++	 * purge dm of old maps and save new set of maps formed by
++	 * considering current path state
+ 	 */
+ 	remove_maps(vecs);
+-
+-	/*
+-	 * save new set of maps formed by considering current path state
+-	 */
+-	vector_free(vecs->mpvec);
+ 	vecs->mpvec = mpvec;
+ 
+ 	/*
+-- 
+2.17.2
+

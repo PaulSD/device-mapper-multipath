@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 15 Sep 2020 10:47:52 +0200
+Subject: [PATCH] multipathd: send "STOPPING=1" to systemd on shutdown
+
+Inform systemd that the daemon is shutting down. See sd_notify(3).
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipathd/main.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 53a22a43..c264351c 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -208,7 +208,9 @@ static void do_sd_notify(enum daemon_status old_state,
+ 	if (msg && !safe_sprintf(notify_msg, "STATUS=%s", msg))
+ 		sd_notify(0, notify_msg);
+ 
+-	if (new_state == DAEMON_IDLE && !startup_done) {
++	if (new_state == DAEMON_SHUTDOWN)
++		sd_notify(0, "STOPPING=1");
++	else if (new_state == DAEMON_IDLE && !startup_done) {
+ 		sd_notify(0, "READY=1");
+ 		startup_done = true;
+ 	}
+-- 
+2.17.2
+

@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 18 Dec 2020 23:11:47 +0100
+Subject: [PATCH] multipath-tools tests: unversioned .so for valgrind tests
+
+We need to the same thing for valgrind tests as we did in
+448752f ("libmultipath: create separate .so for unit tests").
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ tests/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/Makefile b/tests/Makefile
+index 54da774e..50673fae 100644
+--- a/tests/Makefile
++++ b/tests/Makefile
+@@ -76,7 +76,7 @@ lib/libchecktur.so:
+ 
+ %.vgr:  %-test lib/libchecktur.so
+ 	@echo == running valgrind for $< ==
+-	@LD_LIBRARY_PATH=$(multipathdir):$(mpathcmddir) \
++	@LD_LIBRARY_PATH=.:$(mpathcmddir) \
+ 		valgrind --leak-check=full --error-exitcode=128 ./$< >$@ 2>&1
+ 
+ OBJS = $(TESTS:%=%.o) $(HELPERS)
+-- 
+2.17.2
+

@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Date: Wed, 16 Dec 2020 23:17:39 +0100
+Subject: [PATCH] multipath-tools: add Vexata(by StorCentric) VX arrays
+
+https://support.sas.com/resources/papers/performance-tuning-sas-vexata-systems.pdf
+
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Cc: Martin Wilck <mwilck@suse.com>
+Cc: Benjamin Marzinski <bmarzins@redhat.com>
+Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
+Cc: DM-DEVEL ML <dm-devel@redhat.com>
+Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/hwtable.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index cd65afcc..c1d6f7ae 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -1191,6 +1191,14 @@ static struct hwentry default_hw[] = {
+ 		.product       = "Magnitude",
+ 		.pgpolicy      = MULTIBUS,
+ 		.no_path_retry = 30,
++	},
++		/* Vexata */
++	{
++		/* VX */
++		.vendor        = "Vexata",
++		.product       = "VX",
++		.pgpolicy      = MULTIBUS,
++		.no_path_retry = 30,
+ 	},
+ 	/*
+ 	 * Promise Technology
+-- 
+2.17.2
+

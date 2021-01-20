@@ -1,0 +1,112 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 15 Dec 2020 17:09:49 +0100
+Subject: [PATCH] multipath-tools: avoid access to /etc/localtime
+
+If the root file system is multipathed, and IO is queued because all paths
+are failed, multipathd may block trying to access the root FS, and thus be
+unable to reinstate paths. One file that is frequently accessed is
+/etc/localtime. Avoid that by printing monotonic timestamps instead.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/debug.c     | 14 ++++++++------
+ libmultipath/devmapper.c | 12 ++++++------
+ libmultipath/log.c       |  1 -
+ multipathd/main.c        |  3 ---
+ 4 files changed, 14 insertions(+), 16 deletions(-)
+
+diff --git a/libmultipath/debug.c b/libmultipath/debug.c
+index 429f2699..510e15e5 100644
+--- a/libmultipath/debug.c
++++ b/libmultipath/debug.c
+@@ -14,6 +14,8 @@
+ #include "config.h"
+ #include "defaults.h"
+ #include "debug.h"
++#include "time-util.h"
++#include "util.h"
+ 
+ int logsink;
+ int libmp_verbosity = DEFAULT_VERBOSITY;
+@@ -25,13 +27,13 @@ void dlog(int prio, const char * fmt, ...)
+ 	va_start(ap, fmt);
+ 	if (logsink != LOGSINK_SYSLOG) {
+ 		if (logsink == LOGSINK_STDERR_WITH_TIME) {
+-			time_t t = time(NULL);
+-			struct tm *tb = localtime(&t);
+-			char buff[16];
++			struct timespec ts;
++			char buff[32];
+ 
+-			strftime(buff, sizeof(buff),
+-				 "%b %d %H:%M:%S", tb);
+-			buff[sizeof(buff)-1] = '\0';
++			get_monotonic_time(&ts);
++			safe_sprintf(buff, "%ld.%06ld",
++				     (long)ts.tv_sec,
++				     ts.tv_nsec/1000);
+ 			fprintf(stderr, "%s | ", buff);
+ 		}
+ 		vfprintf(stderr, fmt, ap);
+diff --git a/libmultipath/devmapper.c b/libmultipath/devmapper.c
+index 4977b311..095cbc0c 100644
+--- a/libmultipath/devmapper.c
++++ b/libmultipath/devmapper.c
+@@ -27,6 +27,7 @@
+ #include "config.h"
+ #include "wwids.h"
+ #include "version.h"
++#include "time-util.h"
+ 
+ #include "log_pthread.h"
+ #include <sys/types.h>
+@@ -106,13 +107,12 @@ dm_write_log (int level, const char *file, int line, const char *f, ...)
+ 	va_start(ap, f);
+ 	if (logsink != LOGSINK_SYSLOG) {
+ 		if (logsink == LOGSINK_STDERR_WITH_TIME) {
+-			time_t t = time(NULL);
+-			struct tm *tb = localtime(&t);
+-			char buff[16];
+-
+-			strftime(buff, sizeof(buff), "%b %d %H:%M:%S", tb);
+-			buff[sizeof(buff)-1] = '\0';
++			struct timespec ts;
++			char buff[32];
+ 
++			get_monotonic_time(&ts);
++			safe_sprintf(buff, "%ld.%06ld",
++				     (long)ts.tv_sec, ts.tv_nsec/1000);
+ 			fprintf(stderr, "%s | ", buff);
+ 		}
+ 		fprintf(stderr, "libdevmapper: %s(%i): ", file, line);
+diff --git a/libmultipath/log.c b/libmultipath/log.c
+index 95c8f01a..6498c88c 100644
+--- a/libmultipath/log.c
++++ b/libmultipath/log.c
+@@ -120,7 +120,6 @@ void log_reset (char *program_name)
+ 	pthread_cleanup_push(cleanup_mutex, &logq_lock);
+ 
+ 	closelog();
+-	tzset();
+ 	openlog(program_name, 0, LOG_DAEMON);
+ 
+ 	pthread_cleanup_pop(1);
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 2eab4854..4417860b 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -2706,9 +2706,6 @@ reconfigure (struct vectors * vecs)
+ 	delete_all_foreign();
+ 
+ 	reset_checker_classes();
+-	/* Re-read any timezone changes */
+-	tzset();
+-
+ 	if (bindings_read_only)
+ 		conf->bindings_read_only = bindings_read_only;
+ 	check_alias_settings(conf);
+-- 
+2.17.2
+

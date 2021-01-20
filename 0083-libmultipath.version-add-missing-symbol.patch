@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 17 Dec 2020 01:30:30 +0100
+Subject: [PATCH] libmultipath.version: add missing symbol
+
+The weightedpath prioritizer uses get_next_string(). I'd overlooked
+this before. This was found with the help of the previous patch.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/libmultipath.version | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/libmultipath/libmultipath.version b/libmultipath/libmultipath.version
+index 751099dc..2228f4ec 100644
+--- a/libmultipath/libmultipath.version
++++ b/libmultipath/libmultipath.version
+@@ -275,3 +275,8 @@ LIBMULTIPATH_4.3.0 {
+ global:
+ 	start_checker_thread;
+ } LIBMULTIPATH_4.2.0;
++
++LIBMULTIPATH_4.4.0 {
++global:
++	get_next_string;
++} LIBMULTIPATH_4.3.0;
+-- 
+2.17.2
+

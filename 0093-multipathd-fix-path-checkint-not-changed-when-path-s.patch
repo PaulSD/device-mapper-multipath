@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Chongyun Wu <wucy11@chinatelecom.cn>
+Date: Wed, 6 Jan 2021 09:39:12 +0800
+Subject: [PATCH] multipathd: fix path checkint not changed when path state
+ changed from delay to failed
+
+Check_path: when path state change back to failed from delay state,
+should change this path's check interval time to the shortest delay
+to faster path state check.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Chongyun Wu <wucy11@chinatelecom.cn>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipathd/main.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 4417860b..7612430a 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -2161,6 +2161,11 @@ check_path (struct vectors * vecs, struct path * pp, unsigned int ticks)
+ 			(pp->state == PATH_DELAYED)) {
+ 		/* If path state become failed again cancel path delay state */
+ 		pp->state = newstate;
++		/*
++		 * path state bad again should change the check interval time
++		 * to the shortest delay
++		 */
++		pp->checkint = checkint;
+ 		return 1;
+ 	}
+ 	if (!pp->mpp) {
+-- 
+2.17.2
+
