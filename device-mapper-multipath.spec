@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -8,7 +8,7 @@ URL:     http://christophe.varoqui.free.fr/
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
 # curl -L https://github.com/opensvc/multipath-tools/archive/0.8.5.tar.gz -o multipath-tools-0.8.5.tgz
-Source0: multipath-tools-0.8.4.tgz
+Source0: multipath-tools-0.8.5.tgz
 Source1: multipath.conf
 Patch0001: 0001-Change-the-multipath.conf-manpage-uxsock_timeout-def.patch
 Patch0002: 0002-libmultipath-find_mpe-don-t-match-with-empty-WWID.patch
@@ -262,14 +262,14 @@ fi
 %{_mandir}/man8/mpathpersist.8.gz
 %config /usr/lib/udev/rules.d/62-multipath.rules
 %config /usr/lib/udev/rules.d/11-dm-mpath.rules
-%doc README
+%doc README.md
 %doc README.alua
 %doc multipath.conf
 %dir /etc/multipath
 
 %files libs
 %license LICENSES/GPL-2.0 LICENSES/LGPL-2.0
-%doc README
+%doc README.md
 %{_libdir}/libmultipath.so
 %{_libdir}/libmultipath.so.*
 %{_libdir}/libmpathpersist.so.*
@@ -281,7 +281,7 @@ fi
 %ldconfig_scriptlets libs
 
 %files devel
-%doc README
+%doc README.md
 %{_libdir}/libmpathpersist.so
 %{_libdir}/libmpathcmd.so
 %{_libdir}/libmpathvalid.so
@@ -293,7 +293,7 @@ fi
 
 %files -n kpartx
 %license LICENSES/GPL-2.0
-%doc README
+%doc README.md
 %{_sbindir}/kpartx
 /usr/lib/udev/kpartx_id
 %{_mandir}/man8/kpartx.8.gz
@@ -303,13 +303,13 @@ fi
 
 %files -n libdmmp
 %license LICENSES/GPL-3.0
-%doc README
+%doc README.md
 %{_libdir}/libdmmp.so.*
 
 %ldconfig_scriptlets -n libdmmp
 
 %files -n libdmmp-devel
-%doc README
+%doc README.md
 %{_libdir}/libdmmp.so
 %dir %{_includedir}/libdmmp
 %{_includedir}/libdmmp/*
@@ -318,6 +318,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Jan 19 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.5-2
+- Fix build issues
+
 * Tue Jan 19 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.5-1
 - Update Source to upstream version 0.8.5 plus post tag commits
   * Patches 0001-0102 are from
