@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 2 Feb 2021 15:18:33 +0100
+Subject: [PATCH] libmultipath: check return value of udev_device_get_devnum()
+
+udev_device_get_devnum() may fail, in which case it returns
+makedev(0, 0).
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/discovery.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index 921025d4..15cf6413 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -1659,6 +1659,9 @@ common_sysfs_pathinfo (struct path * pp)
+ 		return PATHINFO_FAILED;
+ 	}
+ 	devt = udev_device_get_devnum(pp->udev);
++	if (major(devt) == 0 && minor(devt) == 0)
++		return PATHINFO_FAILED;
++
+ 	snprintf(pp->dev_t, BLK_DEV_SIZE, "%d:%d", major(devt), minor(devt));
+ 
+ 	condlog(4, "%s: dev_t = %s", pp->dev, pp->dev_t);
+-- 
+2.17.2
+

@@ -81,12 +81,12 @@ index 048a838d..8bd47a80 100644
  .
  .\" ----------------------------------------------------------------------------
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
-index ba24983e..17434cef 100644
+index 7d547fa7..af592057 100644
 --- a/multipathd/multipathd.service
 +++ b/multipathd/multipathd.service
 @@ -4,6 +4,7 @@ Wants=systemd-udev-trigger.service systemd-udev-settle.service
  Before=iscsi.service iscsid.service lvm2-activation-early.service
- Before=local-fs-pre.target blk-availability.service
+ Before=local-fs-pre.target blk-availability.service shutdown.target
  After=multipathd.socket systemd-udev-trigger.service systemd-udev-settle.service
 +ConditionPathExists=/etc/multipath.conf
  DefaultDependencies=no

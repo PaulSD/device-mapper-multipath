@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -112,15 +112,36 @@ Patch0099: 0099-multipathd-avoid-io_err_stat-ABBA-deadlock.patch
 Patch0100: 0100-multipathd-use-get_monotonic_time-in-io_err_stat-cod.patch
 Patch0101: 0101-multipathd-combine-free_io_err_stat_path-and-destroy.patch
 Patch0102: 0102-multipathd-cleanup-logging-for-marginal-paths.patch
-Patch0103: 0103-RH-fixup-udev-rules-for-redhat.patch
-Patch0104: 0104-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0105: 0105-RH-don-t-start-without-a-config-file.patch
-Patch0106: 0106-RH-Fix-nvme-function-missing-argument.patch
-Patch0107: 0107-RH-use-rpm-optflags-if-present.patch
-Patch0108: 0108-RH-add-mpathconf.patch
-Patch0109: 0109-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0110: 0110-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0111: 0111-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0103: 0103-libmultipath-fix-NULL-dereference-in-find_path_by_de.patch
+Patch0104: 0104-libmultipath-snprint_devices-avoid-NULL-dereference.patch
+Patch0105: 0105-libmpathpersist-fix-thread-safety-of-default-functio.patch
+Patch0106: 0106-Added-github-action-for-building.patch
+Patch0107: 0107-github-workflow-use-zram-device-as-test-block-device.patch
+Patch0108: 0108-github-workflow-use-explicit-Ubuntu-version.patch
+Patch0109: 0109-github-workflow-add-valgrind-tests.patch
+Patch0110: 0110-github-workflow-run-apt-get-update.patch
+Patch0111: 0111-github-workflow-add-tests-with-gcc-10-and-clang.patch
+Patch0112: 0112-multipathd-Fix-multipathd-stopping-on-shutdown.patch
+Patch0113: 0113-libmultipath-use-3rd-digit-as-transport_id-for-expan.patch
+Patch0114: 0114-libmultipath-sysfs_set_nexus_loss_tmo-support-SAS-ex.patch
+Patch0115: 0115-multipathd-add-code-to-initalize-unwinder.patch
+Patch0116: 0116-libmultipath-check-if-adopt_path-really-added-curren.patch
+Patch0117: 0117-multipathd-ev_add_path-fail-if-add_map_with_path-fai.patch
+Patch0118: 0118-libmultipath-check-return-value-of-udev_device_get_d.patch
+Patch0119: 0119-pathinfo-call-filter_property-after-sysfs_pathinfo.patch
+Patch0120: 0120-libmultipath-pathinfo-call-filter_property-only-with.patch
+Patch0121: 0121-multipath-w-allow-removing-blacklisted-paths.patch
+Patch0122: 0122-libmultipath-fix-use-after-free-in-uev_add_path.patch
+Patch0123: 0123-kpartx-free-loop-device-after-listing-partitions.patch
+Patch0124: 0124-RH-fixup-udev-rules-for-redhat.patch
+Patch0125: 0125-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0126: 0126-RH-don-t-start-without-a-config-file.patch
+Patch0127: 0127-RH-Fix-nvme-function-missing-argument.patch
+Patch0128: 0128-RH-use-rpm-optflags-if-present.patch
+Patch0129: 0129-RH-add-mpathconf.patch
+Patch0130: 0130-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0131: 0131-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0132: 0132-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -318,6 +339,15 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Feb 11 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.5-4
+- Update Source to upstream version 0.8.5 plus post tag commits
+  * Patches 0001-0121 are from
+    https://github.com/openSUSE/multipath-tools/tree/queue and are
+    already queued for upstream
+  * Patches 0122&0123 have been posted for upstream inclusion
+- Rename files
+  * Previous patches 0103-0111 are now patches 0124-0132
+
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.5-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 

@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 13 Nov 2020 22:34:41 +0100
+Subject: [PATCH] libmultipath: use 3rd digit as transport_id for expanders
+
+On SAS expanders, node id's have 3 digits. sysfs paths look like this:
+
+/sys/devices/pci0000:80/0000:80:02.0/0000:8b:00.0/0000:8c:09.0/0000:8f:00.0/host9/port-9:0/expander-9:0/port-9:0:13/expander-9:1/port-9:1:12/expander-9:2/port-9:2:4/end_device-9:2:4/target9:0:29/9:0:29:0/block/sdac
+
+In that case, we should use the last digit as transport id.
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/discovery.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index e818585a..6d74cc07 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -358,10 +358,17 @@ sysfs_get_tgt_nodename(struct path *pp, char *node)
+ 	if (value) {
+ 		tgtdev = udev_device_get_parent(parent);
+ 		while (tgtdev) {
++			char c;
++
+ 			tgtname = udev_device_get_sysname(tgtdev);
+-			if (tgtname && sscanf(tgtname, "end_device-%d:%d",
+-				   &host, &tgtid) == 2)
+-				break;
++			if (tgtname) {
++				if (sscanf(tgtname, "end_device-%d:%d:%d%c",
++					   &host, &channel, &tgtid, &c) == 3)
++					break;
++				if (sscanf(tgtname, "end_device-%d:%d%c",
++					   &host, &tgtid, &c) == 2)
++					break;
++			}
+ 			tgtdev = udev_device_get_parent(tgtdev);
+ 			tgtid = -1;
+ 		}
+-- 
+2.17.2
+

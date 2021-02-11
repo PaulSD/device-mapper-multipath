@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Fri, 18 Dec 2020 17:06:41 -0600
+Subject: [PATCH] multipathd: Fix multipathd stopping on shutdown
+
+According to man "systemd.special"
+
+"shutdown.target: ... Services that shall be terminated on system
+shutdown shall add Conflicts= and Before= dependencies to this unit for
+their service unit, which is implicitly done when
+DefaultDependencies=yes is set (the default)."
+
+multipathd.service sets DefaultDependencies=no and includes the
+Conflits= dependency, but not the Before= one. This can cause multipathd
+to continue running past when it is supposed to during shutdown.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+---
+ multipathd/multipathd.service | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
+index ba24983e..7d547fa7 100644
+--- a/multipathd/multipathd.service
++++ b/multipathd/multipathd.service
+@@ -2,7 +2,7 @@
+ Description=Device-Mapper Multipath Device Controller
+ Wants=systemd-udev-trigger.service systemd-udev-settle.service
+ Before=iscsi.service iscsid.service lvm2-activation-early.service
+-Before=local-fs-pre.target blk-availability.service
++Before=local-fs-pre.target blk-availability.service shutdown.target
+ After=multipathd.socket systemd-udev-trigger.service systemd-udev-settle.service
+ DefaultDependencies=no
+ Conflicts=shutdown.target
+-- 
+2.17.2
+

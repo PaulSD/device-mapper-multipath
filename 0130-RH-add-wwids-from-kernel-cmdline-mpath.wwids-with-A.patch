@@ -138,7 +138,7 @@ index 5b29a5d9..0478f4e7 100644
  Remove the WWID for the specified device from the WWIDs file.
  .
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
-index 17434cef..0fbcc46b 100644
+index af592057..bc8fa07a 100644
 --- a/multipathd/multipathd.service
 +++ b/multipathd/multipathd.service
 @@ -15,6 +15,7 @@ Type=notify

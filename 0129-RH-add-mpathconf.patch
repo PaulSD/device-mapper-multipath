@@ -69,7 +69,7 @@ index b9bbb3cf..e720c7f6 100644
  	$(RM) core *.o $(EXEC) *.gz
 diff --git a/multipath/mpathconf b/multipath/mpathconf
 new file mode 100644
-index 00000000..f34003c9
+index 00000000..2f4f3eaf
 --- /dev/null
 +++ b/multipath/mpathconf
 @@ -0,0 +1,555 @@
@@ -129,7 +129,7 @@ index 00000000..f34003c9
 +	echo "Disable: --disable"
 +	echo "Only allow certain wwids (instead of enable): --allow <WWID>"
 +	echo "Set user_friendly_names (Default y): --user_friendly_names <y|n>"
-+	echo "Set find_multipaths (Default y): --find_multipaths <y|n>"
++	echo "Set find_multipaths (Default y): --find_multipaths <yes|no|strict|greedy|smart>"
 +	echo "Set default property blacklist (Default y): --property_blacklist <y|n>"
 +	echo "Set enable_foreign to show foreign devices (Default n): --enable_foreign <y|n>"
 +	echo "Load the dm-multipath modules on enable (Default y): --with_module <y|n>"
@@ -299,8 +299,12 @@ index 00000000..f34003c9
 +		echo "--user_friendly_names must be either 'y' or 'n'"
 +		exit 1
 +	fi
-+	if [ -n "$FIND" ] && [ "$FIND" != "y" -a "$FIND" != "n" ]; then
-+		echo "--find_multipaths must be either 'y' or 'n'"
++	if [ "$FIND" = "y" ]; then
++		FIND="yes"
++	elif [ "$FIND" = "n" ]; then
++		FIND="no"
++	elif [ -n "$FIND" ] && [ "$FIND" != "yes" -a "$FIND" != "no" -a "$FIND" != "strict" -a "$FIND" != "greedy" -a "$FIND" != "smart" ]; then
++		echo "--find_multipaths must be one of 'yes' 'no' 'strict' 'greedy' or 'smart'"
 +		exit 1
 +	fi
 +	if [ -n "$PROPERTY" ] && [ "$PROPERTY" != "y" -a "$PROPERTY" != "n" ]; then
@@ -402,10 +406,11 @@ index 00000000..f34003c9
 +fi
 +
 +if [ "$HAVE_DEFAULTS" = "1" ]; then
-+	if sed -n '/^defaults[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*find_multipaths[[:space:]]*\(yes\|1\)" ; then
-+		HAVE_FIND=1
-+	elif sed -n '/^defaults[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*find_multipaths[[:space:]]*\(no\|0\)" ; then
-+		HAVE_FIND=0
++	HAVE_FIND=`sed -n '/^defaults[[:space:]]*{/,/^}/ p' $TMPFILE | sed -n 's/^[[:blank:]]*find_multipaths[[:blank:]]*\([^[:blank:]]*\).*$/\1/p' | sed -n 1p`
++	if [ "$HAVE_FIND" = "1" ]; then
++		HAVE_FIND="yes"
++	elif [ "$HAVE_FIND" = "0" ]; then
++		HAVE_FIND="no"
 +	fi
 +	if sed -n '/^defaults[[:space:]]*{/,/^}/ p' $TMPFILE | grep -q "^[[:space:]]*user_friendly_names[[:space:]]*\(yes\|1\)" ; then
 +		HAVE_FRIENDLY=1
@@ -435,10 +440,10 @@ index 00000000..f34003c9
 +	else
 +		echo "multipath is disabled"
 +	fi
-+	if [ -z "$HAVE_FIND"  -o "$HAVE_FIND" = 0 ]; then
-+		echo "find_multipaths is disabled"
++	if [ -z "$HAVE_FIND" ]; then
++		echo "find_multipaths is no"
 +	else
-+		echo "find_multipaths is enabled"
++		echo "find_multipaths is $HAVE_FIND"
 +	fi
 +	if [ -z "$HAVE_FRIENDLY" -o "$HAVE_FRIENDLY" = 0 ]; then
 +		echo "user_friendly_names is disabled"
@@ -530,19 +535,14 @@ index 00000000..f34003c9
 +	fi
 +fi
 +
-+if [ "$FIND" = "n" ]; then
-+	if [ "$HAVE_FIND" = 1 ]; then
-+		sed -i '/^defaults[[:space:]]*{/,/^}/ s/^[[:space:]]*find_multipaths[[:space:]]*\(yes\|1\)/	find_multipaths no/' $TMPFILE
-+		CHANGED_CONFIG=1
-+	fi
-+elif [ "$FIND" = "y" ]; then
++if [ -n "$FIND" ]; then
 +	if [ -z "$HAVE_FIND" ]; then
 +		sed -i '/^defaults[[:space:]]*{/ a\
-+	find_multipaths yes
++	find_multipaths '"$FIND"'
 +' $TMPFILE
 +		CHANGED_CONFIG=1
-+	elif [ "$HAVE_FIND" = 0 ]; then
-+		sed -i '/^defaults[[:space:]]*{/,/^}/ s/^[[:space:]]*find_multipaths[[:space:]]*\(no\|0\)/	find_multipaths yes/' $TMPFILE
++	elif [ "$FIND" != "$HAVE_FIND" ]; then
++		sed -i '/^defaults[[:space:]]*{/,/^}/ s/^[[:blank:]]*find_multipaths[[:blank:]]*[^[:blank:]]*/	find_multipaths '"$FIND"'/' $TMPFILE
 +		CHANGED_CONFIG=1
 +	fi
 +fi
@@ -630,7 +630,7 @@ index 00000000..f34003c9
 +fi
 diff --git a/multipath/mpathconf.8 b/multipath/mpathconf.8
 new file mode 100644
-index 00000000..b82961d6
+index 00000000..83515eb4
 --- /dev/null
 +++ b/multipath/mpathconf.8
 @@ -0,0 +1,135 @@
@@ -674,9 +674,9 @@ index 00000000..b82961d6
 +already exists, mpathconf will edit it. If it does not exist, mpathconf will
 +create a default file with
 +.B user_friendly_names
-+and
++set and
 +.B find_multipaths
-+set. To disable these, use the
++set to \fByes\fP. To disable these, use the
 +.B --user_friendly_names n
 +and
 +.B --find_multipaths n
@@ -713,13 +713,13 @@ index 00000000..b82961d6
 +defaults section. If set to \fBn\fP, this removes the line, if present. This
 +command can be used along with any other command.
 +.TP
-+.B --find_multipaths\fP { \fBy\fP | \fBn\fP }
-+If set to \fBy\fP, this adds the line
-+.B find_multipaths yes
++.B --find_multipaths\fP { \fByes\fP | \fBno\fP | \fBstrict\fP | \fBgreedy\fP | \fBsmart\fP }
++If set to \fB<value>\fP, this adds the line
++.B find_multipaths <value>
 +to the
 +.B /etc/multipath.conf
-+defaults section. If set to \fBn\fP, this removes the line, if present. This
-+command can be used along with any other command.
++defaults section. This command can be used along with any other command.
++\fBy\fP and \fBn\fP can be used instead of \fByes\fP and \fBno\fP.
 +.TP
 +.B --property_blacklist \fP { \fBy\fP | \fBn\fP }
 +If set to \fBy\fP, this adds the line

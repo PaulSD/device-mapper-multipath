@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 18 Dec 2020 21:38:43 +0100
+Subject: [PATCH] Added github action for building
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ .github/workflows/build-and-unittest.yaml | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+ create mode 100644 .github/workflows/build-and-unittest.yaml
+
+diff --git a/.github/workflows/build-and-unittest.yaml b/.github/workflows/build-and-unittest.yaml
+new file mode 100644
+index 00000000..2b13c65c
+--- /dev/null
++++ b/.github/workflows/build-and-unittest.yaml
+@@ -0,0 +1,17 @@
++name: basic-build-and-ci
++on:   [push]
++jobs:
++  build:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v2
++      - name: dependencies
++        run: >
++          sudo apt-get install --yes gcc
++          make perl-base pkg-config
++          libdevmapper-dev libreadline-dev libaio-dev libsystemd-dev
++          libudev-dev libjson-c-dev liburcu-dev libcmocka-dev
++      - name: build
++        run: make -O -j$(grep -c ^processor /proc/cpuinfo)
++      - name: test
++        run: make -O -j$(grep -c ^processor /proc/cpuinfo) test
+-- 
+2.17.2
+
