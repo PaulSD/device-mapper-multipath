@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -339,6 +339,10 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Tue Mar 02 2021 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 0.8.5-5
+- Rebuilt for updated systemd-rpm-macros
+  See https://pagure.io/fesco/issue/2583.
+
 * Thu Feb 11 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.5-4
 - Update Source to upstream version 0.8.5 plus post tag commits
   * Patches 0001-0121 are from
