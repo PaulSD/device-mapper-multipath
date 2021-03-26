@@ -56,6 +56,3 @@ index 39aea4ad..d1f8cc1b 100644
  	pthread_join(check_thr, NULL);
  	pthread_join(uevent_thr, NULL);
  	pthread_join(uxlsnr_thr, NULL);
--- 
-2.17.2
-

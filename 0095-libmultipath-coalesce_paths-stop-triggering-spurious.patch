@@ -60,6 +60,3 @@ index 999f3106..3263bb01 100644
  		conf = get_multipath_config();
  		allow_queueing = conf->allow_queueing;
  		put_multipath_config(conf);
--- 
-2.17.2
-

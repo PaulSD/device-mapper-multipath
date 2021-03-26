@@ -32,6 +32,3 @@ index b6a5f5b7..2eab4854 100644
  	vecs->mpvec = mpvec;
  
  	/*
--- 
-2.17.2
-

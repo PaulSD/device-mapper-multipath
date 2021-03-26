@@ -40,6 +40,3 @@ index e818585a..6d74cc07 100644
  			tgtdev = udev_device_get_parent(tgtdev);
  			tgtid = -1;
  		}
--- 
-2.17.2
-

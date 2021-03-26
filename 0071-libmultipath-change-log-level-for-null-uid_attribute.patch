@@ -40,6 +40,3 @@ index 877e8f2b..c74f13bf 100644
  			len = uid_fallback(pp, path_state, &origin);
  		}
  	}
--- 
-2.17.2
-

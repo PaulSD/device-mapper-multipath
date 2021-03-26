@@ -269,6 +269,3 @@ index 5435eae4..9e9c0a82 100644
   */
  void mpath_persistent_reserve_free_vecs(void);
  
--- 
-2.17.2
-

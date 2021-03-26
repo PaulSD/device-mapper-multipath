@@ -61,6 +61,3 @@ index 0828a8f7..b9bbb3cf 100644
  	$(RM) $(DESTDIR)$(man8dir)/$(EXEC).8.gz
  	$(RM) $(DESTDIR)$(man5dir)/$(EXEC).conf.5.gz
  
--- 
-2.17.2
-

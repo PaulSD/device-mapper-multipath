@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.5
-Release: 5%{?dist}
+Release: 6%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -132,16 +132,40 @@ Patch0119: 0119-pathinfo-call-filter_property-after-sysfs_pathinfo.patch
 Patch0120: 0120-libmultipath-pathinfo-call-filter_property-only-with.patch
 Patch0121: 0121-multipath-w-allow-removing-blacklisted-paths.patch
 Patch0122: 0122-libmultipath-fix-use-after-free-in-uev_add_path.patch
-Patch0123: 0123-kpartx-free-loop-device-after-listing-partitions.patch
-Patch0124: 0124-RH-fixup-udev-rules-for-redhat.patch
-Patch0125: 0125-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0126: 0126-RH-don-t-start-without-a-config-file.patch
-Patch0127: 0127-RH-Fix-nvme-function-missing-argument.patch
-Patch0128: 0128-RH-use-rpm-optflags-if-present.patch
-Patch0129: 0129-RH-add-mpathconf.patch
-Patch0130: 0130-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0131: 0131-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0132: 0132-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0123: 0123-multipath-tools-tests-fix-stringop-overflow-build-er.patch
+Patch0124: 0124-libmultipath-cleanup-code-to-strip-wwid-trailing-spa.patch
+Patch0125: 0125-libmultipath-cleanup-uid_attribute-checking-code.patch
+Patch0126: 0126-multipathd-add-recheck_wwid-option-to-verify-the-pat.patch
+Patch0127: 0127-libmultipath-check-if-user_friendly_name-is-in-use.patch
+Patch0128: 0128-tests-add-tests-for-checking-if-alias-is-in-use.patch
+Patch0129: 0129-multipath-tools-add-DellEMC-PowerStore-to-hardware-t.patch
+Patch0130: 0130-multipath-tools-delete-a-space-in-multipath.conf.5-t.patch
+Patch0131: 0131-multipath-tools-tests-allow-control-of-test-verbosit.patch
+Patch0132: 0132-multipath-tools-devt-test-avoid-failure-when-run-in-.patch
+Patch0133: 0133-multipath-tools-fix-compilation-errors-on-32-bit-mus.patch
+Patch0134: 0134-libmultipath-fix-compilation-error-with-gcc-10-on-i3.patch
+Patch0135: 0135-kpartx-free-loop-device-after-listing-partitions.patch
+Patch0136: 0136-libmultipath-merge-update_multipath_table-and-update.patch
+Patch0137: 0137-11-dm-mpath.rules-run-multipath-U-with-v1.patch
+Patch0138: 0138-multipath-tools-tests-check-if-sys-dev-block-is-non-.patch
+Patch0139: 0139-multipathd-reduce-log-levels-in-cli_add_map.patch
+Patch0140: 0140-multipath-tools-fix-format-in-multipath.conf.5-to-be.patch
+Patch0141: 0141-multipath-tools-use-same-format-for-default-values-i.patch
+Patch0142: 0142-multipathd-fix-NULL-dereference-in-check_path.patch
+Patch0143: 0143-libmultipath-avoid-infinite-loop-with-bad-vpd-page-8.patch
+Patch0144: 0144-libmultipath-fix-priorities-in-parse_vpd_pg83.patch
+Patch0145: 0145-multipathd-improve-getting-parent-udevice-in-rescan_.patch
+Patch0146: 0146-multipathd-don-t-trigger-uevent-for-partitions-on-ww.patch
+Patch0147: 0147-RH-fixup-udev-rules-for-redhat.patch
+Patch0148: 0148-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0149: 0149-RH-don-t-start-without-a-config-file.patch
+Patch0150: 0150-RH-Fix-nvme-function-missing-argument.patch
+Patch0151: 0151-RH-use-rpm-optflags-if-present.patch
+Patch0152: 0152-RH-add-mpathconf.patch
+Patch0153: 0153-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0154: 0154-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0155: 0155-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0156: 0156-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -339,6 +363,19 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Mar 26 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.5-6
+- Change patch format to remove Git version
+  * Patches 0001-0122 only have the patch format modified
+- Update to the head of the upstream staging branch plus redhat patches
+  * Patches 0123-0134 & 1036-0142 are from the upstream staging branch
+  * Patches 0143-1046 have been submitted upstream
+  * Patch 0156 is a Red Hat only patch. Red Hat udev rules set ID_SERIAL
+    from 60-persistent-storage.rules instead of 55-scsi-sg3_id.rules.
+    Multipath's parse_vpd_pg83() function needs to match the ID_SERIAL
+    value from udev.
+- Rename files
+  * Previous patches 0123-0132 are now patches 1035 & 0147-0155
+
 * Tue Mar 02 2021 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 0.8.5-5
 - Rebuilt for updated systemd-rpm-macros
   See https://pagure.io/fesco/issue/2583.

@@ -82,6 +82,3 @@ index b5c7873d..e139360c 100644
  
  	switch (rc) {
  	case NVME_ANA_OPTIMIZED:
--- 
-2.17.2
-

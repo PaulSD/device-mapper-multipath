@@ -83,6 +83,3 @@ index 960a7665..f5542ed0 100644
  
  	if (mp->flags & BL_BY_DEVICE &&
  	    (mask & DI_BLACKLIST && mask & DI_SYSFS))
--- 
-2.17.2
-

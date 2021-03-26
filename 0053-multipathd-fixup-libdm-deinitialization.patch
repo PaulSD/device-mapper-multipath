@@ -35,6 +35,3 @@ index 7ab3eab8..4c4e2eab 100644
  	libmultipath_init();
  	if (atexit(libmultipath_exit))
  		condlog(3, "failed to register exit handler for libmultipath");
--- 
-2.17.2
-

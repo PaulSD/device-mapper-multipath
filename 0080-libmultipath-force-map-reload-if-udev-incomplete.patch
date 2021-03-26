@@ -146,6 +146,3 @@ index c076be72..d9fd9cb8 100644
  		return;
  	}
  	if (cmpp->nextpg != mpp->bestpg) {
--- 
-2.17.2
-

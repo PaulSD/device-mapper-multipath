@@ -1,0 +1,62 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 18 Mar 2021 09:50:55 +0100
+Subject: [PATCH] multipath-tools tests: check if /sys/dev/block is non-empty
+
+Since f131e31 ("multipath-tools: devt test: avoid failure when run in
+containers"), we check the existence of /sys/dev/block before running
+the devt test. It turns out that on recent releases of podman (3.0.1),
+this check is insufficient, because /sys/dev/block exists now in
+containers, albeit empty. So we need to check for actual entries
+in the directory.
+
+Fixes: f131e31 ("multipath-tools: devt test: avoid failure when run in containers")
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ tests/devt.c | 22 +++++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/tests/devt.c b/tests/devt.c
+index 02f2e8f3..d971302c 100644
+--- a/tests/devt.c
++++ b/tests/devt.c
+@@ -13,7 +13,9 @@
+ #include <sys/sysmacros.h>
+ #include <fcntl.h>
+ #include <sys/stat.h>
++#include <sys/types.h>
+ #include <unistd.h>
++#include <dirent.h>
+ #include "util.h"
+ #include "debug.h"
+ 
+@@ -21,12 +23,22 @@
+ 
+ static bool sys_dev_block_exists(void)
+ {
+-	int fd;
+-	bool rc;
++	DIR *dir;
++	bool rc = false;
+ 
+-	fd = open("/sys/dev/block", O_RDONLY|O_DIRECTORY);
+-	rc = (fd != -1);
+-	close(fd);
++	dir = opendir("/sys/dev/block");
++	if (dir != NULL) {
++		struct dirent *de;
++
++		while((de = readdir(dir)) != NULL) {
++			if (strcmp(de->d_name, ".") &&
++			    strcmp(de->d_name, "..")) {
++				rc = true;
++				break;
++			}
++		}
++	}
++	closedir(dir);
+ 	return rc;
+ }
+ 

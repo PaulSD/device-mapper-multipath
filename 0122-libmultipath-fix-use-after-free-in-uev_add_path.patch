@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
-Date: Mon, 1 Feb 2021 19:47:11 -0600
+Date: Mon, 8 Feb 2021 23:19:26 -0600
 Subject: [PATCH] libmultipath: fix use-after-free in uev_add_path
 
 if ev_remove_path() returns success the path has very likely been
@@ -11,6 +11,7 @@ Insted, uev_add_path() should only continue to access the path if
 ev_remove_path() didn't succeed.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
 ---
  multipathd/main.c | 15 +++++++--------
  1 file changed, 7 insertions(+), 8 deletions(-)
@@ -48,6 +49,3 @@ index 425492a9..19679848 100644
  			} else if (r == PATHINFO_SKIPPED) {
  				condlog(3, "%s: remove blacklisted path",
  					uev->kernel);
--- 
-2.17.2
-

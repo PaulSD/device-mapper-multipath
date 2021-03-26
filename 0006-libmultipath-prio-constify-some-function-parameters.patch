@@ -48,6 +48,3 @@ index 599d1d88..26754f78 100644
  int prio_getprio (struct prio *, struct path *, unsigned int);
  void prio_get (char *, struct prio *, char *, char *);
  void prio_put (struct prio *);
--- 
-2.17.2
-

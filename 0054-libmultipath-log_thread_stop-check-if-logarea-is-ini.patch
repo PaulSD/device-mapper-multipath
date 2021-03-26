@@ -24,6 +24,3 @@ index 15baef88..0c327ffc 100644
  	logdbg(stderr,"enter log_thread_stop\n");
  
  	pthread_mutex_lock(&logev_lock);
--- 
-2.17.2
-

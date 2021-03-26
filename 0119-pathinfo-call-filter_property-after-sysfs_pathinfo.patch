@@ -276,6 +276,3 @@ index 693c72c5..8ec803e8 100644
  	assert_int_equal(is_path_valid(name, &conf, &pp, false),
  			 PATH_IS_NOT_VALID);
  }
--- 
-2.17.2
-

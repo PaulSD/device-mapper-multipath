@@ -12,7 +12,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libmultipath/defaults.h b/libmultipath/defaults.h
-index 947ba467..518d0b16 100644
+index c27946c7..e0dd32ad 100644
 --- a/libmultipath/defaults.h
 +++ b/libmultipath/defaults.h
 @@ -23,7 +23,7 @@
@@ -24,6 +24,3 @@ index 947ba467..518d0b16 100644
  #define DEFAULT_FAST_IO_FAIL	5
  #define DEFAULT_DEV_LOSS_TMO	600
  #define DEFAULT_RETAIN_HWHANDLER RETAIN_HWHANDLER_ON
--- 
-2.17.2
-

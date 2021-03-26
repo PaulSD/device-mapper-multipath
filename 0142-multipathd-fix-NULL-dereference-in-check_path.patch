@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lixiaokeng <lixiaokeng@huawei.com>
+Date: Tue, 23 Mar 2021 19:50:02 +0800
+Subject: [PATCH] multipathd fix NULL dereference in check_path
+
+When iscsi login/logout and multipath command are executed
+concurrently, there is a coredump.
+
+The reason is:
+check_path
+    ->update_multipath_strings
+        ->sync_paths
+            ->orphan_path    //pp->mpp is set to NULL
+        ->update_multipath_status
+            ->dm_get_status  //return DMP_NOT_FOUND
+    ->condlog //pp->mpp->alias, NULL dereference
+
+Here we don't dereference pp-> mpp if it is NULL.
+
+Signed-off-by: Lixiaokeng<lixiaokeng@huawei.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipathd/main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 154a4eef..1df69096 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -2250,7 +2250,7 @@ check_path (struct vectors * vecs, struct path * pp, unsigned int ticks)
+ 		if (ret == DMP_NOT_FOUND) {
+ 			/* multipath device missing. Likely removed */
+ 			condlog(1, "%s: multipath device '%s' not found",
+-				pp->dev, pp->mpp->alias);
++				pp->dev, pp->mpp ? pp->mpp->alias : "");
+ 			return 0;
+ 		} else
+ 			condlog(1, "%s: Couldn't synchronize with kernel state",

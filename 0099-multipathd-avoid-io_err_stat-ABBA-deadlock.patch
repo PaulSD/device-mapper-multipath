@@ -141,6 +141,3 @@ index feb66469..775e7259 100644
  }
  
  static void cleanup_exited(__attribute__((unused)) void *arg)
--- 
-2.17.2
-

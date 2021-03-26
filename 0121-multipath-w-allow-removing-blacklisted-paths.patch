@@ -34,6 +34,3 @@ index 3263bb01..598efe05 100644
  		    filter_wwid(conf->blist_wwid, conf->elist_wwid, refwwid,
  				NULL) > 0)
  			return PATHINFO_SKIPPED;
--- 
-2.17.2
-

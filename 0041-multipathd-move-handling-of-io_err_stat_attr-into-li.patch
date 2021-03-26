@@ -141,6 +141,3 @@ index ce14bb66..abc6a9f7 100644
  #ifdef _DEBUG_
  	dbg_free_final(NULL);
  #endif
--- 
-2.17.2
-

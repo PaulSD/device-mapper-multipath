@@ -118,6 +118,3 @@ index 92c45d44..99a89a69 100644
  	else if (update_prio(pp, new_path_up) &&
  	    (pp->mpp->pgpolicyfn == (pgpolicyfn *)group_by_prio) &&
  	     pp->mpp->pgfailback == -FAILBACK_IMMEDIATE) {
--- 
-2.17.2
-

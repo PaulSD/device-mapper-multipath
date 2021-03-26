@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Date: Sat, 6 Mar 2021 03:54:15 +0100
+Subject: [PATCH] multipath-tools: add DellEMC/PowerStore to hardware table
+
+Info from: https://www.delltechnologies.com/en-us/collaterals/unauth/technical-guides-support-information/products/storage-2/docu5128.pdf
+
+Cc: Martin Wilck <mwilck@suse.com>
+Cc: Benjamin Marzinski <bmarzins@redhat.com>
+Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
+Cc: DM-DEVEL ML <dm-devel@redhat.com>
+Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/hwtable.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index 921aadc5..58fa7387 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -388,6 +388,17 @@ static struct hwentry default_hw[] = {
+ 		.product       = "^EMC PowerMax_",
+ 		.pgpolicy      = MULTIBUS,
+ 	},
++	{
++		/* PowerStore */
++		.vendor        = "DellEMC",
++		.product       = "PowerStore",
++		.pgpolicy      = GROUP_BY_PRIO,
++		.prio_name     = PRIO_ALUA,
++		.hwhandler     = "1 alua",
++		.pgfailback    = -FAILBACK_IMMEDIATE,
++		.no_path_retry = 3,
++		.fast_io_fail  = 15,
++	},
+ 	/*
+ 	 * Fujitsu
+ 	 */

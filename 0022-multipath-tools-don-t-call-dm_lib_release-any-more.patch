@@ -160,6 +160,3 @@ index d1f8cc1b..5cc34357 100644
  	dm_lib_exit();
  
  	/* We're done here */
--- 
-2.17.2
-

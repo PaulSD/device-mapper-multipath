@@ -32,6 +32,3 @@ index 00000000..2b13c65c
 +        run: make -O -j$(grep -c ^processor /proc/cpuinfo)
 +      - name: test
 +        run: make -O -j$(grep -c ^processor /proc/cpuinfo) test
--- 
-2.17.2
-

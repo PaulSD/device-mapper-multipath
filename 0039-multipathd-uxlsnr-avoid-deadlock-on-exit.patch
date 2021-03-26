@@ -100,6 +100,3 @@ index 1c5ce9d2..ce2b6800 100644
  			if (polls[i].revents & POLLIN) {
  				struct timespec start_time;
  
--- 
-2.17.2
-

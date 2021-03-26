@@ -333,6 +333,3 @@ index 7242d39b..ea66a01e 100644
  .B bindings_file
  The full pathname of the binding file to be used when the user_friendly_names
  option is set.
--- 
-2.17.2
-

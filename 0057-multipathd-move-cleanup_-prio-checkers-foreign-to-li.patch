@@ -88,6 +88,3 @@ index 50cc3356..4de0978e 100644
  	if (poll_dmevents)
  		cleanup_dmevent_waiter();
  
--- 
-2.17.2
-

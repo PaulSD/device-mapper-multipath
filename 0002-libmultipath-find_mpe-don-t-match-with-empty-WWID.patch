@@ -22,6 +22,3 @@ index b9bdbdbc..df0f8f45 100644
  		return NULL;
  
  	vector_foreach_slot (mptable, mpe, i)
--- 
-2.17.2
-

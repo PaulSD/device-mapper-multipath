@@ -527,6 +527,3 @@ index 00000000..5ffabb9d
 +	r += test_mpathvalid();
 +	return r;
 +}
--- 
-2.17.2
-

@@ -52,6 +52,3 @@ index 00b66ba4..c5c374b7 100644
  	libmp_udev_set_sync_support(0);
  
  	while ((arg = getopt(argc, argv, ":dsv:k::Bniw")) != EOF ) {
--- 
-2.17.2
-

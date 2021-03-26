@@ -85,6 +85,3 @@ index e7084664..877e8f2b 100644
  		  !strcmp(pp->uid_attribute, ""))));
  }
  
--- 
-2.17.2
-

@@ -120,6 +120,3 @@ index abc6a9f7..3da0d7cc 100644
  	cleanup_foreign();
  	cleanup_checkers();
  	cleanup_prio();
--- 
-2.17.2
-

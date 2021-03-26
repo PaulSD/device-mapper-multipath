@@ -85,6 +85,3 @@ index 389578be..4173576f 100644
 +        run: rm -f tests/dmevents.out tests/directio.out
 +      - name: root-test
 +        run: sudo make DIO_TEST_DEV=/dev/ram0 test
--- 
-2.17.2
-

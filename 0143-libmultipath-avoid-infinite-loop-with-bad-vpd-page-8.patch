@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Wed, 24 Mar 2021 14:15:02 -0500
+Subject: [PATCH] libmultipath: avoid infinite loop with bad vpd page 83
+ identifier
+
+If a device with a scsi name identifier has an unknown prefix,
+parse_vpd_pg83() needs to advance to the next identifier, instead of
+simply trying the same one again in an infinite loop.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/discovery.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index f216a724..5727f7a6 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -1157,7 +1157,7 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
+ 			if (memcmp(d + 4, "eui.", 4) &&
+ 			    memcmp(d + 4, "naa.", 4) &&
+ 			    memcmp(d + 4, "iqn.", 4))
+-				continue;
++				break;
+ 			if (prio < 4) {
+ 				prio = 4;
+ 				vpd = d;

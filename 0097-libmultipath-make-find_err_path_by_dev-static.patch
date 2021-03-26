@@ -22,6 +22,3 @@ index 5363049d..2e48ee81 100644
  {
  	int i;
  	struct io_err_stat_path *pp;
--- 
-2.17.2
-

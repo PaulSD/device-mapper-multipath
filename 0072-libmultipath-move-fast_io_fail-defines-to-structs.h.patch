@@ -155,6 +155,3 @@ index 4ce30551..cfa7b649 100644
  struct vpd_vendor_page {
  	int pg;
  	const char *name;
--- 
-2.17.2
-

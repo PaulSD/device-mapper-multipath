@@ -26,6 +26,3 @@ index 43d77688..425492a9 100644
  			goto fail; /* leave path added to pathvec */
  	}
  
--- 
-2.17.2
-

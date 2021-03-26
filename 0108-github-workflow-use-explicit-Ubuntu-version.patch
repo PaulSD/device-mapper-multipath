@@ -21,6 +21,3 @@ index ef55b8c1..577a14ac 100644
      steps:
        - uses: actions/checkout@v2
        - name: mpath
--- 
-2.17.2
-

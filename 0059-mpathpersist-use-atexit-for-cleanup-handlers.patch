@@ -27,6 +27,3 @@ index 3c2e6576..14245cc3 100644
  	return (ret >= 0) ? ret : MPATH_PR_OTHER;
  }
  
--- 
-2.17.2
-

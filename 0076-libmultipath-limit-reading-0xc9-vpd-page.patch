@@ -86,6 +86,3 @@ index fa4ac5d9..f771a830 100644
  		return 0;
  	len = get_vpd_sgio(pp->fd, 0xC9, 0, buff, 44);
  	if (len <= 0)
--- 
-2.17.2
-

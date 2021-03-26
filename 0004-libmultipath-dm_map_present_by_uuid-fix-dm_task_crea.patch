@@ -26,6 +26,3 @@ index 7f093617..0bc1d16e 100644
  		goto out;
  
  	dm_task_no_open_count(dmt);
--- 
-2.17.2
-

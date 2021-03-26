@@ -43,6 +43,3 @@ index 4bbfce9a..9ae46ed5 100644
  	if (dev)
  		FREE(dev);
  #ifdef _DEBUG_
--- 
-2.17.2
-

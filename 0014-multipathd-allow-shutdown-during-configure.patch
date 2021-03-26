@@ -135,6 +135,3 @@ index eedc6c10..fa53e963 100644
  	sync_maps_state(mpvec);
  	vector_foreach_slot(mpvec, mpp, i){
  		if (remember_wwid(mpp->wwid) == 1)
--- 
-2.17.2
-

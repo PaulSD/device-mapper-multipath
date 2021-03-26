@@ -20,10 +20,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  5 files changed, 18 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index be310159..8d291491 100644
+index 30046a17..5f35c3d3 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -893,6 +893,19 @@ int _init_config (const char *file, struct config *conf)
+@@ -895,6 +895,19 @@ int _init_config (const char *file, struct config *conf)
  			goto out;
  		}
  		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
@@ -44,7 +44,7 @@ index be310159..8d291491 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index 9ce37f16..7f8d9cd0 100644
+index 933fe0d1..5f01c1fc 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -9,6 +9,7 @@
@@ -92,6 +92,3 @@ index 7d547fa7..af592057 100644
  DefaultDependencies=no
  Conflicts=shutdown.target
  ConditionKernelCommandLine=!nompath
--- 
-2.17.2
-

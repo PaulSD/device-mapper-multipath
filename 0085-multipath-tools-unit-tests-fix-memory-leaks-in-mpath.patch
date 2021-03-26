@@ -48,6 +48,3 @@ index 5ffabb9d..cfe4bae1 100644
  }
  
  #define setup_test(name) \
--- 
-2.17.2
-

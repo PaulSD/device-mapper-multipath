@@ -50,6 +50,3 @@ index 1fb0ee62..39aea4ad 100644
  	}
  	pthread_cleanup_pop(1);
  	return rc;
--- 
-2.17.2
-

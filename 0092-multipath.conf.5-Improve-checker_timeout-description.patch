@@ -60,6 +60,3 @@ index ea66a01e..8ef3a747 100644
  .RS
  .TP
  The default is: in \fB/sys/block/sd<x>/device/timeout\fR
--- 
-2.17.2
-

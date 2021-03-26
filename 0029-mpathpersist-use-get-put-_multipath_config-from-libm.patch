@@ -50,6 +50,3 @@ index a6a3bcf6..278e48f7 100644
  	udev_unref(udev);
  
  	return (ret >= 0) ? ret : MPATH_PR_OTHER;
--- 
-2.17.2
-

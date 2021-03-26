@@ -41,6 +41,3 @@ index 464596fc..a3f27fd6 100644
  		return NULL;
  
  	vector_foreach_slot (pathvec, pp, i)
--- 
-2.17.2
-

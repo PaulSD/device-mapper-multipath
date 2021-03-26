@@ -279,6 +279,3 @@ index 2e3583f5..751099dc 100644
 +global:
 +	start_checker_thread;
 +} LIBMULTIPATH_4.2.0;
--- 
-2.17.2
-

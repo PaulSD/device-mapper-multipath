@@ -62,6 +62,3 @@ index dc4974b9..4bbfce9a 100644
  	udev_unref(udev);
  	if (dev)
  		FREE(dev);
--- 
-2.17.2
-

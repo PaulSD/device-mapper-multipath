@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
-Date: Tue, 9 Feb 2021 17:16:04 -0600
+Date: Wed, 24 Feb 2021 00:05:13 -0600
 Subject: [PATCH] kpartx: free loop device after listing partitions
 
 If "kpartx -l" is run on a file that doesn't already have a loop device
@@ -18,6 +18,7 @@ at normal verbosity.
 
 Fixes: da59d15c6 ("Fix loopback file with kpartx -av")
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
 ---
  kpartx/kpartx.c | 9 +++++----
  1 file changed, 5 insertions(+), 4 deletions(-)
@@ -56,6 +57,3 @@ index 6a7933fa..8ff116b8 100644
  	}
  
  end:
--- 
-2.17.2
-

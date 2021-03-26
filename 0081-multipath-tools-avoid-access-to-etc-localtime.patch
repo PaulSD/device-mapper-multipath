@@ -107,6 +107,3 @@ index 2eab4854..4417860b 100644
  	if (bindings_read_only)
  		conf->bindings_read_only = bindings_read_only;
  	check_alias_settings(conf);
--- 
-2.17.2
-

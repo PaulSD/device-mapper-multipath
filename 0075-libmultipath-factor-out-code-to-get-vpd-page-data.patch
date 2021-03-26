@@ -61,6 +61,3 @@ index add7bb97..f901e9ff 100644
  	if (pg == 0x80)
  		len = parse_vpd_pg80(buff, str, maxlen);
  	else if (pg == 0x83)
--- 
-2.17.2
-

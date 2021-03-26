@@ -82,6 +82,3 @@ index d26b3ce7..9658c9fd 100644
  	$(CC) $(CFLAGS) -o $@ $(LDFLAGS) $< $($@_TESTDEPS) $($@_OBJDEPS) \
  		$(LIBDEPS) $($@_LIBDEPS) \
  		$(shell cat $<.wrap) $(foreach dep,$($@_TESTDEPS),$(shell cat $(dep).wrap))
--- 
-2.17.2
-

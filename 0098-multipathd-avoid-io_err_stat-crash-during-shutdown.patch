@@ -252,6 +252,3 @@ index 2e48ee81..feb66469 100644
 +	free_io_err_pathvec();
  	io_destroy(ioctx);
  }
--- 
-2.17.2
-

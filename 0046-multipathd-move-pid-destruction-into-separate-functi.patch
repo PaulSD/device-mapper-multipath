@@ -37,6 +37,3 @@ index 07973e85..fc1f8d7f 100644
  	condlog(2, "--------shut down-------");
  
  	if (logsink == 1)
--- 
-2.17.2
-

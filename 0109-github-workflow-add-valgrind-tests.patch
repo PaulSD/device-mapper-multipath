@@ -31,6 +31,3 @@ index 577a14ac..929f63a6 100644
        - name: clean-nonroot-artifacts
          run: rm -f tests/dmevents.out tests/directio.out
        - name: root-test
--- 
-2.17.2
-

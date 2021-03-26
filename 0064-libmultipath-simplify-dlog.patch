@@ -147,6 +147,3 @@ index 2c878c63..6d22cd23 100644
  void expect_condlog(int prio, char *string);
  
  #endif
--- 
-2.17.2
-

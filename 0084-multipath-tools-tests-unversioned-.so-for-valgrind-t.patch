@@ -25,6 +25,3 @@ index 54da774e..50673fae 100644
  		valgrind --leak-check=full --error-exitcode=128 ./$< >$@ 2>&1
  
  OBJS = $(TESTS:%=%.o) $(HELPERS)
--- 
-2.17.2
-

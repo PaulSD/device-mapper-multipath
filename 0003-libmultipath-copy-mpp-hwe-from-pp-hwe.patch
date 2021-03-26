@@ -255,6 +255,3 @@ index a4abbb27..eedc6c10 100644
  		if (setup_map(mpp, params, PARAMS_SIZE, vecs)) {
  			condlog(0, "%s: failed to setup map for"
  				" removal of path %s", mpp->alias, pp->dev);
--- 
-2.17.2
-

@@ -26,6 +26,3 @@ index 53a22a43..c264351c 100644
  		sd_notify(0, "READY=1");
  		startup_done = true;
  	}
--- 
-2.17.2
-

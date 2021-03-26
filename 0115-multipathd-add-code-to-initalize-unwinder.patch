@@ -129,6 +129,3 @@ index 99a89a69..6f851ae8 100644
  	mlockall(MCL_CURRENT | MCL_FUTURE);
  	signal_init();
  	mp_rcu_data = setup_rcu();
--- 
-2.17.2
-

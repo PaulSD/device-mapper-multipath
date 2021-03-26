@@ -55,6 +55,3 @@ index 24e943d5..e978d306 100644
  	@echo building $@ because of $?
 -	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 +	$(CC) $(CFLAGS) -c -o $@ $<
--- 
-2.17.2
-

@@ -25,6 +25,3 @@ index 6b9e323e..7ab3eab8 100644
  
  	if (verbosity)
  		conf->verbosity = verbosity;
--- 
-2.17.2
-

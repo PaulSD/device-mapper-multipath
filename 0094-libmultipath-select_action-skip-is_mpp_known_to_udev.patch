@@ -46,6 +46,3 @@ index d9fd9cb8..999f3106 100644
  	mpp->action = ACT_NOTHING;
  	condlog(3, "%s: set ACT_NOTHING (map unchanged)",
  		mpp->alias);
--- 
-2.17.2
-

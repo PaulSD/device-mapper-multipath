@@ -199,6 +199,3 @@ index 97acdbb2..3e780fce 100644
 +	init_config;
 +	uninit_config;
 +} LIBMULTIPATH_2.1.0;
--- 
-2.17.2
-

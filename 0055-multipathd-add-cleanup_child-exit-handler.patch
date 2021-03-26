@@ -90,6 +90,3 @@ index 4c4e2eab..50cc3356 100644
  	return sd_notify_exit(exit_code);
  }
  
--- 
-2.17.2
-

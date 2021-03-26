@@ -52,6 +52,3 @@ index 6f851ae8..43d77688 100644
  			goto fail; /* leave path added to pathvec */
  
  		verify_paths(mpp);
--- 
-2.17.2
-

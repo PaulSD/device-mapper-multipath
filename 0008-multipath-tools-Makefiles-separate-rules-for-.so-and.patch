@@ -91,6 +91,3 @@ index 62ba16e8..40028556 100644
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
  	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
  	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(libdir)
--- 
-2.17.2
-

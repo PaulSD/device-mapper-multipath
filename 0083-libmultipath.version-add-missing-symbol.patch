@@ -25,6 +25,3 @@ index 751099dc..2228f4ec 100644
 +global:
 +	get_next_string;
 +} LIBMULTIPATH_4.3.0;
--- 
-2.17.2
-

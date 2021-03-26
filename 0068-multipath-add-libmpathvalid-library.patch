@@ -500,6 +500,3 @@ index 67a7379f..2e3583f5 100644
 +	dm_prereq;
 +	skip_libmp_dm_init;
 +} LIBMULTIPATH_4.1.0;
--- 
-2.17.2
-

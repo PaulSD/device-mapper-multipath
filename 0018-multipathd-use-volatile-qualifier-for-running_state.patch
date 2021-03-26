@@ -26,6 +26,3 @@ index e3f2328d..d081b3e9 100644
  pid_t daemon_pid;
  pthread_mutex_t config_lock = PTHREAD_MUTEX_INITIALIZER;
  pthread_cond_t config_cond;
--- 
-2.17.2
-

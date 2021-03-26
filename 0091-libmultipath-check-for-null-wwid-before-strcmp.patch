@@ -29,6 +29,3 @@ index a643703e..be310159 100644
  				continue;
  			condlog(1, "%s: duplicate multipath config section for %s",
  				__func__, mp1->wwid);
--- 
-2.17.2
-

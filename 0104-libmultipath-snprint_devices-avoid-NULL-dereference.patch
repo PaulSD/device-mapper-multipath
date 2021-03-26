@@ -33,6 +33,3 @@ index 19de2c7c..8151e11e 100644
  
  		fwd += snprintf(buff + fwd, len - fwd, "    %s", devname);
  		if (fwd >= len)
--- 
-2.17.2
-

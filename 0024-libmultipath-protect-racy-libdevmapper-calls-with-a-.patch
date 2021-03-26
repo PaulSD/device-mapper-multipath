@@ -432,6 +432,3 @@ index bee117ac..b7c5122b 100644
  	assert_ptr_equal((struct test_data *)dmt, &data);
  
  	if (data.names) {
--- 
-2.17.2
-

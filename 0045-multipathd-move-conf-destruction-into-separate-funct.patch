@@ -51,6 +51,3 @@ index 9eb658d4..07973e85 100644
  #ifdef _DEBUG_
  	dbg_free_final(NULL);
  #endif
--- 
-2.17.2
-

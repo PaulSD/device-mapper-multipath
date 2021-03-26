@@ -34,6 +34,3 @@ index 41789c46..08077936 100644
  		memcpy(&mpp->reservation_key, paramp->sa_key, 8);
  		if (update_prkey_flags(alias, get_be64(mpp->reservation_key),
  				       paramp->sa_flags)) {
--- 
-2.17.2
-

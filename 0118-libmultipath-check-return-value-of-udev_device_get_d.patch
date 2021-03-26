@@ -26,6 +26,3 @@ index 921025d4..15cf6413 100644
  	snprintf(pp->dev_t, BLK_DEV_SIZE, "%d:%d", major(devt), minor(devt));
  
  	condlog(4, "%s: dev_t = %s", pp->dev, pp->dev_t);
--- 
-2.17.2
-

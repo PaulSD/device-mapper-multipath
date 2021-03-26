@@ -82,6 +82,3 @@ index 867f0f84..b6a5f5b7 100644
  		err = uxclnt(s, uxsock_timeout + 100);
  		free_config(conf);
  		return err;
--- 
-2.17.2
-

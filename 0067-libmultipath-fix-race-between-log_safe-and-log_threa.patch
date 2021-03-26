@@ -102,6 +102,3 @@ index 3a2566ae..0d48c52c 100644
 +	flush_logqueue();
  	log_close();
  }
--- 
-2.17.2
-

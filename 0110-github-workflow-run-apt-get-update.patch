@@ -23,6 +23,3 @@ index 929f63a6..389578be 100644
        - name: dependencies
          run: >
            sudo apt-get install --yes gcc
--- 
-2.17.2
-

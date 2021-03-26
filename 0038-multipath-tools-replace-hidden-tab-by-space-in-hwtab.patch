@@ -26,6 +26,3 @@ index a54cc0a3..921aadc5 100644
  		.product       = "^NetApp ONTAP Controller",
  		.pgpolicy      = MULTIBUS,
  		.no_path_retry = NO_PATH_RETRY_QUEUE,
--- 
-2.17.2
-

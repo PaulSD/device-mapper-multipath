@@ -87,6 +87,3 @@ index fa6b3c53..e29b4d41 100644
  void libmp_udev_set_sync_support(int on);
  struct dm_task *libmp_dm_task_create(int task);
  int dm_simplecmd_flush (int, const char *, uint16_t);
--- 
-2.17.2
-

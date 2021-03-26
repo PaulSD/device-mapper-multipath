@@ -29,6 +29,3 @@ index 79322e86..41789c46 100644
  		condlog(0, "%s: configured reservation key doesn't match: 0x%" PRIx64, alias, get_be64(mpp->reservation_key));
  		ret = MPATH_PR_SYNTAX_ERROR;
  		goto out1;
--- 
-2.17.2
-

@@ -105,6 +105,3 @@ index d2448f6a..fa224e4d 100644
 -void free_logarea (void);
  
  #endif /* LOG_H */
--- 
-2.17.2
-

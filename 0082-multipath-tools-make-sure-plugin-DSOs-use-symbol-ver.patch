@@ -144,6 +144,3 @@ index fc6e0e0c..8d34ae32 100644
  
  install: $(LIBS)
  	$(INSTALL_PROGRAM) -m 755 libprio*.so $(DESTDIR)$(libdir)
--- 
-2.17.2
-

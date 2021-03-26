@@ -93,6 +93,3 @@ index 62906e98..06666ccf 100644
  extern struct keyword * find_keyword(vector keywords, vector v, char * name);
  int snprint_keyword(char *buff, int len, char *fmt, struct keyword *kw,
  		    const void *data);
--- 
-2.17.2
-

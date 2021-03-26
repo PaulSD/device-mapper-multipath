@@ -1,0 +1,231 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Wed, 10 Mar 2021 15:15:14 -0600
+Subject: [PATCH] libmultipath: check if user_friendly_name is in use
+
+If there are multipath devices that have user_friendly_names but do not
+have their bindings in the bindings_file, get_user_friendly_alias() can
+currently give out those names again. This can result in an incorrect
+entry in the bindings file, and a device that gets created with a WWID
+alias instead of a user_friendly_name. This situation can happen after
+the pivot root, if a multipath device is created in the initramfs.  If
+this device doesn't have a binding in the regular filesystem
+bindings_file and a new multipath device is created before it can add
+its binding, the new device can steal that user_friendly_name during
+multipathd's initial configure.
+
+To solve this, get_user_friendly_alias() now calls lookup_binding() with
+a new paramter, telling it to check if the id it found is already in use
+by a diffent device. If so, lookup_binding() will continue to check open
+ids, until it finds one that it not currently in use by a dm device.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+---
+ libmultipath/alias.c | 48 +++++++++++++++++++++++++++++++++++++++++---
+ tests/alias.c        | 22 ++++++++++----------
+ 2 files changed, 56 insertions(+), 14 deletions(-)
+
+diff --git a/libmultipath/alias.c b/libmultipath/alias.c
+index a7ba485a..02bc9d65 100644
+--- a/libmultipath/alias.c
++++ b/libmultipath/alias.c
+@@ -21,6 +21,7 @@
+ #include "config.h"
+ #include "util.h"
+ #include "errno.h"
++#include "devmapper.h"
+ 
+ 
+ /*
+@@ -119,6 +120,28 @@ scan_devname(const char *alias, const char *prefix)
+ 	return n;
+ }
+ 
++static int
++id_already_taken(int id, const char *prefix, const char *map_wwid)
++{
++	char alias[LINE_MAX];
++
++	if (format_devname(alias, id, LINE_MAX, prefix) < 0)
++		return 0;
++
++	if (dm_map_present(alias)) {
++		char wwid[WWID_SIZE];
++
++		/* If both the name and the wwid match, then it's fine.*/
++		if (dm_get_uuid(alias, wwid, sizeof(wwid)) == 0 &&
++		    strncmp(map_wwid, wwid, sizeof(wwid)) == 0)
++			return 0;
++		condlog(3, "%s: alias '%s' already taken, but not in bindings file. reselecting alias", map_wwid, alias);
++		return 1;
++	}
++	return 0;
++}
++
++
+ /*
+  * Returns: 0   if matching entry in WWIDs file found
+  *         -1   if an error occurs
+@@ -128,7 +151,7 @@ scan_devname(const char *alias, const char *prefix)
+  */
+ static int
+ lookup_binding(FILE *f, const char *map_wwid, char **map_alias,
+-	       const char *prefix)
++	       const char *prefix, int check_if_taken)
+ {
+ 	char buf[LINE_MAX];
+ 	unsigned int line_nr = 0;
+@@ -183,12 +206,31 @@ lookup_binding(FILE *f, const char *map_wwid, char **map_alias,
+ 			return 0;
+ 		}
+ 	}
++	if (!prefix && check_if_taken)
++		id = -1;
+ 	if (id >= smallest_bigger_id) {
+ 		if (biggest_id < INT_MAX)
+ 			id = biggest_id + 1;
+ 		else
+ 			id = -1;
+ 	}
++	if (id > 0 && check_if_taken) {
++		while(id_already_taken(id, prefix, map_wwid)) {
++			if (id == INT_MAX) {
++				id = -1;
++				break;
++			}
++			id++;
++			if (id == smallest_bigger_id) {
++				if (biggest_id == INT_MAX) {
++					id = -1;
++					break;
++				}
++				if (biggest_id >= smallest_bigger_id)
++					id = biggest_id + 1;
++			}
++		}
++	}
+ 	if (id < 0) {
+ 		condlog(0, "no more available user_friendly_names");
+ 		return -1;
+@@ -331,7 +373,7 @@ use_existing_alias (const char *wwid, const char *file, const char *alias_old,
+ 		goto out;
+ 	}
+ 
+-	id = lookup_binding(f, wwid, &alias, NULL);
++	id = lookup_binding(f, wwid, &alias, NULL, 0);
+ 	if (alias) {
+ 		condlog(3, "Use existing binding [%s] for WWID [%s]",
+ 			alias, wwid);
+@@ -388,7 +430,7 @@ get_user_friendly_alias(const char *wwid, const char *file, const char *prefix,
+ 		return NULL;
+ 	}
+ 
+-	id = lookup_binding(f, wwid, &alias, prefix);
++	id = lookup_binding(f, wwid, &alias, prefix, 1);
+ 	if (id < 0) {
+ 		fclose(f);
+ 		return NULL;
+diff --git a/tests/alias.c b/tests/alias.c
+index 5e0bfea3..344aba73 100644
+--- a/tests/alias.c
++++ b/tests/alias.c
+@@ -357,7 +357,7 @@ static void lb_empty(void **state)
+ 
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(3, "No matching wwid [WWID0] in bindings file.\n");
+-	rc = lookup_binding(NULL, "WWID0", &alias, NULL);
++	rc = lookup_binding(NULL, "WWID0", &alias, NULL, 0);
+ 	assert_int_equal(rc, 1);
+ 	assert_ptr_equal(alias, NULL);
+ }
+@@ -370,7 +370,7 @@ static void lb_match_a(void **state)
+ 	will_return(__wrap_fgets, "MPATHa WWID0\n");
+ 	expect_condlog(3, "Found matching wwid [WWID0] in bindings file."
+ 		       " Setting alias to MPATHa\n");
+-	rc = lookup_binding(NULL, "WWID0", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID0", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, 0);
+ 	assert_ptr_not_equal(alias, NULL);
+ 	assert_string_equal(alias, "MPATHa");
+@@ -385,7 +385,7 @@ static void lb_nomatch_a(void **state)
+ 	will_return(__wrap_fgets, "MPATHa WWID0\n");
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(3, "No matching wwid [WWID1] in bindings file.\n");
+-	rc = lookup_binding(NULL, "WWID1", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID1", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, 2);
+ 	assert_ptr_equal(alias, NULL);
+ }
+@@ -399,7 +399,7 @@ static void lb_match_c(void **state)
+ 	will_return(__wrap_fgets, "MPATHc WWID1\n");
+ 	expect_condlog(3, "Found matching wwid [WWID1] in bindings file."
+ 		       " Setting alias to MPATHc\n");
+-	rc = lookup_binding(NULL, "WWID1", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID1", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, 0);
+ 	assert_ptr_not_equal(alias, NULL);
+ 	assert_string_equal(alias, "MPATHc");
+@@ -415,7 +415,7 @@ static void lb_nomatch_a_c(void **state)
+ 	will_return(__wrap_fgets, "MPATHc WWID1\n");
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(3, "No matching wwid [WWID2] in bindings file.\n");
+-	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, 2);
+ 	assert_ptr_equal(alias, NULL);
+ }
+@@ -429,7 +429,7 @@ static void lb_nomatch_c_a(void **state)
+ 	will_return(__wrap_fgets, "MPATHa WWID0\n");
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(3, "No matching wwid [WWID2] in bindings file.\n");
+-	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, 2);
+ 	assert_ptr_equal(alias, NULL);
+ }
+@@ -444,7 +444,7 @@ static void lb_nomatch_a_b(void **state)
+ 	will_return(__wrap_fgets, "MPATHb WWID1\n");
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(3, "No matching wwid [WWID2] in bindings file.\n");
+-	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, 3);
+ 	assert_ptr_equal(alias, NULL);
+ }
+@@ -460,7 +460,7 @@ static void lb_nomatch_a_b_bad(void **state)
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(3, "Ignoring malformed line 3 in bindings file\n");
+ 	expect_condlog(3, "No matching wwid [WWID2] in bindings file.\n");
+-	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, 3);
+ 	assert_ptr_equal(alias, NULL);
+ }
+@@ -475,7 +475,7 @@ static void lb_nomatch_b_a(void **state)
+ 	will_return(__wrap_fgets, "MPATHa WWID0\n");
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(3, "No matching wwid [WWID2] in bindings file.\n");
+-	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, 27);
+ 	assert_ptr_equal(alias, NULL);
+ }
+@@ -491,7 +491,7 @@ static void lb_nomatch_int_max(void **state)
+ 	will_return(__wrap_fgets, "MPATHa WWID0\n");
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(0, "no more available user_friendly_names\n");
+-	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, -1);
+ 	assert_ptr_equal(alias, NULL);
+ }
+@@ -506,7 +506,7 @@ static void lb_nomatch_int_max_m1(void **state)
+ 	will_return(__wrap_fgets, "MPATHa WWID0\n");
+ 	will_return(__wrap_fgets, NULL);
+ 	expect_condlog(3, "No matching wwid [WWID2] in bindings file.\n");
+-	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH");
++	rc = lookup_binding(NULL, "WWID2", &alias, "MPATH", 0);
+ 	assert_int_equal(rc, INT_MAX);
+ 	assert_ptr_equal(alias, NULL);
+ }

@@ -23,6 +23,3 @@ index b561cbfd..f52f5970 100644
  	pthread_mutex_lock(&waiter->events_lock);
  	vector_foreach_slot(waiter->events, dev_evt, i)
  		free(dev_evt);
--- 
-2.17.2
-

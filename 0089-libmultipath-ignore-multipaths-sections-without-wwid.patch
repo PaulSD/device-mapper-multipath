@@ -32,6 +32,3 @@ index 9f3cb38d..a643703e 100644
  		j = i + 1;
  		vector_foreach_slot_after(mptable, mp2, j) {
  			if (strcmp(mp1->wwid, mp2->wwid))
--- 
-2.17.2
-
