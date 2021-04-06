@@ -17,96 +17,129 @@
 
 # Author: Lin Li   <lilin@redhat.com>
 
+source ../include/ec.sh || exit 200
+tlog "running $0"
 
-# Include Beaker environment
-. /usr/bin/rhts-environment.sh || exit 1
-. /usr/share/beakerlib/beakerlib.sh || exit 1
+cleanup ()
+{
+	trun "multipathd disablequeueing maps"
+	sleep 5
+	trun "multipath -F"
+	trun "service multipathd stop"
+	sleep 5
+	trun "udevadm settle"
+	trun "modprobe -r scsi_debug"
+}
 
-PACKAGE="device-mapper-multipath"
+assert ()
+{
+	local cmd="$*"
+	_trun_ "$cmd" 0
+	if test $? -eq 0; then
+		tpass_ "$cmd" ;
+	else
+		tfail_ "$cmd" ;
+		cleanup ;
+		tend ;
+	fi
+}
 
-rlJournalStart
-    rlPhaseStartSetup
-        rlAssertRpm $PACKAGE
-	rlRun "multipath -F; sleep 5"
-        rlRun "modprobe -r scsi_debug" 0 "Remove if scsi_debug load before"
-	rlRun "rm -f /etc/multipath.conf"
-        rlRun "mpathconf --enable --with_module y --with_multipathd y --find_multipaths n" 0 "Set up multipath"
-        rlServiceStart multipathd
-	rlRun "cp /etc/multipath.conf /etc/multipath.conf.bak" 0 "Backup /etc/multipath.conf first"
-    rlPhaseEnd
+rpm -q device-mapper-multipath || yum install -y device-mapper-multipath
 
-    rlPhaseStartTest
-        rlRun "modprobe scsi_debug"
-        sleep 5
-        rlLogInfo "`multipath -ll`"
-	wwid=`multipathd show maps format %w | grep -v uuid`
-	# test missing closing quote on alias
-	cat << _EOF_ >> /etc/multipath.conf 
-multipaths {
-  multipath {
-	wwid "$wwid" 
-	alias "mypath
-  }
+# cleanup existing devices and restart
+cleanup
+trun "rm -f /etc/multipath.conf"
+trun "mpathconf --enable --with_module y --with_multipathd n --find_multipaths n"
+sed -i '/^blacklist[[:space:]]*{/ a\
+	device {\n		vendor ".*"\n		product ".*"\n	}
+' /etc/multipath.conf
+if grep -qw blacklist_exceptions /etc/multipath.conf ; then
+	sed -i '/^blacklist_exceptions[[:space:]]*{/ a\
+	device {\n		vendor Linux\n		product scsi_debug\n	}
+' /etc/multipath.conf
+else
+	cat << _EOF_ >> /etc/multipath.conf
+blacklist_exceptions {
+	device {
+		vendor Linux
+		product scsi_debug
+	}
 }
 _EOF_
-	rlRun "multipath 2>&1 | grep 'missing closing quotes on line'" 0 "test missing closing quote on alias"
-	rlRun "multipath -r"
-	rlRun "multipath -ll |grep mypath" 0 "check if mpath rename to mypath successfully"
+fi
 
-	# test no value for alias
-	rlRun "sed -i 's/alias.*$/alias/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 | grep \"missing value for option 'alias' on line\"" 0 "test no value for alias"
-	rlRun "multipath -r"
-	rlRun "multipath -ll |grep mpath*" 0 "check if mpath rename to mpath* from mypath successfully"
+trun "cp /etc/multipath.conf /etc/multipath.conf.bak"
+trun "service multipathd stop"
+trun "service multipathd start"
 
-	# test missing starting quote on alias
-	rlRun "sed -i 's/alias.*$/alias mypath\"/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 |grep 'ignoring extra data starting with'" 0 "test missing starting quote on alias"
-	rlRun "multipath -r"
-	rlRun "multipath -ll |grep mypath" 0 "check if mpath rename to mypath successfully"
+trun "modprobe scsi_debug"
+sleep 5
+trun "multipath -ll"
+pathcount=`multipathd show maps format %w | grep -v uuid | wc -l`
+assert "[[ $pathcount -eq 1 ]]"
+wwid=`multipathd show maps format %w | grep -v uuid`
 
-	# test wrong quote on alias
-	rlRun "sed -i 's/alias.*$/alias <mypath>/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 | grep config" 1 "no warning"	
-	rlRun "multipath -r"
-	rlRun "multipath -ll |grep '<mypath>'" 0 "check if mpath rename to <mypath> successfully"
+# test missing closing quote on alias
+cat << _EOF_ >> /etc/multipath.conf
+multipaths {
+	multipath {
+		wwid "$wwid"
+		alias "mypath
+	}
+}
+_EOF_
+tok "multipath 2>&1 | grep 'missing closing quotes on line'"
+trun "multipath -r"
+tok "multipath -ll | grep mypath"
 
-	# test value has a space
-	rlRun "sed -i 's/alias.*$/alias mypath test/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 |grep 'ignoring extra data starting with'" 0 "test value has a space"
-        rlRun "multipath -r"
-	rlRun "multipath -ll |grep mypath" 0 "check if mpath rename to mypath successfully"
+# test no value for alias
+trun "sed -i 's/alias.*$/alias/g' /etc/multipath.conf"
+multipath
+tok "multipath 2>&1 | grep \"missing value for option 'alias' on line\""
+trun "multipath -r"
+tok "multipath -ll | grep mpath"
 
-	# test wrong alias keyword
-	rlRun "sed -i 's/alias.*$/alia mypath/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 |grep 'invalid keyword: alia'" 0 "invalid keyword: alia"
-        rlRun "multipath -r"
-	rlRun "multipath -ll |grep mpath*" 0 "check if mpath rename to mpath* from mypath successfully"
-	rlRun "sed -i 's/alia.*$/alias mypath/g' /etc/multipath.conf"
+# test missing starting quote on alias
+trun "sed -i 's/alias.*$/alias mypath\"/g' /etc/multipath.conf"
+tok "multipath 2>&1 |grep 'ignoring extra data starting with'"
+trun "multipath -r"
+tok "multipath -ll | grep mypath"
 
-	# test no space between the section name and the open bracket that followed it	
-	# fix issue about if a section doesn't have a space between the section name and the open bracket, that section isn't read in.
-	rlRun "sed -i 's/multipaths.*/multipaths{/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 | grep config" 1 "no warning"
-	rlRun "multipath -r"
-	rlRun "multipath -ll |grep mypath" 0 "check if mpath rename to mypath successfully"
+# test wrong quote on alias
+trun "sed -i 's/alias.*$/alias <mypath>/g' /etc/multipath.conf"
+tnot "multipath 2>&1 | grep config"
+trun "multipath -r"
+tok "multipath -ll | grep '<mypath>'"
 
-	# test wrong section keywords
-	rlRun "sed -i 's/multipaths.*/ultipaths {/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 | grep 'invalid keyword: ultipaths'" 0 "test wrong multipaths section keyword"
-	rlRun "sed -i 's/defaults.*/efaults {/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 | grep 'invalid keyword: efaults'" 0 "test wrong defaults section keyword"
-	rlRun "sed -i 's/blacklist {/lacklist {/g' /etc/multipath.conf"
-	rlRun "multipath 2>&1 | grep 'invalid keyword: lacklist'" 0 "test wrong blacklist section keyword"
+# test value has a space
+trun "sed -i 's/alias.*$/alias mypath test/g' /etc/multipath.conf"
+tok "multipath 2>&1 |grep 'ignoring extra data starting with'"
+trun "multipath -r"
+tok "multipath -ll | grep mypath"
 
-    rlPhaseEnd
+# test wrong alias keyword
+trun "sed -i 's/alias.*$/alia mypath/g' /etc/multipath.conf"
+tok "multipath 2>&1 | grep 'invalid keyword: alia'"
+trun "multipath -r"
+tok "multipath -ll | grep mpath"
+trun "sed -i 's/alia.*$/alias mypath/g' /etc/multipath.conf"
 
-    rlPhaseStartCleanup
-        rlRun "udevadm settle"
-        rlRun "multipath -F" 0 "Flush all unused multipath device maps"
-        rlServiceStop multipathd
-        rlRun "modprobe -r scsi_debug" 0 "Remove scsi_debug"
-	rlRun "cp -f /etc/multipath.conf.bak /etc/multipath.conf" 0 "Recovery /etc/multipath.conf"
-    rlPhaseEnd
-rlJournalPrintText
-rlJournalEnd
+# test no space between the section name and the open bracket that followed it
+# fix issue about if a section doesn't have a space between the section name
+# and the open bracket, that section isn't read in.
+trun "sed -i 's/multipaths.*/multipaths{/g' /etc/multipath.conf"
+tnot "multipath 2>&1 | grep config"
+trun "multipath -r"
+tok "multipath -ll |grep mypath"
+
+# test wrong section keywords
+trun "sed -i 's/multipaths.*/ultipaths {/g' /etc/multipath.conf"
+tok "multipath 2>&1 | grep 'invalid keyword: ultipaths'"
+trun "sed -i 's/defaults.*/efaults {/g' /etc/multipath.conf"
+tok "multipath 2>&1 | grep 'invalid keyword: efaults'"
+trun "sed -i 's/blacklist {/lacklist {/g' /etc/multipath.conf"
+tok "multipath 2>&1 | grep 'invalid keyword: lacklist'"
+trun "mv /etc/multipath.conf.bak /etc/multipath.conf"
+
+cleanup
+tend

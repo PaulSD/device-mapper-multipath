@@ -1,171 +1,25 @@
 Name:    device-mapper-multipath
-Version: 0.8.5
-Release: 6%{?dist}
+Version: 0.8.6
+Release: 1%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl -L https://github.com/opensvc/multipath-tools/archive/0.8.5.tar.gz -o multipath-tools-0.8.5.tgz
-Source0: multipath-tools-0.8.5.tgz
+# curl -L https://github.com/opensvc/multipath-tools/archive/0.8.6.tar.gz -o multipath-tools-0.8.6.tgz
+Source0: multipath-tools-0.8.6.tgz
 Source1: multipath.conf
-Patch0001: 0001-Change-the-multipath.conf-manpage-uxsock_timeout-def.patch
-Patch0002: 0002-libmultipath-find_mpe-don-t-match-with-empty-WWID.patch
-Patch0003: 0003-libmultipath-copy-mpp-hwe-from-pp-hwe.patch
-Patch0004: 0004-libmultipath-dm_map_present_by_uuid-fix-dm_task_crea.patch
-Patch0005: 0005-libdmmp-tests-fix-compilation.patch
-Patch0006: 0006-libmultipath-prio-constify-some-function-parameters.patch
-Patch0007: 0007-libmultipath-checkers-prio-allow-non-lazy-.so-loadin.patch
-Patch0008: 0008-multipath-tools-Makefiles-separate-rules-for-.so-and.patch
-Patch0009: 0009-libmultipath-create-separate-.so-for-unit-tests.patch
-Patch0010: 0010-libmultipath-add-linker-version-script.patch
-Patch0011: 0011-libmpathpersist-add-linker-version-script.patch
-Patch0012: 0012-libmpathcmd-add-linker-version-script.patch
-Patch0013: 0013-libmpathpersist-initialize-mpp-hwe-in-get_mpvec.patch
-Patch0014: 0014-multipathd-allow-shutdown-during-configure.patch
-Patch0015: 0015-multipathd-avoid-sending-READY-1-to-systemd-on-early.patch
-Patch0016: 0016-multipathd-send-STOPPING-1-to-systemd-on-shutdown.patch
-Patch0017: 0017-multipathd-send-RELOADING-1-to-systemd-on-DAEMON_CON.patch
-Patch0018: 0018-multipathd-use-volatile-qualifier-for-running_state.patch
-Patch0019: 0019-multipathd-generalize-and-fix-wait_for_state_change_.patch
-Patch0020: 0020-multipathd-set_config_state-avoid-code-duplication.patch
-Patch0021: 0021-multipathd-cancel-threads-early-during-shutdown.patch
-Patch0022: 0022-multipath-tools-don-t-call-dm_lib_release-any-more.patch
-Patch0023: 0023-libmultipath-devmapper-refactor-libdm-version-determ.patch
-Patch0024: 0024-libmultipath-protect-racy-libdevmapper-calls-with-a-.patch
-Patch0025: 0025-libmultipath-constify-file-argument-in-config-parser.patch
-Patch0026: 0026-libmultipath-provide-defaults-for-get-put-_multipath.patch
-Patch0027: 0027-libmpathpersist-allow-using-libmultipath-get-put-_mu.patch
-Patch0028: 0028-multipath-use-get_put-_multipath_config-from-libmult.patch
-Patch0029: 0029-mpathpersist-use-get-put-_multipath_config-from-libm.patch
-Patch0030: 0030-libmultipath-add-udev-and-logsink-symbols.patch
-Patch0031: 0031-multipath-remove-logsink-and-udev.patch
-Patch0032: 0032-libmpathpersist-call-libmultipath_-init-exit.patch
-Patch0033: 0033-mpathpersist-remove-logsink-and-udev.patch
-Patch0034: 0034-multipathd-remove-logsink-and-udev.patch
-Patch0035: 0035-multipath-tools-add-Vexata-by-StorCentric-VX-arrays.patch
-Patch0036: 0036-multipath-tools-Violin-and-Nexsan-were-bought-by-Sto.patch
-Patch0037: 0037-libmultipath-fix-memory-leaks-in-coalesce_paths.patch
-Patch0038: 0038-multipath-tools-replace-hidden-tab-by-space-in-hwtab.patch
-Patch0039: 0039-multipathd-uxlsnr-avoid-deadlock-on-exit.patch
-Patch0040: 0040-multipathd-Fix-liburcu-memory-leak.patch
-Patch0041: 0041-multipathd-move-handling-of-io_err_stat_attr-into-li.patch
-Patch0042: 0042-multipathd-move-vecs-desctruction-into-cleanup-funct.patch
-Patch0043: 0043-multipathd-make-some-globals-static.patch
-Patch0044: 0044-multipathd-move-threads-destruction-into-separate-fu.patch
-Patch0045: 0045-multipathd-move-conf-destruction-into-separate-funct.patch
-Patch0046: 0046-multipathd-move-pid-destruction-into-separate-functi.patch
-Patch0047: 0047-multipathd-close-pidfile-on-exit.patch
-Patch0048: 0048-multipathd-add-helper-for-systemd-notification-at-ex.patch
-Patch0049: 0049-multipathd-child-call-cleanups-in-failure-case-too.patch
-Patch0050: 0050-multipathd-unwatch_all_dmevents-check-if-waiter-is-i.patch
-Patch0051: 0051-multipathd-print-error-message-if-config-can-t-be-lo.patch
-Patch0052: 0052-libmultipath-add-libmp_dm_exit.patch
-Patch0053: 0053-multipathd-fixup-libdm-deinitialization.patch
-Patch0054: 0054-libmultipath-log_thread_stop-check-if-logarea-is-ini.patch
-Patch0055: 0055-multipathd-add-cleanup_child-exit-handler.patch
-Patch0056: 0056-libmultipath-fix-log_thread-startup-and-teardown.patch
-Patch0057: 0057-multipathd-move-cleanup_-prio-checkers-foreign-to-li.patch
-Patch0058: 0058-multipath-use-atexit-for-cleanup-handlers.patch
-Patch0059: 0059-mpathpersist-use-atexit-for-cleanup-handlers.patch
-Patch0060: 0060-multipath-fix-leak-in-check_path_valid.patch
-Patch0061: 0061-multipath-tools-mpath-tools.supp-file-with-valgrind-.patch
-Patch0062: 0062-libmultipath-use-libmp_verbosity-to-track-verbosity.patch
-Patch0063: 0063-libmultipath-introduce-symbolic-values-for-logsink.patch
-Patch0064: 0064-libmultipath-simplify-dlog.patch
-Patch0065: 0065-multipathd-common-code-for-k-and-command-args.patch
-Patch0066: 0066-multipathd-sanitize-uxsock_listen.patch
-Patch0067: 0067-libmultipath-fix-race-between-log_safe-and-log_threa.patch
-Patch0068: 0068-multipath-add-libmpathvalid-library.patch
-Patch0069: 0069-multipath-tools-tests-and-unit-tests-for-libmpathval.patch
-Patch0070: 0070-libmultipath-add-uid-failback-for-dasd-devices.patch
-Patch0071: 0071-libmultipath-change-log-level-for-null-uid_attribute.patch
-Patch0072: 0072-libmultipath-move-fast_io_fail-defines-to-structs.h.patch
-Patch0073: 0073-libmultipath-add-eh_deadline-multipath.conf-paramete.patch
-Patch0074: 0074-multipathd-remove-redundant-vector_free-int-configur.patch
-Patch0075: 0075-libmultipath-factor-out-code-to-get-vpd-page-data.patch
-Patch0076: 0076-libmultipath-limit-reading-0xc9-vpd-page.patch
-Patch0077: 0077-libmultipath-move-logq_lock-handling-to-log.c.patch
-Patch0078: 0078-libmultipath-protect-logarea-with-logq_lock.patch
-Patch0079: 0079-libmultipath-prevent-DSO-unloading-with-astray-check.patch
-Patch0080: 0080-libmultipath-force-map-reload-if-udev-incomplete.patch
-Patch0081: 0081-multipath-tools-avoid-access-to-etc-localtime.patch
-Patch0082: 0082-multipath-tools-make-sure-plugin-DSOs-use-symbol-ver.patch
-Patch0083: 0083-libmultipath.version-add-missing-symbol.patch
-Patch0084: 0084-multipath-tools-tests-unversioned-.so-for-valgrind-t.patch
-Patch0085: 0085-multipath-tools-unit-tests-fix-memory-leaks-in-mpath.patch
-Patch0086: 0086-mpathpersist-Fix-Register-and-Ignore-with-0x00-SARK.patch
-Patch0087: 0087-mpathpersist-update-prkeys-file-on-changing-registra.patch
-Patch0088: 0088-libmultipath-warn-about-missing-braces-at-end-of-mul.patch
-Patch0089: 0089-libmultipath-ignore-multipaths-sections-without-wwid.patch
-Patch0090: 0090-libmultipath-fix-format-warning-with-clang.patch
-Patch0091: 0091-libmultipath-check-for-null-wwid-before-strcmp.patch
-Patch0092: 0092-multipath.conf.5-Improve-checker_timeout-description.patch
-Patch0093: 0093-multipathd-fix-path-checkint-not-changed-when-path-s.patch
-Patch0094: 0094-libmultipath-select_action-skip-is_mpp_known_to_udev.patch
-Patch0095: 0095-libmultipath-coalesce_paths-stop-triggering-spurious.patch
-Patch0096: 0096-Revert-multipathd-uev_trigger-handle-incomplete-ADD-.patch
-Patch0097: 0097-libmultipath-make-find_err_path_by_dev-static.patch
-Patch0098: 0098-multipathd-avoid-io_err_stat-crash-during-shutdown.patch
-Patch0099: 0099-multipathd-avoid-io_err_stat-ABBA-deadlock.patch
-Patch0100: 0100-multipathd-use-get_monotonic_time-in-io_err_stat-cod.patch
-Patch0101: 0101-multipathd-combine-free_io_err_stat_path-and-destroy.patch
-Patch0102: 0102-multipathd-cleanup-logging-for-marginal-paths.patch
-Patch0103: 0103-libmultipath-fix-NULL-dereference-in-find_path_by_de.patch
-Patch0104: 0104-libmultipath-snprint_devices-avoid-NULL-dereference.patch
-Patch0105: 0105-libmpathpersist-fix-thread-safety-of-default-functio.patch
-Patch0106: 0106-Added-github-action-for-building.patch
-Patch0107: 0107-github-workflow-use-zram-device-as-test-block-device.patch
-Patch0108: 0108-github-workflow-use-explicit-Ubuntu-version.patch
-Patch0109: 0109-github-workflow-add-valgrind-tests.patch
-Patch0110: 0110-github-workflow-run-apt-get-update.patch
-Patch0111: 0111-github-workflow-add-tests-with-gcc-10-and-clang.patch
-Patch0112: 0112-multipathd-Fix-multipathd-stopping-on-shutdown.patch
-Patch0113: 0113-libmultipath-use-3rd-digit-as-transport_id-for-expan.patch
-Patch0114: 0114-libmultipath-sysfs_set_nexus_loss_tmo-support-SAS-ex.patch
-Patch0115: 0115-multipathd-add-code-to-initalize-unwinder.patch
-Patch0116: 0116-libmultipath-check-if-adopt_path-really-added-curren.patch
-Patch0117: 0117-multipathd-ev_add_path-fail-if-add_map_with_path-fai.patch
-Patch0118: 0118-libmultipath-check-return-value-of-udev_device_get_d.patch
-Patch0119: 0119-pathinfo-call-filter_property-after-sysfs_pathinfo.patch
-Patch0120: 0120-libmultipath-pathinfo-call-filter_property-only-with.patch
-Patch0121: 0121-multipath-w-allow-removing-blacklisted-paths.patch
-Patch0122: 0122-libmultipath-fix-use-after-free-in-uev_add_path.patch
-Patch0123: 0123-multipath-tools-tests-fix-stringop-overflow-build-er.patch
-Patch0124: 0124-libmultipath-cleanup-code-to-strip-wwid-trailing-spa.patch
-Patch0125: 0125-libmultipath-cleanup-uid_attribute-checking-code.patch
-Patch0126: 0126-multipathd-add-recheck_wwid-option-to-verify-the-pat.patch
-Patch0127: 0127-libmultipath-check-if-user_friendly_name-is-in-use.patch
-Patch0128: 0128-tests-add-tests-for-checking-if-alias-is-in-use.patch
-Patch0129: 0129-multipath-tools-add-DellEMC-PowerStore-to-hardware-t.patch
-Patch0130: 0130-multipath-tools-delete-a-space-in-multipath.conf.5-t.patch
-Patch0131: 0131-multipath-tools-tests-allow-control-of-test-verbosit.patch
-Patch0132: 0132-multipath-tools-devt-test-avoid-failure-when-run-in-.patch
-Patch0133: 0133-multipath-tools-fix-compilation-errors-on-32-bit-mus.patch
-Patch0134: 0134-libmultipath-fix-compilation-error-with-gcc-10-on-i3.patch
-Patch0135: 0135-kpartx-free-loop-device-after-listing-partitions.patch
-Patch0136: 0136-libmultipath-merge-update_multipath_table-and-update.patch
-Patch0137: 0137-11-dm-mpath.rules-run-multipath-U-with-v1.patch
-Patch0138: 0138-multipath-tools-tests-check-if-sys-dev-block-is-non-.patch
-Patch0139: 0139-multipathd-reduce-log-levels-in-cli_add_map.patch
-Patch0140: 0140-multipath-tools-fix-format-in-multipath.conf.5-to-be.patch
-Patch0141: 0141-multipath-tools-use-same-format-for-default-values-i.patch
-Patch0142: 0142-multipathd-fix-NULL-dereference-in-check_path.patch
-Patch0143: 0143-libmultipath-avoid-infinite-loop-with-bad-vpd-page-8.patch
-Patch0144: 0144-libmultipath-fix-priorities-in-parse_vpd_pg83.patch
-Patch0145: 0145-multipathd-improve-getting-parent-udevice-in-rescan_.patch
-Patch0146: 0146-multipathd-don-t-trigger-uevent-for-partitions-on-ww.patch
-Patch0147: 0147-RH-fixup-udev-rules-for-redhat.patch
-Patch0148: 0148-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0149: 0149-RH-don-t-start-without-a-config-file.patch
-Patch0150: 0150-RH-Fix-nvme-function-missing-argument.patch
-Patch0151: 0151-RH-use-rpm-optflags-if-present.patch
-Patch0152: 0152-RH-add-mpathconf.patch
-Patch0153: 0153-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0154: 0154-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0155: 0155-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0156: 0156-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0001: 0001-RH-fixup-udev-rules-for-redhat.patch
+Patch0002: 0002-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0003: 0003-RH-don-t-start-without-a-config-file.patch
+Patch0004: 0004-RH-Fix-nvme-function-missing-argument.patch
+Patch0005: 0005-RH-use-rpm-optflags-if-present.patch
+Patch0006: 0006-RH-add-mpathconf.patch
+Patch0007: 0007-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0008: 0008-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0009: 0009-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0010: 0010-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -249,7 +103,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%autosetup -n multipath-tools-0.8.5 -p1
+%autosetup -n multipath-tools-0.8.6 -p1
 cp %{SOURCE1} .
 
 %build
@@ -363,6 +217,13 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Apr  5 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.6-1
+- Update Source to upstream version 0.8.6
+  * Previous patches 0001-0146 are included in the commit
+- Rename files
+  * Previous patches 0147-0156 are now patches 0001-0010
+- sync tests with RHEL repository
+
 * Fri Mar 26 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.5-6
 - Change patch format to remove Git version
   * Patches 0001-0122 only have the patch format modified

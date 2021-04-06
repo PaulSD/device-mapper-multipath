@@ -78,8 +78,7 @@ get_mpath_disk_by_scsi_device()
 {
 #    multipathd_running || texit "multipathd is not running" 
     local disk=$1
-    wwid=$(get_wwid_of_disk $disk)
-    local mpath=$(multipathd show maps format %w,%n | grep "^$wwid\s*," \
+    local mpath=$(multipathd show paths raw format "%d,%m" | grep "^$disk\s*," \
         | awk -F, '{ print $2 }' | sed 's/\s//g')
     echo $mpath
 }

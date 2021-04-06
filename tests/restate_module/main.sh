@@ -93,4 +93,5 @@ path_state=`multipathd show paths raw format "%d %t %T %o" | grep ${pathname} | 
 tlog "Checking state of ${pathname}"
 assert "[[ $path_state -eq 1 ]]"
 
+cleanup
 tend

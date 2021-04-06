@@ -27,15 +27,17 @@
      - bindings:
         run: ./main.sh
         timeout: 15m
-    required_packages:
-     - device-mapper-multipath
-     - perl
-
-  - role: standard-test-beakerlib
-    tags:
-    - classic
-    tests:
+     - restate_module:
+        run: ./main.sh
+        timeout: 15m
+     - find_multipaths:
+        run: ./main.sh
+        timeout: 15m
      - multipath_conf_syntax:
+        run: ./main.sh
+        timeout: 15m
+     - alias_clash:
+        run: ./main.sh
         timeout: 15m
     required_packages:
      - device-mapper-multipath
