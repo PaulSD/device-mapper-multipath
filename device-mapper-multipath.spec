@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.6
-Release: 1%{?dist}
+Release: 1%{?dist}.1
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -217,6 +217,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Jun 23 2021 Cole Robinson <crobinso@redhat.com> - 0.8.6-1.fc35.1
+- Rebuild for userspace-rcu soname bump
+
 * Mon Apr  5 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.6-1
 - Update Source to upstream version 0.8.6
   * Previous patches 0001-0146 are included in the commit
