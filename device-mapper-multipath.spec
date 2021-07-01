@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.6
-Release: 1%{?dist}.1
+Release: 2%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -10,16 +10,31 @@ URL:     http://christophe.varoqui.free.fr/
 # curl -L https://github.com/opensvc/multipath-tools/archive/0.8.6.tar.gz -o multipath-tools-0.8.6.tgz
 Source0: multipath-tools-0.8.6.tgz
 Source1: multipath.conf
-Patch0001: 0001-RH-fixup-udev-rules-for-redhat.patch
-Patch0002: 0002-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0003: 0003-RH-don-t-start-without-a-config-file.patch
-Patch0004: 0004-RH-Fix-nvme-function-missing-argument.patch
-Patch0005: 0005-RH-use-rpm-optflags-if-present.patch
-Patch0006: 0006-RH-add-mpathconf.patch
-Patch0007: 0007-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0008: 0008-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0009: 0009-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0010: 0010-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0001: 0001-libmultipath-fix-memory-leak-in-checker_cleanup_thre.patch
+Patch0002: 0002-multipathd-fix-compilation-issue-with-liburcu-0.8.patch
+Patch0003: 0003-multipathd-don-t-fail-to-remove-path-once-the-map-is.patch
+Patch0004: 0004-multipathd-remove-duplicate-orphan_paths-in-flush_ma.patch
+Patch0005: 0005-multipathd-fix-ev_remove_path-return-code-handling.patch
+Patch0006: 0006-multipath-free-vectors-in-configure.patch
+Patch0007: 0007-kpartx-Don-t-leak-memory-when-getblock-returns-NULL.patch
+Patch0008: 0008-multipathd-don-t-rescan_path-on-wwid-change-in-uev_u.patch
+Patch0009: 0009-multipathd-cli_handlers-cleanup-setting-reply-length.patch
+Patch0010: 0010-multipathd-cli_getprkey-fix-return-value.patch
+Patch0011: 0011-multipath-tools-enable-Wformat-overflow-2.patch
+Patch0012: 0012-libdmmp-use-KBUILD_BUILD_TIMESTAMP-when-building-man.patch
+Patch0013: 0013-multipath-tools-add-info-about-HPE-Alletra-6000-and-.patch
+Patch0014: 0014-multipathd-don-t-start-in-containers.patch
+Patch0015: 0015-libmultipath-fix-build-without-LIBDM_API_DEFERRED.patch
+Patch0016: 0016-RH-fixup-udev-rules-for-redhat.patch
+Patch0017: 0017-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0018: 0018-RH-don-t-start-without-a-config-file.patch
+Patch0019: 0019-RH-Fix-nvme-function-missing-argument.patch
+Patch0020: 0020-RH-use-rpm-optflags-if-present.patch
+Patch0021: 0021-RH-add-mpathconf.patch
+Patch0022: 0022-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0023: 0023-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0024: 0024-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0025: 0025-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -217,6 +232,14 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Jul  1 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.6-2
+- Pull in latest upstream post-tag commits
+  * Patches 0001-0015 are from
+    https://github.com/openSUSE/multipath-tools/tree/queue and are
+    already queued for upstream
+- Rename files
+  * Previous patches 0001-0010 and now patches 0016-0025
+
 * Wed Jun 23 2021 Cole Robinson <crobinso@redhat.com> - 0.8.6-1.fc35.1
 - Rebuild for userspace-rcu soname bump
 
