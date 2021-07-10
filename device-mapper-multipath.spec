@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -232,6 +232,9 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Sat Jul 10 2021 Björn Esser <besser82@fedoraproject.org> - 0.8.6-3
+- Rebuild for versioned symbols in json-c
+
 * Thu Jul  1 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.6-2
 - Pull in latest upstream post-tag commits
   * Patches 0001-0015 are from
