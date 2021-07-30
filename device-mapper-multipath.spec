@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.6
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -25,16 +25,24 @@ Patch0012: 0012-libdmmp-use-KBUILD_BUILD_TIMESTAMP-when-building-man.patch
 Patch0013: 0013-multipath-tools-add-info-about-HPE-Alletra-6000-and-.patch
 Patch0014: 0014-multipathd-don-t-start-in-containers.patch
 Patch0015: 0015-libmultipath-fix-build-without-LIBDM_API_DEFERRED.patch
-Patch0016: 0016-RH-fixup-udev-rules-for-redhat.patch
-Patch0017: 0017-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0018: 0018-RH-don-t-start-without-a-config-file.patch
-Patch0019: 0019-RH-Fix-nvme-function-missing-argument.patch
-Patch0020: 0020-RH-use-rpm-optflags-if-present.patch
-Patch0021: 0021-RH-add-mpathconf.patch
-Patch0022: 0022-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0023: 0023-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0024: 0024-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0025: 0025-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0016: 0016-libmultipath-use-uint64_t-for-sg_id.lun.patch
+Patch0017: 0017-multipath-tools-Remove-trailing-leading-whitespaces.patch
+Patch0018: 0018-multipath-tools-make-HUAWEI-XSG1-config-work-with-al.patch
+Patch0019: 0019-multipath.conf-fix-typo-in-ghost_delay-description.patch
+Patch0020: 0020-mpathpersist-fail-commands-when-no-usable-paths-exis.patch
+Patch0021: 0021-multipath-print-warning-if-multipathd-is-not-running.patch
+Patch0022: 0022-libmultipath-remove-unneeded-code-in-coalesce_paths.patch
+Patch0023: 0023-libmultipath-deal-with-dynamic-PTHREAD_STACK_MIN.patch
+Patch0024: 0024-RH-fixup-udev-rules-for-redhat.patch
+Patch0025: 0025-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0026: 0026-RH-don-t-start-without-a-config-file.patch
+Patch0027: 0027-RH-Fix-nvme-function-missing-argument.patch
+Patch0028: 0028-RH-use-rpm-optflags-if-present.patch
+Patch0029: 0029-RH-add-mpathconf.patch
+Patch0030: 0030-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0031: 0031-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0032: 0032-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0033: 0033-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -232,6 +240,13 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Jul 30 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.6-5
+- Update to the head of the upstream staging branch plus redhat patches
+  * Patches 0016-0018 are from the upstream staging branch
+  * Patches 0019-0024 have been submitted upstream
+- Rename files
+  * Previous patches 0016-0025 are now patches 0024-0033
+
 * Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.6-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
