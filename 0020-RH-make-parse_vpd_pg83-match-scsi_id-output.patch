@@ -13,10 +13,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 2 insertions(+), 16 deletions(-)
 
 diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
-index e9f5703c..7c1bcdf0 100644
+index f25fe9e3..6fb81c28 100644
 --- a/libmultipath/discovery.c
 +++ b/libmultipath/discovery.c
-@@ -1135,12 +1135,9 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
+@@ -1136,12 +1136,9 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
  				naa_prio = 7;
  				break;
  			case 2:
@@ -31,7 +31,7 @@ index e9f5703c..7c1bcdf0 100644
  				break;
  			default:
  				/* Default: no priority */
-@@ -1159,17 +1156,6 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
+@@ -1160,17 +1157,6 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
  				vpd = d;
  			}
  			break;

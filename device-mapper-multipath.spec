@@ -1,48 +1,35 @@
 Name:    device-mapper-multipath
-Version: 0.8.6
-Release: 5%{?dist}
+Version: 0.8.7
+Release: 1%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl -L https://github.com/opensvc/multipath-tools/archive/0.8.6.tar.gz -o multipath-tools-0.8.6.tgz
-Source0: multipath-tools-0.8.6.tgz
+# curl -L https://github.com/opensvc/multipath-tools/archive/0.8.7.tar.gz -o multipath-tools-0.8.7.tgz
+Source0: multipath-tools-0.8.7.tgz
 Source1: multipath.conf
-Patch0001: 0001-libmultipath-fix-memory-leak-in-checker_cleanup_thre.patch
-Patch0002: 0002-multipathd-fix-compilation-issue-with-liburcu-0.8.patch
-Patch0003: 0003-multipathd-don-t-fail-to-remove-path-once-the-map-is.patch
-Patch0004: 0004-multipathd-remove-duplicate-orphan_paths-in-flush_ma.patch
-Patch0005: 0005-multipathd-fix-ev_remove_path-return-code-handling.patch
-Patch0006: 0006-multipath-free-vectors-in-configure.patch
-Patch0007: 0007-kpartx-Don-t-leak-memory-when-getblock-returns-NULL.patch
-Patch0008: 0008-multipathd-don-t-rescan_path-on-wwid-change-in-uev_u.patch
-Patch0009: 0009-multipathd-cli_handlers-cleanup-setting-reply-length.patch
-Patch0010: 0010-multipathd-cli_getprkey-fix-return-value.patch
-Patch0011: 0011-multipath-tools-enable-Wformat-overflow-2.patch
-Patch0012: 0012-libdmmp-use-KBUILD_BUILD_TIMESTAMP-when-building-man.patch
-Patch0013: 0013-multipath-tools-add-info-about-HPE-Alletra-6000-and-.patch
-Patch0014: 0014-multipathd-don-t-start-in-containers.patch
-Patch0015: 0015-libmultipath-fix-build-without-LIBDM_API_DEFERRED.patch
-Patch0016: 0016-libmultipath-use-uint64_t-for-sg_id.lun.patch
-Patch0017: 0017-multipath-tools-Remove-trailing-leading-whitespaces.patch
-Patch0018: 0018-multipath-tools-make-HUAWEI-XSG1-config-work-with-al.patch
-Patch0019: 0019-multipath.conf-fix-typo-in-ghost_delay-description.patch
-Patch0020: 0020-mpathpersist-fail-commands-when-no-usable-paths-exis.patch
-Patch0021: 0021-multipath-print-warning-if-multipathd-is-not-running.patch
-Patch0022: 0022-libmultipath-remove-unneeded-code-in-coalesce_paths.patch
-Patch0023: 0023-libmultipath-deal-with-dynamic-PTHREAD_STACK_MIN.patch
-Patch0024: 0024-RH-fixup-udev-rules-for-redhat.patch
-Patch0025: 0025-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0026: 0026-RH-don-t-start-without-a-config-file.patch
-Patch0027: 0027-RH-Fix-nvme-function-missing-argument.patch
-Patch0028: 0028-RH-use-rpm-optflags-if-present.patch
-Patch0029: 0029-RH-add-mpathconf.patch
-Patch0030: 0030-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0031: 0031-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0032: 0032-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0033: 0033-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0001: 0001-multipath-tools-add-info-about-IO-affinity-path-sele.patch
+Patch0002: 0002-multipathd-fix-missing-persistent-reseravtion-for-ac.patch
+Patch0003: 0003-multipath-tools-minor-fixes-to-multipath.conf.5-man-.patch
+Patch0004: 0004-multipath-tools-make-IBM-XIV-config-work-with-alua-a.patch
+Patch0005: 0005-multipathd.socket-add-missing-conditions-from-servic.patch
+Patch0006: 0006-multipath-tools-make-IBM-2107900-DS8000-config-work-.patch
+Patch0007: 0007-multipath-tools-make-EMC-SYMMETRIX-config-work-with-.patch
+Patch0008: 0008-multipath-tools-make-EMC-Invista-config-work-with-al.patch
+Patch0009: 0009-multipath-tools-make-COMPELNT-Compellent-Vol-config-.patch
+Patch0010: 0010-multipath-tools-remove-Compellent-maintainer.patch
+Patch0011: 0011-RH-fixup-udev-rules-for-redhat.patch
+Patch0012: 0012-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0013: 0013-RH-don-t-start-without-a-config-file.patch
+Patch0014: 0014-RH-Fix-nvme-function-missing-argument.patch
+Patch0015: 0015-RH-use-rpm-optflags-if-present.patch
+Patch0016: 0016-RH-add-mpathconf.patch
+Patch0017: 0017-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0018: 0018-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0019: 0019-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0020: 0020-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -126,7 +113,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%autosetup -n multipath-tools-0.8.6 -p1
+%autosetup -n multipath-tools-0.8.7 -p1
 cp %{SOURCE1} .
 
 %build
@@ -240,6 +227,14 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Oct  6 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-1
+- Update source to upstream version 0.8.7
+  * Previous patches 0001-0023 are included in the commit.
+- Add patches from upstream staging branch
+  * Patches 0001-0010 are from the upstream staging branch
+- Rename redhat patches
+  * Previous patches 0024-0033 are now patches 0011-0020
+
 * Fri Jul 30 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.6-5
 - Update to the head of the upstream staging branch plus redhat patches
   * Patches 0016-0018 are from the upstream staging branch
