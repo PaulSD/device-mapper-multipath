@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -227,6 +227,10 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Oct  6 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-2
+- Modify 0013-RH-don-t-start-without-a-config-file.patch
+  * add condtion to multipathd.socket as well
+
 * Wed Oct  6 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-1
 - Update source to upstream version 0.8.7
   * Previous patches 0001-0023 are included in the commit.

@@ -17,7 +17,8 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  multipath/multipath.rules     |  1 +
  multipathd/multipathd.8       |  2 ++
  multipathd/multipathd.service |  1 +
- 5 files changed, 18 insertions(+)
+ multipathd/multipathd.socket  |  1 +
+ 6 files changed, 19 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
 index 30046a17..5f35c3d3 100644
@@ -92,3 +93,15 @@ index 0b2ac814..6d57c7e8 100644
  DefaultDependencies=no
  Conflicts=shutdown.target
  ConditionKernelCommandLine=!nompath
+diff --git a/multipathd/multipathd.socket b/multipathd/multipathd.socket
+index c777e5e3..3c20a2ff 100644
+--- a/multipathd/multipathd.socket
++++ b/multipathd/multipathd.socket
+@@ -1,6 +1,7 @@
+ [Unit]
+ Description=multipathd control socket
+ DefaultDependencies=no
++ConditionPathExists=/etc/multipath.conf
+ ConditionKernelCommandLine=!nompath
+ ConditionKernelCommandLine=!multipath=off
+ ConditionVirtualization=!container
