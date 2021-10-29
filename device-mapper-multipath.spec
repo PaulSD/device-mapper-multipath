@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.7
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -20,16 +20,18 @@ Patch0007: 0007-multipath-tools-make-EMC-SYMMETRIX-config-work-with-.patch
 Patch0008: 0008-multipath-tools-make-EMC-Invista-config-work-with-al.patch
 Patch0009: 0009-multipath-tools-make-COMPELNT-Compellent-Vol-config-.patch
 Patch0010: 0010-multipath-tools-remove-Compellent-maintainer.patch
-Patch0011: 0011-RH-fixup-udev-rules-for-redhat.patch
-Patch0012: 0012-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0013: 0013-RH-don-t-start-without-a-config-file.patch
-Patch0014: 0014-RH-Fix-nvme-function-missing-argument.patch
-Patch0015: 0015-RH-use-rpm-optflags-if-present.patch
-Patch0016: 0016-RH-add-mpathconf.patch
-Patch0017: 0017-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0018: 0018-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0019: 0019-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0020: 0020-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0011: 0011-Revert-multipath-tools-make-EMC-Invista-config-work-.patch
+Patch0012: 0012-Revert-multipath-tools-make-EMC-SYMMETRIX-config-wor.patch
+Patch0013: 0013-RH-fixup-udev-rules-for-redhat.patch
+Patch0014: 0014-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0015: 0015-RH-don-t-start-without-a-config-file.patch
+Patch0016: 0016-RH-Fix-nvme-function-missing-argument.patch
+Patch0017: 0017-RH-use-rpm-optflags-if-present.patch
+Patch0018: 0018-RH-add-mpathconf.patch
+Patch0019: 0019-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0020: 0020-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0021: 0021-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0022: 0022-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -227,6 +229,12 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Thu Oct 28 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-3
+- Update to the head of the upstream staging branch
+  * Patches 0011 & 0012 are from the upstream staging branch
+- Rename redhat patches
+  * Previous patches 0011-0020 are now patches 0013-0022
+
 * Wed Oct  6 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-2
 - Modify 0013-RH-don-t-start-without-a-config-file.patch
   * add condtion to multipathd.socket as well
