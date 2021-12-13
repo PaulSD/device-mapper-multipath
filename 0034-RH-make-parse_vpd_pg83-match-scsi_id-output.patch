@@ -10,7 +10,8 @@ that.
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/discovery.c | 18 ++----------------
- 1 file changed, 2 insertions(+), 16 deletions(-)
+ tests/vpd.c              |  6 ++++++
+ 2 files changed, 8 insertions(+), 16 deletions(-)
 
 diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
 index f25fe9e3..6fb81c28 100644
@@ -49,3 +50,53 @@ index f25fe9e3..6fb81c28 100644
  		case 0x1:
  			/* T-10 Vendor ID: Prio 2 */
  			if (prio < 2) {
+diff --git a/tests/vpd.c b/tests/vpd.c
+index 8e730d37..7bf7990f 100644
+--- a/tests/vpd.c
++++ b/tests/vpd.c
+@@ -230,11 +230,13 @@ static const char * const str_prefix[] = {
+ 	[STR_IQN] = "iqn.",
+ };
+ 
++#if 0
+ static const char byte0[] = {
+ 	[STR_EUI] = '2',
+ 	[STR_NAA] = '3',
+ 	[STR_IQN] = '8',
+ };
++#endif
+ 
+ /**
+  * create_scsi_string_desc() - create a SCSI name string descriptor.
+@@ -659,6 +661,7 @@ make_test_vpd_naa(2, 18);
+ make_test_vpd_naa(2, 17);
+ make_test_vpd_naa(2, 16);
+ 
++#if 0
+ /* SCSI Name string: EUI64, WWID size: 17 */
+ make_test_vpd_str(0, 20, 18)
+ make_test_vpd_str(0, 20, 17)
+@@ -694,6 +697,7 @@ make_test_vpd_str(18, 20, 18)
+ make_test_vpd_str(18, 20, 17)
+ make_test_vpd_str(18, 20, 16)
+ make_test_vpd_str(18, 20, 15)
++#endif
+ 
+ static int test_vpd(void)
+ {
+@@ -767,6 +771,7 @@ static int test_vpd(void)
+ 		cmocka_unit_test(test_vpd_naa_2_18),
+ 		cmocka_unit_test(test_vpd_naa_2_17),
+ 		cmocka_unit_test(test_vpd_naa_2_16),
++/*
+ 		cmocka_unit_test(test_vpd_str_0_20_18),
+ 		cmocka_unit_test(test_vpd_str_0_20_17),
+ 		cmocka_unit_test(test_vpd_str_0_20_16),
+@@ -791,6 +796,7 @@ static int test_vpd(void)
+ 		cmocka_unit_test(test_vpd_str_18_20_17),
+ 		cmocka_unit_test(test_vpd_str_18_20_16),
+ 		cmocka_unit_test(test_vpd_str_18_20_15),
++*/
+ 	};
+ 	return cmocka_run_group_tests(tests, setup, teardown);
+ }

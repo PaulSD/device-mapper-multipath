@@ -14,9 +14,9 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/config.c |   2 +
  multipath/Makefile    |   5 +
- multipath/mpathconf   | 561 ++++++++++++++++++++++++++++++++++++++++++
+ multipath/mpathconf   | 556 ++++++++++++++++++++++++++++++++++++++++++
  multipath/mpathconf.8 | 135 ++++++++++
- 4 files changed, 703 insertions(+)
+ 4 files changed, 698 insertions(+)
  create mode 100644 multipath/mpathconf
  create mode 100644 multipath/mpathconf.8
 
@@ -69,10 +69,10 @@ index b9bbb3cf..e720c7f6 100644
  	$(RM) core *.o $(EXEC) *.gz
 diff --git a/multipath/mpathconf b/multipath/mpathconf
 new file mode 100644
-index 00000000..039b3e47
+index 00000000..c00d2555
 --- /dev/null
 +++ b/multipath/mpathconf
-@@ -0,0 +1,561 @@
+@@ -0,0 +1,556 @@
 +#!/bin/bash
 +#
 +# Copyright (C) 2010 Red Hat, Inc. All rights reserved.
@@ -107,11 +107,6 @@ index 00000000..039b3e47
 +defaults {
 +	user_friendly_names yes
 +	find_multipaths yes
-+	enable_foreign \"^$\"
-+}
-+
-+blacklist_exceptions {
-+        property \"(SCSI_IDENT_|ID_WWN)\"
 +}"
 +
 +CONFIGFILE="/etc/multipath.conf"
@@ -130,7 +125,7 @@ index 00000000..039b3e47
 +	echo "Only allow certain wwids (instead of enable): --allow <WWID>"
 +	echo "Set user_friendly_names (Default y): --user_friendly_names <y|n>"
 +	echo "Set find_multipaths (Default y): --find_multipaths <yes|no|strict|greedy|smart>"
-+	echo "Set default property blacklist (Default y): --property_blacklist <y|n>"
++	echo "Set default property blacklist (Default n): --property_blacklist <y|n>"
 +	echo "Set enable_foreign to show foreign devices (Default n): --enable_foreign <y|n>"
 +	echo "Load the dm-multipath modules on enable (Default y): --with_module <y|n>"
 +	echo "start/stop/reload multipathd (Default n): --with_multipathd <y|n>"

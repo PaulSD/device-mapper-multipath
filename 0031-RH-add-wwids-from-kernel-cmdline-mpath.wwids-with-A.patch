@@ -20,7 +20,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 59 insertions(+), 3 deletions(-)
 
 diff --git a/multipath/main.c b/multipath/main.c
-index 65ece830..748e7902 100644
+index b2d300e5..80fa68e5 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -122,7 +122,7 @@ usage (char * progname)
@@ -92,7 +92,7 @@ index 65ece830..748e7902 100644
  static int
  configure (struct config *conf, enum mpath_cmds cmd,
  	   enum devtypes dev_type, char *devpath)
-@@ -838,7 +884,7 @@ main (int argc, char *argv[])
+@@ -839,7 +885,7 @@ main (int argc, char *argv[])
  	conf->retrigger_tries = 0;
  	conf->force_sync = 1;
  	atexit(cleanup_vecs);
@@ -101,7 +101,7 @@ index 65ece830..748e7902 100644
  		switch(arg) {
  		case 1: printf("optarg : %s\n",optarg);
  			break;
-@@ -915,6 +961,10 @@ main (int argc, char *argv[])
+@@ -916,6 +962,10 @@ main (int argc, char *argv[])
  		case 'T':
  			cmd = CMD_DUMP_CONFIG;
  			break;

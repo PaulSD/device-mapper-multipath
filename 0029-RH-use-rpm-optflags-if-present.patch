@@ -9,14 +9,14 @@ still being generic.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
- Makefile.inc | 24 ++++++++++++++++++------
- 1 file changed, 18 insertions(+), 6 deletions(-)
+ Makefile.inc | 26 +++++++++++++++++++-------
+ 1 file changed, 19 insertions(+), 7 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index 2a75dc9c..db35feb6 100644
+index 2a75dc9c..5ac660de 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
-@@ -92,16 +92,28 @@ TEST_CC_OPTION = $(shell \
+@@ -92,23 +92,35 @@ TEST_CC_OPTION = $(shell \
  		echo "$(2)"; \
  	fi)
  
@@ -50,6 +50,14 @@ index 2a75dc9c..db35feb6 100644
  CFLAGS		:= --std=gnu99 $(CFLAGS) $(OPTFLAGS) $(WARNFLAGS) -pipe \
  		   -DBIN_DIR=\"$(bindir)\" -DLIB_STRING=\"${LIB}\" -DRUN_DIR=\"${RUN}\" \
  		   -MMD -MP
+ BIN_CFLAGS	= -fPIE -DPIE
+ LIB_CFLAGS	= -fPIC
+ SHARED_FLAGS	= -shared
+-LDFLAGS		:= $(LDFLAGS) -Wl,-z,relro -Wl,-z,now -Wl,-z,defs
++LDFLAGS		:= $(LDFLAGS) $(RPM_LD_FLAGS) -Wl,-z,relro -Wl,-z,now -Wl,-z,defs
+ BIN_LDFLAGS	= -pie
+ 
+ # Check whether a function with name $1 has been declared in header file $2.
 @@ -139,4 +151,4 @@ check_file = $(shell \
  
  %.o:	%.c

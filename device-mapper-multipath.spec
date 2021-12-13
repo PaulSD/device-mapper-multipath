@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -22,16 +22,28 @@ Patch0009: 0009-multipath-tools-make-COMPELNT-Compellent-Vol-config-.patch
 Patch0010: 0010-multipath-tools-remove-Compellent-maintainer.patch
 Patch0011: 0011-Revert-multipath-tools-make-EMC-Invista-config-work-.patch
 Patch0012: 0012-Revert-multipath-tools-make-EMC-SYMMETRIX-config-wor.patch
-Patch0013: 0013-RH-fixup-udev-rules-for-redhat.patch
-Patch0014: 0014-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0015: 0015-RH-don-t-start-without-a-config-file.patch
-Patch0016: 0016-RH-Fix-nvme-function-missing-argument.patch
-Patch0017: 0017-RH-use-rpm-optflags-if-present.patch
-Patch0018: 0018-RH-add-mpathconf.patch
-Patch0019: 0019-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0020: 0020-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0021: 0021-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0022: 0022-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0013: 0013-multipath-fix-exit-status-of-multipath-T.patch
+Patch0014: 0014-libmultipath-add-section-name-to-invalid-keyword-out.patch
+Patch0015: 0015-libmultipath-use-typedef-for-keyword-handler-functio.patch
+Patch0016: 0016-libmultipath-print-the-correct-file-when-parsing-fai.patch
+Patch0017: 0017-libmultipath-pass-file-and-line-number-to-keyword-ha.patch
+Patch0018: 0018-libmultipath-make-set_int-take-a-range-for-valid-val.patch
+Patch0019: 0019-libmultipath-improve-checks-for-set_str.patch
+Patch0020: 0020-libmultipath-deprecate-file-and-directory-config-opt.patch
+Patch0021: 0021-libmultipath-split-set_int-to-enable-reuse.patch
+Patch0022: 0022-libmultipath-cleanup-invalid-config-handling.patch
+Patch0023: 0023-libmultipath-don-t-return-error-on-invalid-values.patch
+Patch0024: 0024-multipathd-avoid-unnecessary-path-read-only-reloads.patch
+Patch0025: 0025-RH-fixup-udev-rules-for-redhat.patch
+Patch0026: 0026-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0027: 0027-RH-don-t-start-without-a-config-file.patch
+Patch0028: 0028-RH-Fix-nvme-function-missing-argument.patch
+Patch0029: 0029-RH-use-rpm-optflags-if-present.patch
+Patch0030: 0030-RH-add-mpathconf.patch
+Patch0031: 0031-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0032: 0032-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0033: 0033-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0034: 0034-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -229,6 +241,12 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Dec 13 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-4
+- Update to the head of the upstream staging branch
+  * Patches 0013 - 0024 are from the upstream staging branch
+- Rename redhat patches
+  * Previous patches 0013-0022 are now patches 0025-0034
+
 * Thu Oct 28 2021 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-3
 - Update to the head of the upstream staging branch
   * Patches 0011 & 0012 are from the upstream staging branch
