@@ -14,9 +14,9 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/config.c |   2 +
  multipath/Makefile    |   5 +
- multipath/mpathconf   | 556 ++++++++++++++++++++++++++++++++++++++++++
+ multipath/mpathconf   | 564 ++++++++++++++++++++++++++++++++++++++++++
  multipath/mpathconf.8 | 135 ++++++++++
- 4 files changed, 698 insertions(+)
+ 4 files changed, 706 insertions(+)
  create mode 100644 multipath/mpathconf
  create mode 100644 multipath/mpathconf.8
 
@@ -69,10 +69,10 @@ index b9bbb3cf..e720c7f6 100644
  	$(RM) core *.o $(EXEC) *.gz
 diff --git a/multipath/mpathconf b/multipath/mpathconf
 new file mode 100644
-index 00000000..c00d2555
+index 00000000..0de6b121
 --- /dev/null
 +++ b/multipath/mpathconf
-@@ -0,0 +1,556 @@
+@@ -0,0 +1,564 @@
 +#!/bin/bash
 +#
 +# Copyright (C) 2010 Red Hat, Inc. All rights reserved.
@@ -571,7 +571,15 @@ index 00000000..c00d2555
 +		CHANGED_CONFIG=1
 +	fi
 +elif [ "$PROPERTY" = "y" ]; then
-+	if [ -z "$HAVE_PROPERTY" ]; then
++	if [ -z "$HAVE_PROPERTY" -a -z "$HAVE_EXCEPTIONS" ]; then
++		cat >> $TMPFILE << _EOF_
++
++blacklist_exceptions {
++	property "(SCSI_IDENT_|ID_WWN)"
++}
++_EOF_
++		CHANGED_CONFIG=1
++	elif [ -z "$HAVE_PROPERTY" ]; then
 +		sed -i '/^blacklist_exceptions[[:space:]]*{/ a\
 +	property "(SCSI_IDENT_|ID_WWN)"
 +' $TMPFILE
