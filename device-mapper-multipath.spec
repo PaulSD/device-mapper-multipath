@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.7
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -44,6 +44,7 @@ Patch0031: 0031-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
 Patch0032: 0032-RH-reset-default-find_mutipaths-value-to-off.patch
 Patch0033: 0033-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
 Patch0034: 0034-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0035: 0035-libmultipath-use-asprintf-to-allocate-prefixed_uuid.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -241,6 +242,10 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Jan 26 2022 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-7
+- Add 0035-libmultipath-use-asprintf-to-allocate-prefixed_uuid.patch
+- Resolves: bz #2045309
+
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.7-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
