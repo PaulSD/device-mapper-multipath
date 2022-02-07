@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.8.7
-Release: 7%{?dist}
+Release: 8%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -45,6 +45,8 @@ Patch0032: 0032-RH-reset-default-find_mutipaths-value-to-off.patch
 Patch0033: 0033-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
 Patch0034: 0034-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
 Patch0035: 0035-libmultipath-use-asprintf-to-allocate-prefixed_uuid.patch
+Patch0036: 0036-RH-add-support-to-mpathconf-for-setting-arbitrary-de.patch
+Patch0037: 0037-RH-add-support-to-mpathconf-for-setting-recheck_wwid.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -242,6 +244,12 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Feb  7 2022 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-8
+- Add 0036-RH-add-support-to-mpathconf-for-setting-arbitrary-de.patch
+  * add the ability for mpathconf to set arbitray options with --option
+- Add 0037-RH-add-support-to-mpathconf-for-setting-recheck_wwid.patch
+  * add --recheck_wwid option to mpathconf
+
 * Wed Jan 26 2022 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-7
 - Add 0035-libmultipath-use-asprintf-to-allocate-prefixed_uuid.patch
 - Resolves: bz #2045309
