@@ -21,10 +21,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  6 files changed, 19 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 30046a17..5f35c3d3 100644
+index c595e768..b193de5c 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -895,6 +895,19 @@ int _init_config (const char *file, struct config *conf)
+@@ -894,6 +894,19 @@ int _init_config (const char *file, struct config *conf)
  			goto out;
  		}
  		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
@@ -45,7 +45,7 @@ index 30046a17..5f35c3d3 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index 933fe0d1..5f01c1fc 100644
+index c73389b5..69a01cb7 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -9,6 +9,7 @@
@@ -69,7 +69,7 @@ index 9df11a95..0486bf70 100644
  ENV{DEVTYPE}!="partition", GOTO="test_dev"
  IMPORT{parent}="DM_MULTIPATH_DEVICE_PATH"
 diff --git a/multipathd/multipathd.8 b/multipathd/multipathd.8
-index 048a838d..8bd47a80 100644
+index 1e318bdc..6aab9325 100644
 --- a/multipathd/multipathd.8
 +++ b/multipathd/multipathd.8
 @@ -39,6 +39,8 @@ map regains its maximum performance and redundancy.
@@ -82,17 +82,17 @@ index 048a838d..8bd47a80 100644
  .
  .\" ----------------------------------------------------------------------------
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
-index 0b2ac814..6d57c7e8 100644
+index aec62dbb..d76f94f9 100644
 --- a/multipathd/multipathd.service
 +++ b/multipathd/multipathd.service
-@@ -4,6 +4,7 @@ Wants=systemd-udev-trigger.service systemd-udev-settle.service
- Before=iscsi.service iscsid.service lvm2-activation-early.service
- Before=local-fs-pre.target blk-availability.service shutdown.target
- After=multipathd.socket systemd-udev-trigger.service systemd-udev-settle.service
+@@ -6,6 +6,7 @@ Wants=systemd-udevd-kernel.socket
+ After=systemd-udevd-kernel.socket
+ After=multipathd.socket systemd-remount-fs.service
+ Before=initrd-cleanup.service
 +ConditionPathExists=/etc/multipath.conf
  DefaultDependencies=no
  Conflicts=shutdown.target
- ConditionKernelCommandLine=!nompath
+ Conflicts=initrd-cleanup.service
 diff --git a/multipathd/multipathd.socket b/multipathd/multipathd.socket
 index c777e5e3..3c20a2ff 100644
 --- a/multipathd/multipathd.socket

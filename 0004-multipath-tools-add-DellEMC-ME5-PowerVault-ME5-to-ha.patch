@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Date: Wed, 23 Feb 2022 23:16:44 +0100
+Subject: [PATCH] multipath-tools: add DellEMC/ME5 (PowerVault ME5) to hardware
+ table
+
+Convert PowerVault ME4 template for all ME series.
+
+[MW] https://dl.dell.com/content/manual51886263-dell-powervault-me5-series-administrator's-guide.pdf
+
+Cc: Martin Wilck <mwilck@suse.com>
+Cc: Benjamin Marzinski <bmarzins@redhat.com>
+Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
+Cc: DM-DEVEL ML <dm-devel@redhat.com>
+Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/hwtable.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index ff8ed036..0e1c0a41 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -397,9 +397,9 @@ static struct hwentry default_hw[] = {
+ 		.fast_io_fail  = 15,
+ 	},
+ 	{
+-		/* PowerVault ME4 */
++		/* PowerVault ME 4/5 families */
+ 		.vendor        = "DellEMC",
+-		.product       = "ME4",
++		.product       = "^ME",
+ 		.pgpolicy      = GROUP_BY_PRIO,
+ 		.prio_name     = PRIO_ALUA,
+ 		.hwhandler     = "1 alua",

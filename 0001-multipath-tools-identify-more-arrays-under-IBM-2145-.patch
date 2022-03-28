@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Date: Thu, 24 Feb 2022 22:06:08 +0100
+Subject: [PATCH] multipath-tools: identify more arrays under IBM/2145 ID
+
+Cc: Martin Wilck <mwilck@suse.com>
+Cc: Benjamin Marzinski <bmarzins@redhat.com>
+Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
+Cc: DM-DEVEL ML <dm-devel@redhat.com>
+Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/hwtable.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index bd157103..643caa32 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -665,7 +665,7 @@ static struct hwentry default_hw[] = {
+ 	},
+ 	{
+ 		// Storwize V5000 and V7000 lines / SAN Volume Controller (SVC) / Flex System V7000 /
+-		// FlashSystem V840/V9000/5000/5100/5200/7200/9100/9200/9200R
++		// FlashSystem V840/V9000/5000/5100/5200/7200/7300/9100/9200/9200R/9500
+ 		.vendor        = "IBM",
+ 		.product       = "^2145",
+ 		.no_path_retry = NO_PATH_RETRY_QUEUE,

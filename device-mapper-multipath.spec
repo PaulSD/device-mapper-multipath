@@ -1,52 +1,31 @@
 Name:    device-mapper-multipath
-Version: 0.8.7
-Release: 8%{?dist}
+Version: 0.8.9
+Release: 1%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl -L https://github.com/opensvc/multipath-tools/archive/0.8.7.tar.gz -o multipath-tools-0.8.7.tgz
-Source0: multipath-tools-0.8.7.tgz
+# curl -L https://github.com/opensvc/multipath-tools/archive/0.8.9.tar.gz -o multipath-tools-0.8.9.tgz
+Source0: multipath-tools-0.8.9.tgz
 Source1: multipath.conf
-Patch0001: 0001-multipath-tools-add-info-about-IO-affinity-path-sele.patch
-Patch0002: 0002-multipathd-fix-missing-persistent-reseravtion-for-ac.patch
-Patch0003: 0003-multipath-tools-minor-fixes-to-multipath.conf.5-man-.patch
-Patch0004: 0004-multipath-tools-make-IBM-XIV-config-work-with-alua-a.patch
-Patch0005: 0005-multipathd.socket-add-missing-conditions-from-servic.patch
-Patch0006: 0006-multipath-tools-make-IBM-2107900-DS8000-config-work-.patch
-Patch0007: 0007-multipath-tools-make-EMC-SYMMETRIX-config-work-with-.patch
-Patch0008: 0008-multipath-tools-make-EMC-Invista-config-work-with-al.patch
-Patch0009: 0009-multipath-tools-make-COMPELNT-Compellent-Vol-config-.patch
-Patch0010: 0010-multipath-tools-remove-Compellent-maintainer.patch
-Patch0011: 0011-Revert-multipath-tools-make-EMC-Invista-config-work-.patch
-Patch0012: 0012-Revert-multipath-tools-make-EMC-SYMMETRIX-config-wor.patch
-Patch0013: 0013-multipath-fix-exit-status-of-multipath-T.patch
-Patch0014: 0014-libmultipath-add-section-name-to-invalid-keyword-out.patch
-Patch0015: 0015-libmultipath-use-typedef-for-keyword-handler-functio.patch
-Patch0016: 0016-libmultipath-print-the-correct-file-when-parsing-fai.patch
-Patch0017: 0017-libmultipath-pass-file-and-line-number-to-keyword-ha.patch
-Patch0018: 0018-libmultipath-make-set_int-take-a-range-for-valid-val.patch
-Patch0019: 0019-libmultipath-improve-checks-for-set_str.patch
-Patch0020: 0020-libmultipath-deprecate-file-and-directory-config-opt.patch
-Patch0021: 0021-libmultipath-split-set_int-to-enable-reuse.patch
-Patch0022: 0022-libmultipath-cleanup-invalid-config-handling.patch
-Patch0023: 0023-libmultipath-don-t-return-error-on-invalid-values.patch
-Patch0024: 0024-multipathd-avoid-unnecessary-path-read-only-reloads.patch
-Patch0025: 0025-RH-fixup-udev-rules-for-redhat.patch
-Patch0026: 0026-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0027: 0027-RH-don-t-start-without-a-config-file.patch
-Patch0028: 0028-RH-Fix-nvme-function-missing-argument.patch
-Patch0029: 0029-RH-use-rpm-optflags-if-present.patch
-Patch0030: 0030-RH-add-mpathconf.patch
-Patch0031: 0031-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0032: 0032-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0033: 0033-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0034: 0034-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
-Patch0035: 0035-libmultipath-use-asprintf-to-allocate-prefixed_uuid.patch
-Patch0036: 0036-RH-add-support-to-mpathconf-for-setting-arbitrary-de.patch
-Patch0037: 0037-RH-add-support-to-mpathconf-for-setting-recheck_wwid.patch
+Patch0001: 0001-multipath-tools-identify-more-arrays-under-IBM-2145-.patch
+Patch0002: 0002-multipath-tools-add-HPE-as-vendor-for-OPEN-XP8-array.patch
+Patch0003: 0003-multipath-tools-add-HP-HSVX740-to-hwtable.patch
+Patch0004: 0004-multipath-tools-add-DellEMC-ME5-PowerVault-ME5-to-ha.patch
+Patch0005: 0005-multipath-tools-update-mpp-force_readonly-in-ev_add_.patch
+Patch0006: 0006-RH-fixup-udev-rules-for-redhat.patch
+Patch0007: 0007-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0008: 0008-RH-don-t-start-without-a-config-file.patch
+Patch0009: 0009-RH-Fix-nvme-function-missing-argument.patch
+Patch0010: 0010-RH-use-rpm-optflags-if-present.patch
+Patch0011: 0011-RH-add-mpathconf.patch
+Patch0012: 0012-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0013: 0013-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0014: 0014-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0015: 0015-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0016: 0016-RH-add-scsi-device-handlers-to-modules-load.d.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -130,7 +109,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%autosetup -n multipath-tools-0.8.7 -p1
+%autosetup -n multipath-tools-0.8.9 -p1
 cp %{SOURCE1} .
 
 %build
@@ -188,6 +167,9 @@ fi
 %{_mandir}/man8/mpathpersist.8.gz
 %config /usr/lib/udev/rules.d/62-multipath.rules
 %config /usr/lib/udev/rules.d/11-dm-mpath.rules
+%dir /usr/lib/modules-load.d
+/usr/lib/modules-load.d/multipath.conf
+/usr/lib/modules-load.d/scsi_dh.conf
 %doc README.md
 %doc README.alua
 %doc multipath.conf
@@ -244,6 +226,19 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Mon Mar 28 2022 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.9-1
+- Update source to upstream version 0.8.9
+  * Previous patches 0001-0024 & 0035 are included in the commit.
+- Add patches from upstream staging branch
+  * Patches 0001-0005 are from the upstream staging branch
+- Rename redhat patches
+  * Previous patches 0025-0034 are now patches 0006-0015
+- Combine redhat patches
+  * Previous patches 0036 & 0037 are now part of patch 0011
+- Add 0016-RH-add-scsi-device-handlers-to-modules-load.d.patch
+- Spec file changes
+  * Install multipath.conf and scsi_dh.conf to /usr/lib/modules-load.d
+
 * Mon Feb  7 2022 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.7-8
 - Add 0036-RH-add-support-to-mpathconf-for-setting-arbitrary-de.patch
   * add the ability for mpathconf to set arbitray options with --option

@@ -9,52 +9,46 @@ that.
 
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
- libmultipath/discovery.c | 18 ++----------------
+ libmultipath/discovery.c | 12 ++----------
  tests/vpd.c              |  6 ++++++
- 2 files changed, 8 insertions(+), 16 deletions(-)
+ 2 files changed, 8 insertions(+), 10 deletions(-)
 
 diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
-index f25fe9e3..6fb81c28 100644
+index b969fba1..d2f2a8cf 100644
 --- a/libmultipath/discovery.c
 +++ b/libmultipath/discovery.c
-@@ -1136,12 +1136,9 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
- 				naa_prio = 7;
+@@ -1156,13 +1156,9 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
+ 				good_len = 8;
  				break;
  			case 2:
 -				/* IEEE Extended: Prio 6 */
--				naa_prio = 6;
+-				new_prio = 6;
+-				good_len = 8;
 -				break;
  			case 3:
 -				/* IEEE Locally assigned: Prio 1 */
--				naa_prio = 1;
+-				new_prio = 1;
 +				/* IEEE Extended or Locally assigned: Prio 6 */
-+				naa_prio = 6;
++				new_prio = 6;
+ 				good_len = 8;
  				break;
  			default:
- 				/* Default: no priority */
-@@ -1160,17 +1157,6 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
- 				vpd = d;
- 			}
+@@ -1180,10 +1176,6 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
  			break;
--		case 0x8:
--			/* SCSI Name: Prio 3 */
--			if (memcmp(d + 4, "eui.", 4) &&
--			    memcmp(d + 4, "naa.", 4) &&
--			    memcmp(d + 4, "iqn.", 4))
--				break;
--			if (prio < 3) {
--				prio = 3;
--				vpd = d;
--			}
--			break;
+ 		case 0x8:
+ 			/* SCSI Name: Prio 3 */
+-			invalid = (d[3] < 4 || (memcmp(d + 4, "eui.", 4) &&
+-						memcmp(d + 4, "naa.", 4) &&
+-						memcmp(d + 4, "iqn.", 4)));
+-			new_prio = 3;
+ 			break;
  		case 0x1:
  			/* T-10 Vendor ID: Prio 2 */
- 			if (prio < 2) {
 diff --git a/tests/vpd.c b/tests/vpd.c
-index 8e730d37..7bf7990f 100644
+index a7d2092c..2366cfba 100644
 --- a/tests/vpd.c
 +++ b/tests/vpd.c
-@@ -230,11 +230,13 @@ static const char * const str_prefix[] = {
+@@ -231,11 +231,13 @@ static const char * const str_prefix[] = {
  	[STR_IQN] = "iqn.",
  };
  
@@ -68,7 +62,7 @@ index 8e730d37..7bf7990f 100644
  
  /**
   * create_scsi_string_desc() - create a SCSI name string descriptor.
-@@ -659,6 +661,7 @@ make_test_vpd_naa(2, 18);
+@@ -766,6 +768,7 @@ make_test_vpd_naa(2, 18);
  make_test_vpd_naa(2, 17);
  make_test_vpd_naa(2, 16);
  
@@ -76,7 +70,7 @@ index 8e730d37..7bf7990f 100644
  /* SCSI Name string: EUI64, WWID size: 17 */
  make_test_vpd_str(0, 20, 18)
  make_test_vpd_str(0, 20, 17)
-@@ -694,6 +697,7 @@ make_test_vpd_str(18, 20, 18)
+@@ -801,6 +804,7 @@ make_test_vpd_str(18, 20, 18)
  make_test_vpd_str(18, 20, 17)
  make_test_vpd_str(18, 20, 16)
  make_test_vpd_str(18, 20, 15)
@@ -84,7 +78,7 @@ index 8e730d37..7bf7990f 100644
  
  static int test_vpd(void)
  {
-@@ -767,6 +771,7 @@ static int test_vpd(void)
+@@ -909,6 +913,7 @@ static int test_vpd(void)
  		cmocka_unit_test(test_vpd_naa_2_18),
  		cmocka_unit_test(test_vpd_naa_2_17),
  		cmocka_unit_test(test_vpd_naa_2_16),
@@ -92,7 +86,7 @@ index 8e730d37..7bf7990f 100644
  		cmocka_unit_test(test_vpd_str_0_20_18),
  		cmocka_unit_test(test_vpd_str_0_20_17),
  		cmocka_unit_test(test_vpd_str_0_20_16),
-@@ -791,6 +796,7 @@ static int test_vpd(void)
+@@ -933,6 +938,7 @@ static int test_vpd(void)
  		cmocka_unit_test(test_vpd_str_18_20_17),
  		cmocka_unit_test(test_vpd_str_18_20_16),
  		cmocka_unit_test(test_vpd_str_18_20_15),
