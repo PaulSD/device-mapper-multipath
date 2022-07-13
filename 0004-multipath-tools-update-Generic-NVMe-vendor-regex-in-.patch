@@ -1,9 +1,10 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Xose Vazquez Perez <xose.vazquez@gmail.com>
-Date: Thu, 24 Feb 2022 22:24:39 +0100
-Subject: [PATCH] multipath-tools: add HP/HSVX740 to hwtable
+Date: Sun, 10 Jul 2022 01:07:09 +0200
+Subject: [PATCH] multipath-tools: update "Generic NVMe" vendor regex in
+ hwtable
 
-Info from: https://community.hpe.com/hpeb/attachments/hpeb/itrc-248/61618/1/HP_DM_MP_Guide.pdf
+to accept NVME and NVMe
 
 Cc: Martin Wilck <mwilck@suse.com>
 Cc: Benjamin Marzinski <bmarzins@redhat.com>
@@ -17,15 +18,15 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
-index 3b9e0e0f..ff8ed036 100644
+index fc0252ba..c88fa09a 100644
 --- a/libmultipath/hwtable.c
 +++ b/libmultipath/hwtable.c
-@@ -192,7 +192,7 @@ static struct hwentry default_hw[] = {
+@@ -86,7 +86,7 @@ static struct hwentry default_hw[] = {
+ 	 */
  	{
- 		/* SAN Virtualization Services Platform */
- 		.vendor        = "HP",
--		.product       = "HSVX700",
-+		.product       = "(HSVX700|HSVX740)",
- 		.hwhandler     = "1 alua",
- 		.pgpolicy      = GROUP_BY_PRIO,
- 		.pgfailback    = -FAILBACK_IMMEDIATE,
+ 		/* Generic NVMe */
+-		.vendor        = "NVME",
++		.vendor        = "NVM[eE]",
+ 		.product       = ".*",
+ 		.uid_attribute = DEFAULT_NVME_UID_ATTRIBUTE,
+ 		.checker_name  = NONE,

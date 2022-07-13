@@ -21,13 +21,13 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  6 files changed, 19 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index c595e768..b193de5c 100644
+index ab8b26e7..f06fcbf9 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -894,6 +894,19 @@ int _init_config (const char *file, struct config *conf)
- 			goto out;
+@@ -955,6 +955,19 @@ int _init_config (const char *file, struct config *conf)
  		}
  		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
+ 		validate_pctable(conf->overrides, 0, file);
 +	} else {
 +		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
 +		if (conf->blist_devnode == NULL) {
@@ -45,7 +45,7 @@ index c595e768..b193de5c 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index c73389b5..69a01cb7 100644
+index 36d40157..115b463b 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -9,6 +9,7 @@

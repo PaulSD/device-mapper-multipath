@@ -20,7 +20,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 59 insertions(+), 3 deletions(-)
 
 diff --git a/multipath/main.c b/multipath/main.c
-index d09f62db..0d786ee5 100644
+index 034dd2f4..4c31820b 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -120,7 +120,7 @@ usage (char * progname)

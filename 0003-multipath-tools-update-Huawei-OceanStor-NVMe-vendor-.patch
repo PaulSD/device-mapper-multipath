@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Date: Sun, 10 Jul 2022 01:07:08 +0200
+Subject: [PATCH] multipath-tools: update Huawei OceanStor NVMe vendor id
+
+"NVME" in the doc, but "NVMe" is the real output:
+(page 61-62): https://drive.google.com/file/d/1c5RK4GXX7ofZBFxTtZ_IN1qHyIjw5eR1
+https://marc.info/?l=dm-devel&m=163393151312418
+Use both, just in case.
+
+Cc: <chengjike.cheng@huawei.com>
+Cc: <sunao.sun@huawei.com>
+Cc: <jiangtao62@huawei.com>
+Cc: Zhouweigang (Jack) <zhouweigang09@huawei.com>
+Cc: Zou Ming <zouming.zouming@huawei.com>
+Cc: Martin Wilck <mwilck@suse.com>
+Cc: Benjamin Marzinski <bmarzins@redhat.com>
+Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
+Cc: DM-DEVEL ML <dm-devel@redhat.com>
+Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/hwtable.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/hwtable.c b/libmultipath/hwtable.c
+index 513fa679..fc0252ba 100644
+--- a/libmultipath/hwtable.c
++++ b/libmultipath/hwtable.c
+@@ -1116,7 +1116,7 @@ static struct hwentry default_hw[] = {
+ 	},
+ 	{
+ 		/* OceanStor NVMe */
+-		.vendor        = "NVME",
++		.vendor        = "NVM[eE]",
+ 		.product       = "Huawei-XSG1",
+ 		.checker_name  = DIRECTIO,
+ 		.no_path_retry = 12,

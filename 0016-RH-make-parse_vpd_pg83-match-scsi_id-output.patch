@@ -14,10 +14,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  2 files changed, 8 insertions(+), 10 deletions(-)
 
 diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
-index b969fba1..d2f2a8cf 100644
+index 0d8a558c..0c73b754 100644
 --- a/libmultipath/discovery.c
 +++ b/libmultipath/discovery.c
-@@ -1156,13 +1156,9 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
+@@ -1177,13 +1177,9 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
  				good_len = 8;
  				break;
  			case 2:
@@ -33,7 +33,7 @@ index b969fba1..d2f2a8cf 100644
  				good_len = 8;
  				break;
  			default:
-@@ -1180,10 +1176,6 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
+@@ -1201,10 +1197,6 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
  			break;
  		case 0x8:
  			/* SCSI Name: Prio 3 */

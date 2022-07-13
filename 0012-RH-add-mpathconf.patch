@@ -21,11 +21,11 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  create mode 100644 multipath/mpathconf.8
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index b193de5c..a8ec3bf4 100644
+index f06fcbf9..e2840839 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -896,6 +896,8 @@ int _init_config (const char *file, struct config *conf)
- 		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
+@@ -957,6 +957,8 @@ int _init_config (const char *file, struct config *conf)
+ 		validate_pctable(conf->overrides, 0, file);
  	} else {
  		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
 +		condlog(0, "You can run \"/sbin/mpathconf --enable\" to create");
@@ -34,10 +34,10 @@ index b193de5c..a8ec3bf4 100644
  			conf->blist_devnode = vector_alloc();
  			if (!conf->blist_devnode) {
 diff --git a/multipath/Makefile b/multipath/Makefile
-index 2059a4f4..e2ebe431 100644
+index d2b3fd82..00e46a0d 100644
 --- a/multipath/Makefile
 +++ b/multipath/Makefile
-@@ -20,6 +20,7 @@ $(EXEC): $(OBJS) $(multipathdir)/libmultipath.so $(mpathcmddir)/libmpathcmd.so
+@@ -21,6 +21,7 @@ $(EXEC): $(OBJS) $(multipathdir)/libmultipath.so $(mpathcmddir)/libmpathcmd.so
  install:
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
  	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
@@ -45,7 +45,7 @@ index 2059a4f4..e2ebe431 100644
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(udevrulesdir)
  	$(INSTALL_PROGRAM) -m 644 11-dm-mpath.rules $(DESTDIR)$(udevrulesdir)
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).rules $(DESTDIR)$(udevrulesdir)/62-multipath.rules
-@@ -29,6 +30,7 @@ install:
+@@ -30,6 +31,7 @@ install:
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(man8dir)
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man5dir)
  	$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5 $(DESTDIR)$(man5dir)
@@ -53,7 +53,7 @@ index 2059a4f4..e2ebe431 100644
  ifneq ($(SCSI_DH_MODULES_PRELOAD),)
  	$(INSTALL_PROGRAM) -m 644 scsi_dh.conf $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
  	for _x in $(SCSI_DH_MODULES_PRELOAD); do echo "$$_x"; done \
-@@ -41,8 +43,10 @@ uninstall:
+@@ -42,8 +44,10 @@ uninstall:
  	$(RM) $(DESTDIR)$(modulesloaddir)/multipath.conf
  	$(RM) $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
  	$(RM) $(DESTDIR)$(libudevdir)/rules.d/62-multipath.rules

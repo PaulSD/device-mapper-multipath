@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 10 Jun 2022 22:44:11 +0200
+Subject: [PATCH] github workflows: switch to fedora 36
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ .github/workflows/native.yaml | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/.github/workflows/native.yaml b/.github/workflows/native.yaml
+index 19c9e297..ddfd4a09 100644
+--- a/.github/workflows/native.yaml
++++ b/.github/workflows/native.yaml
+@@ -12,12 +12,10 @@ jobs:
+     runs-on: ubuntu-20.04
+     strategy:
+       matrix:
+-        os: [buster, jessie, bullseye, fedora-35]
++        os: [buster, jessie, bullseye, fedora-36]
+         arch: ['', '-i386']
+         exclude:
+-          - os: fedora-34
+-            arch: '-i386'
+-          - os: fedora-35
++          - os: fedora-36
+             arch: '-i386'
+     container: mwilck/multipath-build-${{ matrix.os }}${{ matrix.arch }}
+     steps:

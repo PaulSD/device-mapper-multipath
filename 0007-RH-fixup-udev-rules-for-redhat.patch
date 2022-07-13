@@ -15,10 +15,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index d24da43e..fb23635c 100644
+index bcd2212a..40cfbd0c 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
-@@ -75,7 +75,7 @@ endif
+@@ -76,7 +76,7 @@ endif
  prefix		=
  exec_prefix	= $(prefix)
  usr_prefix	= $(prefix)
@@ -40,10 +40,10 @@ index 1969dee0..d2b28233 100644
  
  LABEL="kpartx_end"
 diff --git a/multipath/Makefile b/multipath/Makefile
-index c930499d..2059a4f4 100644
+index bcb04533..d2b3fd82 100644
 --- a/multipath/Makefile
 +++ b/multipath/Makefile
-@@ -22,7 +22,7 @@ install:
+@@ -23,7 +23,7 @@ install:
  	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(udevrulesdir)
  	$(INSTALL_PROGRAM) -m 644 11-dm-mpath.rules $(DESTDIR)$(udevrulesdir)
@@ -52,7 +52,7 @@ index c930499d..2059a4f4 100644
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(modulesloaddir)
  	$(INSTALL_PROGRAM) -m 644 modules-load.conf $(DESTDIR)$(modulesloaddir)/multipath.conf
  	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man8dir)
-@@ -40,7 +40,7 @@ uninstall:
+@@ -41,7 +41,7 @@ uninstall:
  	$(RM) $(DESTDIR)$(udevrulesdir)/11-dm-mpath.rules
  	$(RM) $(DESTDIR)$(modulesloaddir)/multipath.conf
  	$(RM) $(DESTDIR)$(modulesloaddir)/scsi_dh.conf

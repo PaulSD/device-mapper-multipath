@@ -1,5 +1,5 @@
 Name:    device-mapper-multipath
-Version: 0.8.9
+Version: 0.9.0
 Release: 1%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
@@ -7,25 +7,26 @@ URL:     http://christophe.varoqui.free.fr/
 
 # The source for this package was pulled from upstream's git repo.  Use the
 # following command to generate the tarball
-# curl -L https://github.com/opensvc/multipath-tools/archive/0.8.9.tar.gz -o multipath-tools-0.8.9.tgz
-Source0: multipath-tools-0.8.9.tgz
+# curl -L https://github.com/opensvc/multipath-tools/archive/0.9.0.tar.gz -o multipath-tools-0.9.0.tgz
+Source0: multipath-tools-0.9.0.tgz
 Source1: multipath.conf
-Patch0001: 0001-multipath-tools-identify-more-arrays-under-IBM-2145-.patch
-Patch0002: 0002-multipath-tools-add-HPE-as-vendor-for-OPEN-XP8-array.patch
-Patch0003: 0003-multipath-tools-add-HP-HSVX740-to-hwtable.patch
-Patch0004: 0004-multipath-tools-add-DellEMC-ME5-PowerVault-ME5-to-ha.patch
-Patch0005: 0005-multipath-tools-update-mpp-force_readonly-in-ev_add_.patch
-Patch0006: 0006-RH-fixup-udev-rules-for-redhat.patch
-Patch0007: 0007-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0008: 0008-RH-don-t-start-without-a-config-file.patch
-Patch0009: 0009-RH-Fix-nvme-function-missing-argument.patch
-Patch0010: 0010-RH-use-rpm-optflags-if-present.patch
-Patch0011: 0011-RH-add-mpathconf.patch
-Patch0012: 0012-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0013: 0013-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0014: 0014-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0015: 0015-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
-Patch0016: 0016-RH-add-scsi-device-handlers-to-modules-load.d.patch
+Patch0001: 0001-github-workflows-switch-to-fedora-36.patch
+Patch0002: 0002-multipath-tools-fix-multipath-ll-bug-for-Native-NVME.patch
+Patch0003: 0003-multipath-tools-update-Huawei-OceanStor-NVMe-vendor-.patch
+Patch0004: 0004-multipath-tools-update-Generic-NVMe-vendor-regex-in-.patch
+Patch0005: 0005-libmultipath-unset-detect_checker-for-clariion-Unity.patch
+Patch0006: 0006-libmultipath-fix-find_multipaths_timeout-for-unknown.patch
+Patch0007: 0007-RH-fixup-udev-rules-for-redhat.patch
+Patch0008: 0008-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0009: 0009-RH-don-t-start-without-a-config-file.patch
+Patch0010: 0010-RH-Fix-nvme-function-missing-argument.patch
+Patch0011: 0011-RH-use-rpm-optflags-if-present.patch
+Patch0012: 0012-RH-add-mpathconf.patch
+Patch0013: 0013-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0014: 0014-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0015: 0015-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0016: 0016-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0017: 0017-RH-add-scsi-device-handlers-to-modules-load.d.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
@@ -109,7 +110,7 @@ This package contains the files needed to develop applications that use
 device-mapper-multipath's libdmmp C API library
 
 %prep
-%autosetup -n multipath-tools-0.8.9 -p1
+%autosetup -n multipath-tools-0.9.0 -p1
 cp %{SOURCE1} .
 
 %build
@@ -226,6 +227,17 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Wed Jul 13 2022 Benjamin Marzinski <bmarzins@redhat.com> - 0.9.0-1
+- Update source to upstream version 0.9.0
+  * Previous patches 0001-0005 are included in the commit.
+  * This version deprecates multiple options: mutlipath_dir, config_dir, and
+    getuid_callout, along with the "default_" prefixed alternate names for the
+    default section parameters.
+- Add patches from upstream staging branch
+  * Patches 0001-0006 are from the upstream staging branch
+- Rename redhat patches
+  * Previous patches 0006-0016 are now patches 0007-0017
+
 * Mon Mar 28 2022 Benjamin Marzinski <bmarzins@redhat.com> - 0.8.9-1
 - Update source to upstream version 0.8.9
   * Previous patches 0001-0024 & 0035 are included in the commit.

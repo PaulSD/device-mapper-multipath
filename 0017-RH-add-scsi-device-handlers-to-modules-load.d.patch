@@ -11,7 +11,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index 4511ab1f..fec82b00 100644
+index 307b6b4d..8f64c700 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
 @@ -11,7 +11,7 @@
@@ -21,5 +21,5 @@ index 4511ab1f..fec82b00 100644
 -SCSI_DH_MODULES_PRELOAD :=
 +SCSI_DH_MODULES_PRELOAD := scsi_dh_alua scsi_dh_emc scsi_dh_rdac
  
+ EXTRAVERSION := $(shell rev=$$(git rev-parse --short=7 HEAD 2>/dev/null); echo $${rev:+-g$$rev})
  
- PKGCONFIG	?= pkg-config
