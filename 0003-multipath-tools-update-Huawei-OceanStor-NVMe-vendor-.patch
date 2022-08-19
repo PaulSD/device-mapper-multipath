@@ -19,6 +19,7 @@ Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
 Cc: DM-DEVEL ML <dm-devel@redhat.com>
 Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
 Reviewed-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/hwtable.c | 2 +-

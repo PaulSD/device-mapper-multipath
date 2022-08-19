@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Date: Sat, 23 Jul 2022 15:12:04 +0200
+Subject: [PATCH] multipath-tools: add basic info on how to use multipath-tools
+ with NVMe devices
+
+Cc: Martin Wilck <mwilck@suse.com>
+Cc: Benjamin Marzinski <bmarzins@redhat.com>
+Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
+Cc: DM-DEVEL ML <dm-devel@redhat.com>
+Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ README.md | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/README.md b/README.md
+index 2322082c..b05b1332 100644
+--- a/README.md
++++ b/README.md
+@@ -174,3 +174,19 @@ To enable ALUA, the following options should be changed:
+ 
+ - Huawei OceanStor:
+    "Host Access Mode" should be changed to "Asymmetric".
++
++
++NVMe
++====
++To use Device Mapper/multipath-tools with NVMe devices,
++if the Native NVMe Multipath subsystem is enabled
++( "Y" in `/sys/module/nvme_core/parameters/multipath` ),
++it has to be disabled:
++
++`echo "options nvme_core multipath=N" > /etc/modprobe.d/01-nvme_core-mp.conf`,
++regenerate the initramfs (`dracut -f` or `update-initramfs`) and reboot.
++
++Check that it is disabled(N) with:
++`cat /sys/module/nvme_core/parameters/multipath`
++or
++`systool -m nvme_core -A multipath`

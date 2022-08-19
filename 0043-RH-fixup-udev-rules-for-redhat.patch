@@ -15,10 +15,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index bcd2212a..40cfbd0c 100644
+index ad7afd04..03450610 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
-@@ -76,7 +76,7 @@ endif
+@@ -81,7 +81,7 @@ endif
  prefix		=
  exec_prefix	= $(prefix)
  usr_prefix	= $(prefix)

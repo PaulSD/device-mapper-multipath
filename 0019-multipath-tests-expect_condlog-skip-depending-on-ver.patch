@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 5 Jul 2022 23:18:07 +0200
+Subject: [PATCH] multipath tests: expect_condlog: skip depending on verbosity
+
+otherwise we'll get failures if verbosity level is low.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ tests/test-log.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/tests/test-log.c b/tests/test-log.c
+index 14f25b9b..0c17cd96 100644
+--- a/tests/test-log.c
++++ b/tests/test-log.c
+@@ -6,6 +6,8 @@
+ #include <cmocka.h>
+ #include "log.h"
+ #include "test-log.h"
++#include "debug.h"
++
+ 
+ __attribute__((format(printf, 2, 0)))
+ void __wrap_dlog (int prio, const char * fmt, ...)
+@@ -24,6 +26,8 @@ void __wrap_dlog (int prio, const char * fmt, ...)
+ 
+ void expect_condlog(int prio, char *string)
+ {
++	if (prio > MAX_VERBOSITY || prio > libmp_verbosity)
++		return;
+ 	expect_value(__wrap_dlog, prio, prio);
+ 	will_return(__wrap_dlog, string);
+ }

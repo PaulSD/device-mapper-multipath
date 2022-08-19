@@ -43,7 +43,7 @@ index 8d15d2ea..eff690fd 100644
  				udev_device_get_properties_list_entry(udev)) {
  
 diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
-index c2d34f18..18a55b70 100644
+index acdd1ae6..5ab770ba 100644
 --- a/multipath/multipath.conf.5
 +++ b/multipath/multipath.conf.5
 @@ -1348,9 +1348,14 @@ keywords. Both are regular expressions. For a full description of these keywords

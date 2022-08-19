@@ -1,0 +1,65 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 5 Jul 2022 10:47:51 +0200
+Subject: [PATCH] libmultipath: sysfs_bin_attr_get_value(): no error if buffer
+ is filled
+
+sysfs_bin_attr_get_value() sets the length of bytes read to 0
+when the provided buffer was too small, truncating potentially
+useful data. This is harmful e.g. in do_inquiry(), if the "inquiry"
+sysfs attribute contains more than 96 bytes (which is possible).
+
+Actually, binary attributes don't need to be 0-terminated. Thus,
+unlike for string attributes, it's not an error if the requested number of
+bytes is exactly equal to the number of bytes read. We expect that
+the caller knows how many bytes it needs to read.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/discovery.c | 10 ++++++----
+ libmultipath/sysfs.c     |  5 +----
+ 2 files changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index 7e09e4e2..f5b8401c 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -1341,13 +1341,15 @@ static int
+ get_vpd_sysfs (struct udev_device *parent, int pg, char * str, int maxlen)
+ {
+ 	int len;
+-	size_t buff_len;
++	ssize_t buff_len;
+ 	unsigned char buff[VPD_BUFLEN];
+ 
+ 	memset(buff, 0x0, VPD_BUFLEN);
+-	if (!parent || sysfs_get_vpd(parent, pg, buff, VPD_BUFLEN) <= 0) {
+-		condlog(3, "failed to read sysfs vpd pg%02x", pg);
+-		return -EINVAL;
++	buff_len = sysfs_get_vpd(parent, pg, buff, VPD_BUFLEN);
++	if (buff_len < 0) {
++		condlog(3, "failed to read sysfs vpd pg%02x: %s",
++			pg, strerror(-buff_len));
++		return buff_len;
+ 	}
+ 
+ 	if (buff[1] != pg) {
+diff --git a/libmultipath/sysfs.c b/libmultipath/sysfs.c
+index f45dbee1..3ec92512 100644
+--- a/libmultipath/sysfs.c
++++ b/libmultipath/sysfs.c
+@@ -146,10 +146,7 @@ ssize_t sysfs_bin_attr_get_value(struct udev_device *dev, const char *attr_name,
+ 	if (size < 0) {
+ 		condlog(4, "read from %s failed: %s", devpath, strerror(errno));
+ 		size = -errno;
+-	} else if (size == (ssize_t)value_len) {
+-		condlog(4, "overflow while reading from %s", devpath);
+-		size = 0;
+-	}
++	};
+ 
+ 	close(fd);
+ 	return size;

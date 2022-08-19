@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 16 Aug 2022 14:10:39 +0200
+Subject: [PATCH] github workflows: abi.yaml: add libedit-dev
+
+This is is required after switching from libreadline to libedit.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ .github/workflows/abi.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/.github/workflows/abi.yaml b/.github/workflows/abi.yaml
+index 0a40104a..89b971cd 100644
+--- a/.github/workflows/abi.yaml
++++ b/.github/workflows/abi.yaml
+@@ -30,7 +30,7 @@ jobs:
+           sudo apt-get install --yes gcc
+           gcc make pkg-config abigail-tools
+           libdevmapper-dev libreadline-dev libaio-dev libsystemd-dev
+-          libudev-dev libjson-c-dev liburcu-dev libcmocka-dev
++          libudev-dev libjson-c-dev liburcu-dev libcmocka-dev libedit-dev
+       - name: create ABI
+         run: make -O -j$(grep -c ^processor /proc/cpuinfo) abi.tar.gz
+       - name: save ABI

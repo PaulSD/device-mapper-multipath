@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Benjamin Marzinski <bmarzins@redhat.com>
-Date: Tue, 10 May 2022 14:17:22 -0500
+Date: Tue, 7 Jun 2022 17:45:01 -0500
 Subject: [PATCH] libmultipath: unset detect_checker for clariion / Unity
  arrays
 
@@ -12,6 +12,7 @@ checker.
 
 Cc: vincent.chen1@dell.com
 Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
 ---
  libmultipath/hwtable.c | 1 +
  1 file changed, 1 insertion(+)

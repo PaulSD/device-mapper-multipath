@@ -1,6 +1,6 @@
 Name:    device-mapper-multipath
 Version: 0.9.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Tools to manage multipath devices using device-mapper
 License: GPLv2
 URL:     http://christophe.varoqui.free.fr/
@@ -14,25 +14,62 @@ Patch0001: 0001-github-workflows-switch-to-fedora-36.patch
 Patch0002: 0002-multipath-tools-fix-multipath-ll-bug-for-Native-NVME.patch
 Patch0003: 0003-multipath-tools-update-Huawei-OceanStor-NVMe-vendor-.patch
 Patch0004: 0004-multipath-tools-update-Generic-NVMe-vendor-regex-in-.patch
-Patch0005: 0005-libmultipath-unset-detect_checker-for-clariion-Unity.patch
-Patch0006: 0006-libmultipath-fix-find_multipaths_timeout-for-unknown.patch
-Patch0007: 0007-RH-fixup-udev-rules-for-redhat.patch
-Patch0008: 0008-RH-Remove-the-property-blacklist-exception-builtin.patch
-Patch0009: 0009-RH-don-t-start-without-a-config-file.patch
-Patch0010: 0010-RH-Fix-nvme-function-missing-argument.patch
-Patch0011: 0011-RH-use-rpm-optflags-if-present.patch
-Patch0012: 0012-RH-add-mpathconf.patch
-Patch0013: 0013-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
-Patch0014: 0014-RH-reset-default-find_mutipaths-value-to-off.patch
-Patch0015: 0015-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
-Patch0016: 0016-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
-Patch0017: 0017-RH-add-scsi-device-handlers-to-modules-load.d.patch
+Patch0005: 0005-libmultipath-fix-find_multipaths_timeout-for-unknown.patch
+Patch0006: 0006-multipath-tools-update-devel-repo-info-in-README.md.patch
+Patch0007: 0007-multipath-tools-delete-README.alua.patch
+Patch0008: 0008-multipath-tools-add-ALUA-info-to-README.md.patch
+Patch0009: 0009-libmultipath-alua-remove-get_sysfs_pg83.patch
+Patch0010: 0010-libmultipath-remove-sysfs_get_binary.patch
+Patch0011: 0011-libmultipath-sysfs_bin_attr_get_value-no-error-if-bu.patch
+Patch0012: 0012-libmultipath-common-code-path-for-sysfs_attr_get_val.patch
+Patch0013: 0013-libmultipath-sanitize-error-checking-in-sysfs-access.patch
+Patch0014: 0014-libmultipath-get-rid-of-PATH_SIZE.patch
+Patch0015: 0015-libmultipath-sysfs_attr_get_value-don-t-return-0-if-.patch
+Patch0016: 0016-libmultipath-sysfs_attr_set_value-don-t-return-0-on-.patch
+Patch0017: 0017-libmultipath-sysfs-cleanup-file-descriptors-on-pthre.patch
+Patch0018: 0018-libmultipath-multipathd-log-failure-setting-sysfs-at.patch
+Patch0019: 0019-multipath-tests-expect_condlog-skip-depending-on-ver.patch
+Patch0020: 0020-multipath-tests-__wrap_dlog-print-log-message.patch
+Patch0021: 0021-multipath-tests-add-sysfs-test.patch
+Patch0022: 0022-libmultipath.version-bump-version-for-sysfs-accessor.patch
+Patch0023: 0023-libmultipath-unset-detect_checker-for-clariion-Unity.patch
+Patch0024: 0024-libmultipath-spelling-cplusplus.patch
+Patch0025: 0025-libmultipath-spelling-ascii.patch
+Patch0026: 0026-libmultipath-spelling-progress.patch
+Patch0027: 0027-multipath-tools-spelling-fixes.patch
+Patch0028: 0028-multipath-tools-remove-list-of-rebranded-arrays-vend.patch
+Patch0029: 0029-multipath-tools-correct-CLARiiON-info-from-multipath.patch
+Patch0030: 0030-multipath-tools-add-basic-info-on-how-to-use-multipa.patch
+Patch0031: 0031-multipathd-factor-out-the-code-to-flush-a-map-with-n.patch
+Patch0032: 0032-libmultipath-return-success-if-we-raced-to-remove-a-.patch
+Patch0033: 0033-multipathd-Handle-losing-all-path-in-update_map.patch
+Patch0034: 0034-multipath-fix-systemd-timers-in-the-initramfs.patch
+Patch0035: 0035-multipathd-Add-missing-ctype-include.patch
+Patch0036: 0036-multipathd-replace-libreadline-with-libedit.patch
+Patch0037: 0037-libmultipath-convert-license-of-strbuf-code-to-GPL-2.patch
+Patch0038: 0038-github-workflows-build-and-unittest.yaml-add-libedit.patch
+Patch0039: 0039-github-workflows-coverity.yaml-add-libedit-dev.patch
+Patch0040: 0040-github-workflows-abi.yaml-add-libedit-dev.patch
+Patch0041: 0041-GitHub-workflows-native.yaml-add-libedit-dev-except-.patch
+Patch0042: 0042-GitHub-workflows-foreign.yaml-switch-to-Debian-11-bu.patch
+Patch0043: 0043-RH-fixup-udev-rules-for-redhat.patch
+Patch0044: 0044-RH-Remove-the-property-blacklist-exception-builtin.patch
+Patch0045: 0045-RH-don-t-start-without-a-config-file.patch
+Patch0046: 0046-RH-Fix-nvme-function-missing-argument.patch
+Patch0047: 0047-RH-use-rpm-optflags-if-present.patch
+Patch0048: 0048-RH-add-mpathconf.patch
+Patch0049: 0049-RH-add-wwids-from-kernel-cmdline-mpath.wwids-with-A.patch
+Patch0050: 0050-RH-reset-default-find_mutipaths-value-to-off.patch
+Patch0051: 0051-RH-attempt-to-get-ANA-info-via-sysfs-first.patch
+Patch0052: 0052-RH-make-parse_vpd_pg83-match-scsi_id-output.patch
+Patch0053: 0053-RH-add-scsi-device-handlers-to-modules-load.d.patch
 
 # runtime
 Requires: %{name}-libs = %{version}-%{release}
 Requires: kpartx = %{version}-%{release}
 Requires: device-mapper >= 1.02.96
 Requires: userspace-rcu
+Requires: libedit
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
@@ -50,7 +87,7 @@ Conflicts: udisks2 < 2.8.0-2
 # build/setup
 BuildRequires: libaio-devel, device-mapper-devel >= 1.02.89
 BuildRequires: libselinux-devel, libsepol-devel
-BuildRequires: readline-devel, ncurses-devel
+BuildRequires: libedit-devel, ncurses-devel
 BuildRequires: systemd-units, systemd-devel
 BuildRequires: json-c-devel, perl-interpreter, pkgconfig, gcc
 BuildRequires: userspace-rcu-devel
@@ -172,7 +209,6 @@ fi
 /usr/lib/modules-load.d/multipath.conf
 /usr/lib/modules-load.d/scsi_dh.conf
 %doc README.md
-%doc README.alua
 %doc multipath.conf
 %dir /etc/multipath
 
@@ -227,6 +263,18 @@ fi
 %{_pkgconfdir}/libdmmp.pc
 
 %changelog
+* Fri Aug 19 2022 Benjamin Marzinski <bmarzins@redhat.com> - 0.9.0-3
+- Update to the head of the upstream staging branch
+  * Patches 0005-0042 are from the upstream staging branch
+  * Previous patches 0005 & 0006 are now patches 0023 & 0005
+- Rename redhat patches
+  * Previous patches 0007-0017 are now patches 0043-0053
+- Change from using readline to libedit
+  * readline is licensed GPL v3, and multipathd includes code
+    licensed gpl v2.
+- Remove README.alua
+  * information moved to README.md
+
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 

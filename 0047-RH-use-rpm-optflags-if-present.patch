@@ -13,10 +13,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 18 insertions(+), 6 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index 40cfbd0c..307b6b4d 100644
+index 03450610..2cf6e85f 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
-@@ -136,18 +136,30 @@ ERROR_DISCARDED_QUALIFIERS := $(call TEST_CC_OPTION,-Werror=discarded-qualifiers
+@@ -141,18 +141,30 @@ ERROR_DISCARDED_QUALIFIERS := $(call TEST_CC_OPTION,-Werror=discarded-qualifiers
  WNOCLOBBERED := $(call TEST_CC_OPTION,-Wno-clobbered -Wno-error=clobbered,)
  WFORMATOVERFLOW := $(call TEST_CC_OPTION,-Wformat-overflow=2,)
  

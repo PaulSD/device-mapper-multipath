@@ -45,7 +45,7 @@ index ab8b26e7..f06fcbf9 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index 36d40157..115b463b 100644
+index fdcdff0a..affba937 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -9,6 +9,7 @@
@@ -57,7 +57,7 @@ index 36d40157..115b463b 100644
  enum devtypes {
  	DEV_NONE,
 diff --git a/multipath/multipath.rules b/multipath/multipath.rules
-index 9df11a95..0486bf70 100644
+index f993d996..68c30644 100644
 --- a/multipath/multipath.rules
 +++ b/multipath/multipath.rules
 @@ -9,6 +9,7 @@ IMPORT{cmdline}="nompath"

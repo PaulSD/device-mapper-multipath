@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 16 Aug 2022 23:38:18 +0200
+Subject: [PATCH] GitHub workflows: foreign.yaml: switch to Debian 11
+ (bullseye)
+
+Building the containers in the build-multipath project recently
+started failing for buster/s390x and buster/ppc64el. That failure
+had nothing to do with the switch to libedit.
+
+It's about time to switch to bullseye anyway.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ .github/workflows/foreign.yaml | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/.github/workflows/foreign.yaml b/.github/workflows/foreign.yaml
+index 32915186..f6e69709 100644
+--- a/.github/workflows/foreign.yaml
++++ b/.github/workflows/foreign.yaml
+@@ -13,7 +13,7 @@ jobs:
+     runs-on: ubuntu-20.04
+     strategy:
+       matrix:
+-        os: [buster]
++        os: [bullseye]
+         arch: ['ppc64le', 'aarch64', 's390x']
+     container: mwilck/multipath-build-${{ matrix.os }}-${{ matrix.arch }}
+     steps:
+@@ -44,7 +44,7 @@ jobs:
+     needs: build
+     strategy:
+       matrix:
+-        os: [buster]
++        os: [bullseye]
+         arch: ['ppc64le', 'aarch64', 's390x']
+     steps:
+       - name: get binaries

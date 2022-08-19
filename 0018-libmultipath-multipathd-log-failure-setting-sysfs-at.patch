@@ -1,0 +1,168 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 5 Jul 2022 18:45:11 +0200
+Subject: [PATCH] libmultipath, multipathd: log failure setting sysfs
+ attributes
+
+Failure to set a sysfs attribute is worth noting, normally.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/configure.c   | 18 ++++++++++++++---
+ multipathd/fpin_handlers.c | 11 +++++++++--
+ multipathd/main.c          | 40 ++++++++++++++++++++++++++++++--------
+ 3 files changed, 56 insertions(+), 13 deletions(-)
+
+diff --git a/libmultipath/configure.c b/libmultipath/configure.c
+index 0607dbac..4427f910 100644
+--- a/libmultipath/configure.c
++++ b/libmultipath/configure.c
+@@ -489,9 +489,15 @@ void trigger_partitions_udev_change(struct udev_device *dev,
+ 
+ 		devtype = udev_device_get_devtype(part);
+ 		if (devtype && !strcmp("partition", devtype)) {
++			ssize_t ret;
++
+ 			condlog(4, "%s: triggering %s event for %s", __func__,
+ 				action, syspath);
+-			sysfs_attr_set_value(part, "uevent", action, len);
++			ret = sysfs_attr_set_value(part, "uevent", action, len);
++			if (ret != len)
++				log_sysfs_attr_set_value(2, ret,
++					"%s: failed to trigger %s uevent",
++					syspath, action);
+ 		}
+ 		udev_device_unref(part);
+ 	}
+@@ -510,6 +516,7 @@ trigger_path_udev_change(struct path *pp, bool is_mpath)
+ 	 */
+ 	const char *action = is_mpath ? "change" : "add";
+ 	const char *env;
++	ssize_t len, ret;
+ 
+ 	if (!pp->udev)
+ 		return;
+@@ -536,8 +543,13 @@ trigger_path_udev_change(struct path *pp, bool is_mpath)
+ 
+ 	condlog(3, "triggering %s uevent for %s (is %smultipath member)",
+ 		action, pp->dev, is_mpath ? "" : "no ");
+-	sysfs_attr_set_value(pp->udev, "uevent",
+-			     action, strlen(action));
++
++	len = strlen(action);
++	ret = sysfs_attr_set_value(pp->udev, "uevent", action, len);
++	if (ret != len)
++		log_sysfs_attr_set_value(2, ret,
++					 "%s: failed to trigger %s uevent",
++					 pp->dev, action);
+ 	trigger_partitions_udev_change(pp->udev, action,
+ 				       strlen(action));
+ }
+diff --git a/multipathd/fpin_handlers.c b/multipathd/fpin_handlers.c
+index 384ae318..00195721 100644
+--- a/multipathd/fpin_handlers.c
++++ b/multipathd/fpin_handlers.c
+@@ -172,8 +172,15 @@ fpin_els_add_li_frame(struct fc_nl_event *fc_event)
+ /*Sets the rport port_state to marginal*/
+ static void fpin_set_rport_marginal(struct udev_device *rport_dev)
+ {
+-	sysfs_attr_set_value(rport_dev, "port_state",
+-				"Marginal", strlen("Marginal"));
++	static const char marginal[] = "Marginal";
++	ssize_t ret;
++
++	ret = sysfs_attr_set_value(rport_dev, "port_state",
++				   marginal, sizeof(marginal) - 1);
++	if (ret != sizeof(marginal) - 1)
++		log_sysfs_attr_set_value(2, ret,
++					 "%s: failed to set port_state to marginal",
++					 udev_device_get_syspath(rport_dev));
+ }
+ 
+ /*Add the marginal devices info into the list*/
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 68eca925..a160c824 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -911,14 +911,22 @@ rescan_path(struct udev_device *ud)
+ {
+ 	ud = udev_device_get_parent_with_subsystem_devtype(ud, "scsi",
+ 							   "scsi_device");
+-	if (ud)
+-		sysfs_attr_set_value(ud, "rescan", "1", strlen("1"));
++	if (ud) {
++		ssize_t ret =
++			sysfs_attr_set_value(ud, "rescan", "1", strlen("1"));
++		if (ret != strlen("1"))
++			log_sysfs_attr_set_value(1, ret,
++						 "%s: failed to trigger rescan",
++						 udev_device_get_syspath(ud));
++	}
+ }
+ 
+ void
+ handle_path_wwid_change(struct path *pp, struct vectors *vecs)
+ {
+ 	struct udev_device *udd;
++	static const char add[] = "add";
++	ssize_t ret;
+ 
+ 	if (!pp || !pp->udev)
+ 		return;
+@@ -929,8 +937,12 @@ handle_path_wwid_change(struct path *pp, struct vectors *vecs)
+ 		dm_fail_path(pp->mpp->alias, pp->dev_t);
+ 	}
+ 	rescan_path(udd);
+-	sysfs_attr_set_value(udd, "uevent", "add", strlen("add"));
++	ret = sysfs_attr_set_value(udd, "uevent", add, sizeof(add) - 1);
+ 	udev_device_unref(udd);
++	if (ret != sizeof(add) - 1)
++		log_sysfs_attr_set_value(1, ret,
++					 "%s: failed to trigger add event",
++					 pp->dev);
+ }
+ 
+ bool
+@@ -2003,9 +2015,14 @@ partial_retrigger_tick(vector pathvec)
+ 		    --pp->partial_retrigger_delay == 0) {
+ 			const char *msg = udev_device_get_is_initialized(pp->udev) ?
+ 					  "change" : "add";
+-
+-			sysfs_attr_set_value(pp->udev, "uevent", msg,
+-					     strlen(msg));
++			ssize_t len = strlen(msg);
++			ssize_t ret = sysfs_attr_set_value(pp->udev, "uevent", msg,
++							   len);
++
++			if (len != ret)
++				log_sysfs_attr_set_value(2, ret,
++					"%s: failed to trigger %s event",
++					pp->dev, msg);
+ 		}
+ 	}
+ }
+@@ -2245,12 +2262,19 @@ check_path (struct vectors * vecs, struct path * pp, unsigned int ticks)
+ 
+ 	if (!pp->mpp && pp->initialized == INIT_MISSING_UDEV) {
+ 		if (pp->retriggers < retrigger_tries) {
++			static const char change[] = "change";
++			ssize_t ret;
++
+ 			condlog(2, "%s: triggering change event to reinitialize",
+ 				pp->dev);
+ 			pp->initialized = INIT_REQUESTED_UDEV;
+ 			pp->retriggers++;
+-			sysfs_attr_set_value(pp->udev, "uevent", "change",
+-					     strlen("change"));
++			ret = sysfs_attr_set_value(pp->udev, "uevent", change,
++						   sizeof(change) - 1);
++			if (ret != sizeof(change) - 1)
++				log_sysfs_attr_set_value(1, ret,
++							 "%s: failed to trigger change event",
++							 pp->dev);
+ 			return 0;
+ 		} else {
+ 			condlog(1, "%s: not initialized after %d udev retriggers",

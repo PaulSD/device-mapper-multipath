@@ -1,0 +1,77 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 5 Jul 2022 10:54:02 +0200
+Subject: [PATCH] libmultipath: remove sysfs_get_binary()
+
+This function adds no value on top of sysfs_bin_attr_get_value().
+Remove it.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/discovery.c | 26 ++------------------------
+ tests/test-lib.c         |  1 -
+ 2 files changed, 2 insertions(+), 25 deletions(-)
+
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index 0d8a558c..7e09e4e2 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -263,41 +263,19 @@ declare_sysfs_get_str(vendor);
+ declare_sysfs_get_str(model);
+ declare_sysfs_get_str(rev);
+ 
+-static ssize_t
+-sysfs_get_binary (struct udev_device * udev, const char *attrname,
+-		  unsigned char *buff, size_t len)
+-{
+-	ssize_t attr_len;
+-	const char * devname;
+-
+-	if (!udev) {
+-		condlog(3, "No udev device given\n");
+-		return -ENOSYS;
+-	}
+-
+-	devname = udev_device_get_sysname(udev);
+-	attr_len = sysfs_bin_attr_get_value(udev, attrname, buff, len);
+-	if (attr_len < 0) {
+-		condlog(3, "%s: attribute %s not found in sysfs",
+-			devname, attrname);
+-		return attr_len;
+-	}
+-	return attr_len;
+-}
+-
+ ssize_t sysfs_get_vpd(struct udev_device * udev, unsigned char pg,
+ 		      unsigned char *buff, size_t len)
+ {
+ 	char attrname[9];
+ 
+ 	snprintf(attrname, sizeof(attrname), "vpd_pg%02x", pg);
+-	return sysfs_get_binary(udev, attrname, buff, len);
++	return sysfs_bin_attr_get_value(udev, attrname, buff, len);
+ }
+ 
+ ssize_t sysfs_get_inquiry(struct udev_device * udev,
+ 			  unsigned char *buff, size_t len)
+ {
+-	return sysfs_get_binary(udev, "inquiry", buff, len);
++	return sysfs_bin_attr_get_value(udev, "inquiry", buff, len);
+ }
+ 
+ int
+diff --git a/tests/test-lib.c b/tests/test-lib.c
+index 6dd3ee88..0bc49d53 100644
+--- a/tests/test-lib.c
++++ b/tests/test-lib.c
+@@ -334,7 +334,6 @@ void mock_pathinfo(int mask, const struct mocked_path *mp)
+ 	if (mask & DI_SERIAL) {
+ 		will_return(__wrap_udev_device_get_subsystem, "scsi");
+ 		will_return(__wrap_udev_device_get_sysname, hbtl);
+-		will_return(__wrap_udev_device_get_sysname, hbtl);
+ 	}
+ 
+ 	if (mask & DI_WWID) {
