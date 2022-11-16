@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Paul Koetsier <github.com@unicast.nl>
+Date: Thu, 27 Oct 2022 19:29:28 +0200
+Subject: [PATCH] libmultipath: fix 'show paths format' failure
+
+Prevent 'multipathd show paths format "%c"' from failing on orphan paths.
+For orphan paths the checker class isn't set, which caused
+snprint_path_checker() to fail which in turn caused 'show paths format' to fail
+when the format string contained "%c".
+
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/print.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/libmultipath/print.c b/libmultipath/print.c
+index d7d522c8..3193dbe0 100644
+--- a/libmultipath/print.c
++++ b/libmultipath/print.c
+@@ -734,8 +734,12 @@ snprint_host_adapter (struct strbuf *buff, const struct path * pp)
+ static int
+ snprint_path_checker (struct strbuf *buff, const struct path * pp)
+ {
+-	const struct checker * c = &pp->checker;
+-	return snprint_str(buff, checker_name(c));
++	const char * n = checker_name(&pp->checker);
++
++	if (n)
++		return snprint_str(buff, n);
++	else
++		return snprint_str(buff, "(null)");
+ }
+ 
+ static int

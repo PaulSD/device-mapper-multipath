@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 17:40:30 +0200
+Subject: [PATCH] multipath-tools: Makefile.inc: fix a log message
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 86602e2a..77790ddf 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -159,7 +159,7 @@ check_var = $(shell \
+                 found=0; \
+                 status="no"; \
+         fi; \
+-        echo 1>&2 "Checking for ..  $1 in $2 ... $$status"; \
++	echo 1>&2 "Checking for $1 in $2 ... $$status"; \
+         echo "$$found" \
+         )
+ 

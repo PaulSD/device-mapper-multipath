@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 16:14:22 +0200
+Subject: [PATCH] multipath-tools: Makefile.inc: more compact code for LIB
+
+Use make's "if" function instead of a conditional.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index b4ec647c..c39cec9b 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -28,12 +28,6 @@ ifeq ($(TOPDIR),)
+ 	TOPDIR	= ..
+ endif
+ 
+-ifeq ($(shell test -d /lib64 && echo 1),1)
+-	LIB=lib64
+-else
+-	LIB=lib
+-endif
+-
+ ifeq ($(shell $(PKGCONFIG) --modversion libsystemd >/dev/null 2>&1 && echo 1), 1)
+ 	SYSTEMD = $(shell $(PKGCONFIG) --modversion libsystemd | awk '{print $$1}')
+ else
+@@ -80,6 +74,7 @@ mpathutildir	= $(TOPDIR)/libmpathutil
+ man8dir		= $(usr_prefix)/share/man/man8
+ man5dir		= $(usr_prefix)/share/man/man5
+ man3dir		= $(usr_prefix)/share/man/man3
++LIB		:= $(if $(shell test -d /lib64 && echo 1),lib64,lib)
+ syslibdir	= $(prefix)/$(LIB)
+ usrlibdir	= $(usr_prefix)/$(LIB)
+ libdir		= $(prefix)/$(LIB)/multipath

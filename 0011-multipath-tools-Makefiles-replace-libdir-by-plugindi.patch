@@ -1,0 +1,110 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 17:17:00 +0200
+Subject: [PATCH] multipath-tools: Makefiles: replace $(libdir) by $(plugindir)
+
+The make variables $(libdir) and $(plugindir) are redundant.
+I overlooked that in af15832 ("multipath-tools: make multipath_dir a
+compiled-in option"). While libdir has existed longer, I think
+plugindir describes better what this path is used for, so replace
+libdir by plugindir.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc                       | 1 -
+ libmpathutil/Makefile              | 1 -
+ libmultipath/Makefile              | 2 +-
+ libmultipath/checkers/Makefile     | 4 ++--
+ libmultipath/foreign/Makefile      | 4 ++--
+ libmultipath/prioritizers/Makefile | 4 ++--
+ 6 files changed, 7 insertions(+), 9 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 6ec8201b..17707a3e 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -51,7 +51,6 @@ mandir		:= $(usr_prefix)/share/man
+ LIB		:= $(if $(shell test -d /lib64 && echo 1),lib64,lib)
+ syslibdir	= $(prefix)/$(LIB)
+ usrlibdir	= $(usr_prefix)/$(LIB)
+-libdir		= $(prefix)/$(LIB)/multipath
+ includedir	= $(usr_prefix)/include
+ pkgconfdir	= $(usrlibdir)/pkgconfig
+ plugindir       := $(prefix)/$(LIB)/multipath
+diff --git a/libmpathutil/Makefile b/libmpathutil/Makefile
+index 68b1c7d6..c913c761 100644
+--- a/libmpathutil/Makefile
++++ b/libmpathutil/Makefile
+@@ -54,7 +54,6 @@ abi:    $(LIBS:%.so.$(SONAME)=%-nv.abi)
+ install: all
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
+ 	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(libdir)
+ 	$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 
+ uninstall:
+diff --git a/libmultipath/Makefile b/libmultipath/Makefile
+index f0df27c0..c7d4fc99 100644
+--- a/libmultipath/Makefile
++++ b/libmultipath/Makefile
+@@ -119,7 +119,7 @@ test-lib:	../tests/$(LIBS)
+ install: all
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
+ 	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(libdir)
++	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(plugindir)
+ 	$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 
+ uninstall:
+diff --git a/libmultipath/checkers/Makefile b/libmultipath/checkers/Makefile
+index c9a2c4ca..39ad76e0 100644
+--- a/libmultipath/checkers/Makefile
++++ b/libmultipath/checkers/Makefile
+@@ -25,10 +25,10 @@ libcheck%.so: %.o
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
+ 
+ install:
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(libdir)
++	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(plugindir)
+ 
+ uninstall:
+-	for file in $(LIBS); do $(RM) $(DESTDIR)$(libdir)/$$file; done
++	for file in $(LIBS); do $(RM) $(DESTDIR)$(plugindir)/$$file; done
+ 
+ clean: dep_clean
+ 	$(RM) core *.a *.o *.gz *.so
+diff --git a/libmultipath/foreign/Makefile b/libmultipath/foreign/Makefile
+index d0232f20..8bf9047b 100644
+--- a/libmultipath/foreign/Makefile
++++ b/libmultipath/foreign/Makefile
+@@ -17,10 +17,10 @@ libforeign-%.so: %.o
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
+ 
+ install:
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(libdir)
++	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(plugindir)
+ 
+ uninstall:
+-	for file in $(LIBS); do $(RM) $(DESTDIR)$(libdir)/$$file; done
++	for file in $(LIBS); do $(RM) $(DESTDIR)$(plugindir)/$$file; done
+ 
+ clean: dep_clean
+ 	$(RM) core *.a *.o *.gz *.so
+diff --git a/libmultipath/prioritizers/Makefile b/libmultipath/prioritizers/Makefile
+index 97155f51..72eefe49 100644
+--- a/libmultipath/prioritizers/Makefile
++++ b/libmultipath/prioritizers/Makefile
+@@ -37,10 +37,10 @@ libprio%.so: %.o
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
+ 
+ install: $(LIBS)
+-	$(INSTALL_PROGRAM) -m 755 libprio*.so $(DESTDIR)$(libdir)
++	$(INSTALL_PROGRAM) -m 755 libprio*.so $(DESTDIR)$(plugindir)
+ 
+ uninstall:
+-	for file in $(LIBS); do $(RM) $(DESTDIR)$(libdir)/$$file; done
++	for file in $(LIBS); do $(RM) $(DESTDIR)$(plugindir)/$$file; done
+ 
+ clean: dep_clean
+ 	$(RM) core *.a *.o *.gz *.so

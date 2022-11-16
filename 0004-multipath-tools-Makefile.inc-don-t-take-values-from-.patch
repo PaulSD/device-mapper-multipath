@@ -1,0 +1,113 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 13:24:34 +0200
+Subject: [PATCH] multipath-tools: Makefile.inc: don't take values from
+ environment
+
+Don't use environment variables to initialize LIB, RUN, SYSTEMD, SYSTEMDPATH,
+DEVMAPPER_INCDIR, LIBUDEV_INCDIR, and LINUX_HEADERS_INCDIR. Taking
+such variables from the environment is generally discouraged
+(see https://www.gnu.org/software/make/manual/html_node/Environment.html).
+
+Overriding variables from the commandline is still possible
+(https://www.gnu.org/software/make/manual/html_node/Overriding.html).
+So now, when building multipath-tools, rather then running
+"RUN=/somedir make", users need to run "make RUN=/somedir".
+
+This simplifies the Makefile without losing important functionality.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc | 60 ++++++++++++++++++++++------------------------------
+ 1 file changed, 25 insertions(+), 35 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 351358a9..d897ac7a 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -20,59 +20,49 @@ SCSI_DH_MODULES_PRELOAD :=
+ 
+ EXTRAVERSION := $(shell rev=$$(git rev-parse --short=7 HEAD 2>/dev/null); echo $${rev:+-g$$rev})
+ 
++# PKGCONFIG must be read from the environment to enable compilation
++# in Debian multiarch setups
+ PKGCONFIG	?= pkg-config
+ 
+ ifeq ($(TOPDIR),)
+ 	TOPDIR	= ..
+ endif
+ 
+-ifndef LIB
+-	ifeq ($(shell test -d /lib64 && echo 1),1)
+-		LIB=lib64
+-	else
+-		LIB=lib
+-	endif
++ifeq ($(shell test -d /lib64 && echo 1),1)
++	LIB=lib64
++else
++	LIB=lib
+ endif
+ 
+-ifndef RUN
+-	ifeq ($(shell test -L /var/run -o ! -d /var/run && echo 1),1)
+-		RUN=run
+-	else
+-		RUN=var/run
+-	endif
++ifeq ($(shell test -L /var/run -o ! -d /var/run && echo 1),1)
++	RUN=run
++else
++	RUN=var/run
+ endif
+ 
+-ifndef SYSTEMD
+-	ifeq ($(shell $(PKGCONFIG) --modversion libsystemd >/dev/null 2>&1 && echo 1), 1)
+-		SYSTEMD = $(shell $(PKGCONFIG) --modversion libsystemd | awk '{print $$1}')
+-	else
+-		ifeq ($(shell systemctl --version >/dev/null 2>&1 && echo 1), 1)
+-			SYSTEMD = $(shell systemctl --version 2> /dev/null | \
+-				sed -n 's/systemd \([0-9]*\).*/\1/p')
+-		endif
++ifeq ($(shell $(PKGCONFIG) --modversion libsystemd >/dev/null 2>&1 && echo 1), 1)
++	SYSTEMD = $(shell $(PKGCONFIG) --modversion libsystemd | awk '{print $$1}')
++else
++	ifeq ($(shell systemctl --version >/dev/null 2>&1 && echo 1), 1)
++		SYSTEMD = $(shell systemctl --version 2> /dev/null | \
++			sed -n 's/systemd \([0-9]*\).*/\1/p')
+ 	endif
+ endif
+ 
+-ifndef DEVMAPPER_INCDIR
+-	ifeq ($(shell $(PKGCONFIG) --modversion devmapper >/dev/null 2>&1 && echo 1), 1)
+-		DEVMAPPER_INCDIR = $(shell $(PKGCONFIG) --variable=includedir devmapper)
+-	else
+-		DEVMAPPER_INCDIR = /usr/include
+-	endif
++ifeq ($(shell $(PKGCONFIG) --modversion devmapper >/dev/null 2>&1 && echo 1), 1)
++	DEVMAPPER_INCDIR = $(shell $(PKGCONFIG) --variable=includedir devmapper)
++else
++	DEVMAPPER_INCDIR = /usr/include
+ endif
+ 
+-ifndef LIBUDEV_INCDIR
+-	ifeq ($(shell $(PKGCONFIG) --modversion libudev >/dev/null 2>&1 && echo 1), 1)
+-		LIBUDEV_INCDIR = $(shell $(PKGCONFIG) --variable=includedir libudev)
+-	else
+-		LIBUDEV_INCDIR = /usr/include
+-	endif
++ifeq ($(shell $(PKGCONFIG) --modversion libudev >/dev/null 2>&1 && echo 1), 1)
++	LIBUDEV_INCDIR = $(shell $(PKGCONFIG) --variable=includedir libudev)
++else
++	LIBUDEV_INCDIR = /usr/include
+ endif
+ 
+ # Allow user to override default location.
+-ifndef LINUX_HEADERS_INCDIR
+-	LINUX_HEADERS_INCDIR = /usr/include
+-endif
++LINUX_HEADERS_INCDIR = /usr/include
+ 
+ # Paths. All these can be overridden on the "make" command line.
+ prefix		=

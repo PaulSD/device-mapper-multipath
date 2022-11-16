@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 28 Oct 2022 15:42:15 +0200
+Subject: [PATCH] README.md: Fix indentation in paragraph about device handlers
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ README.md | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/README.md b/README.md
+index 52ab776b..b1b78fbb 100644
+--- a/README.md
++++ b/README.md
+@@ -94,12 +94,12 @@ The following variables can be passed to the `make` command line:
+    early. This option causes a *modules-load.d(5)* configuration file to be
+    created, thus it depends on functionality provided by *systemd*.
+    This variable only matters for `make install`.
+-
+-Note: The usefulness of the preload list depends on the kernel configuration.
+-It's especially useful if `scsi_mod` is builtin but `scsi_dh_alua` and
+-other device handler modules are built as modules. If `scsi_mod` itself is compiled
+-as a module, it might make more sense to use a module softdep for the same
+-purpose.
++   
++   **Note**: The usefulness of the preload list depends on the kernel configuration.
++   It's especially useful if `scsi_mod` is builtin but `scsi_dh_alua` and
++   other device handler modules are built as modules. If `scsi_mod` itself is compiled
++   as a module, it might make more sense to use a module softdep for the same
++   purpose.
+ 
+ See `Makefile.inc` for additional variables to customize paths and compiler
+ flags.

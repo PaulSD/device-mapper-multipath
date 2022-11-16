@@ -1,0 +1,879 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 28 Oct 2022 12:39:06 +0200
+Subject: [PATCH] multipath-tools Makefiles: enable quiet build
+
+Like many other projects, make it possible to print much less
+output during build. Verbose output is enabled with "make V=1", as
+usual.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile                           | 12 +++----
+ Makefile.inc                       | 10 +++---
+ kpartx/Makefile                    | 41 ++++++++++++-----------
+ libdmmp/Makefile                   | 48 +++++++++++++-------------
+ libdmmp/test/Makefile              |  8 ++---
+ libmpathcmd/Makefile               | 20 +++++------
+ libmpathpersist/Makefile           | 32 +++++++++---------
+ libmpathutil/Makefile              | 14 ++++----
+ libmpathvalid/Makefile             | 20 +++++------
+ libmultipath/Makefile              | 30 ++++++++---------
+ libmultipath/checkers/Makefile     |  8 ++---
+ libmultipath/foreign/Makefile      |  8 ++---
+ libmultipath/prioritizers/Makefile |  8 ++---
+ mpathpersist/Makefile              | 18 +++++-----
+ multipath/Makefile                 | 54 ++++++++++++++++--------------
+ multipathd/Makefile                | 42 ++++++++++++-----------
+ rules.mk                           |  8 ++---
+ tests/Makefile                     | 23 +++++++------
+ 18 files changed, 206 insertions(+), 198 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 1b28db62..e3ce1a8d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -38,17 +38,17 @@ config.mk libmultipath/autoconfig.h:
+ 	@cat libmultipath/autoconfig.h
+ 
+ $(BUILDDIRS):	config.mk
+-	$(MAKE) -C $@
++	@$(MAKE) -C $@
+ 
+ $(LIB_BUILDDIRS:=.abi): $(LIB_BUILDDIRS)
+-	$(MAKE) -C ${@:.abi=} abi
++	@$(MAKE) -C ${@:.abi=} abi
+ 
+ # Create formal representation of the ABI
+ # Useful for verifying ABI compatibility
+ # Requires abidw from the abigail suite (https://sourceware.org/libabigail/)
+ .PHONY: abi
+ abi:	$(LIB_BUILDDIRS:=.abi)
+-	mkdir -p $@
++	@mkdir -p $@
+ 	ln -ft $@ $(LIB_BUILDDIRS:=/*.abi)
+ 
+ abi.tar.gz:	abi
+@@ -91,13 +91,13 @@ libmultipath/checkers.install \
+ 	libmultipath/foreign.install: libmultipath.install
+ 
+ %.clean:
+-	$(MAKE) -C ${@:.clean=} clean
++	@$(MAKE) -C ${@:.clean=} clean
+ 
+ %.install:	%
+-	$(MAKE) -C ${@:.install=} install
++	@$(MAKE) -C ${@:.install=} install
+ 
+ $(BUILDDIRS:=.uninstall):
+-	$(MAKE) -C ${@:.uninstall=} uninstall
++	@$(MAKE) -C ${@:.uninstall=} uninstall
+ 
+ # If config.mk is missing, "make clean" in subdir either fails, or tries to
+ # build it. Both is undesirable. Avoid it by creating config.mk temporarily.
+diff --git a/Makefile.inc b/Makefile.inc
+index 415634f5..3e14cb8c 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -1,4 +1,4 @@
+-#
++# -*- Makefile -*-
+ # Copyright (C) 2004 Christophe Varoqui, <christophe.varoqui@opensvc.com>
+ #
+ 
+@@ -60,6 +60,8 @@ devmapper_incdir := $(or $(shell $(PKGCONFIG) --variable=includedir devmapper),/
+ libudev_incdir	:= $(or $(shell $(PKGCONFIG) --variable=includedir libudev),/usr/include)
+ kernel_incdir	:= /usr/include
+ 
++Q		:= $(if $(V),,@)
++
+ GZIP_PROG	:= gzip -9 -c
+ RM		:= rm -f
+ LN		:= ln -sf
+@@ -104,13 +106,13 @@ NV_VERSION_SCRIPT = $(DEVLIB:%.so=%-nv.version)
+ 
+ %.o:	%.c
+ 	@echo building $@ because of $?
+-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
++	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+ 
+ %.abi:  %.so.0
+-	abidw $< >$@
++	$(Q)abidw $< >$@
+ 
+ %.abi:  %.so
+-	abidw $< >$@
++	$(Q)abidw $< >$@
+ 
+ %-nv.version:	%.version
+ 	@echo creating $@ from $<
+diff --git a/kpartx/Makefile b/kpartx/Makefile
+index 31b1138a..7720a740 100644
+--- a/kpartx/Makefile
++++ b/kpartx/Makefile
+@@ -16,33 +16,34 @@ OBJS := bsd.o dos.o kpartx.o solaris.o unixware.o dasd.o sun.o \
+ all: $(EXEC)
+ 
+ $(EXEC): $(OBJS)
+-	$(CC) $(CFLAGS) $(OBJS) -o $(EXEC) $(LDFLAGS) $(LIBDEPS)
++	@echo building $@ because of $?
++	$(Q)$(CC) $(CFLAGS) $(OBJS) -o $(EXEC) $(LDFLAGS) $(LIBDEPS)
+ 
+ install: $(EXEC) $(EXEC).8
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
+-	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(libudevdir)
+-	$(INSTALL_PROGRAM) -m 755 kpartx_id $(DESTDIR)$(libudevdir)
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(libudevdir)/rules.d
+-	$(INSTALL_PROGRAM) -m 644 dm-parts.rules $(DESTDIR)$(libudevdir)/rules.d/11-dm-parts.rules
+-	$(INSTALL_PROGRAM) -m 644 kpartx.rules $(DESTDIR)$(libudevdir)/rules.d/66-kpartx.rules
+-	$(INSTALL_PROGRAM) -m 644 del-part-nodes.rules $(DESTDIR)$(libudevdir)/rules.d/68-del-part-nodes.rules
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(libudevdir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 kpartx_id $(DESTDIR)$(libudevdir)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(libudevdir)/rules.d
++	$(Q)$(INSTALL_PROGRAM) -m 644 dm-parts.rules $(DESTDIR)$(libudevdir)/rules.d/11-dm-parts.rules
++	$(Q)$(INSTALL_PROGRAM) -m 644 kpartx.rules $(DESTDIR)$(libudevdir)/rules.d/66-kpartx.rules
++	$(Q)$(INSTALL_PROGRAM) -m 644 del-part-nodes.rules $(DESTDIR)$(libudevdir)/rules.d/68-del-part-nodes.rules
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(bindir)/$(EXEC)
+-	$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
+-	$(RM) $(DESTDIR)$(libudevdir)/kpartx_id
+-	$(RM) $(DESTDIR)$(libudevdir)/rules.d/11-dm-parts.rules
+-	$(RM) $(DESTDIR)$(libudevdir)/rules.d/66-kpartx.rules
+-	$(RM) $(DESTDIR)$(libudevdir)/rules.d/67-kpartx-compat.rules
+-	$(RM) $(DESTDIR)$(libudevdir)/rules.d/68-del-part-nodes.rules
++	$(Q)$(RM) $(DESTDIR)$(bindir)/$(EXEC)
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
++	$(Q)$(RM) $(DESTDIR)$(libudevdir)/kpartx_id
++	$(Q)$(RM) $(DESTDIR)$(libudevdir)/rules.d/11-dm-parts.rules
++	$(Q)$(RM) $(DESTDIR)$(libudevdir)/rules.d/66-kpartx.rules
++	$(Q)$(RM) $(DESTDIR)$(libudevdir)/rules.d/67-kpartx-compat.rules
++	$(Q)$(RM) $(DESTDIR)$(libudevdir)/rules.d/68-del-part-nodes.rules
+ 
+ clean: dep_clean
+-	$(RM) core *.o $(EXEC)
++	$(Q)$(RM) core *.o $(EXEC)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libdmmp/Makefile b/libdmmp/Makefile
+index 67b6f86f..7693facb 100644
+--- a/libdmmp/Makefile
++++ b/libdmmp/Makefile
+@@ -23,62 +23,62 @@ all: $(LIBS) doc
+ .PHONY:	doc clean install uninstall check speed_test dep_clean
+ 
+ $(LIBS): $(OBJS)
+-	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ -o $@ $(OBJS) $(LIBDEPS)
++	$(Q)$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ -o $@ $(OBJS) $(LIBDEPS)
+ 
+ $(DEVLIB): $(LIBS)
+-	$(LN) $(LIBS) $@
++	$(Q)$(LN) $(LIBS) $@
+ 
+ abi:    $(DEVLIB:%.so=%.abi)
+ 
+ install:
+-	mkdir -p $(DESTDIR)$(usrlibdir)
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(usrlibdir)/$(LIBS)
+-	$(INSTALL_PROGRAM) -m 644 -D \
++	@mkdir -p $(DESTDIR)$(usrlibdir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(usrlibdir)/$(LIBS)
++	$(Q)$(INSTALL_PROGRAM) -m 644 -D \
+ 		$(HEADERS) $(DESTDIR)$(includedir)/$(HEADERS)
+-	$(LN) $(LIBS) $(DESTDIR)$(usrlibdir)/$(DEVLIB)
+-	$(INSTALL_PROGRAM) -m 644 -D \
++	$(Q)$(LN) $(LIBS) $(DESTDIR)$(usrlibdir)/$(DEVLIB)
++	$(Q)$(INSTALL_PROGRAM) -m 644 -D \
+ 		$(PKGFILE).in $(DESTDIR)$(pkgconfdir)/$(PKGFILE)
+-	perl -i -pe 's|__VERSION__|$(LIBDMMP_VERSION)|g' \
++	$(Q)perl -i -pe 's|__VERSION__|$(LIBDMMP_VERSION)|g' \
+ 		$(DESTDIR)$(pkgconfdir)/$(PKGFILE)
+-	perl -i -pe 's|__LIBDIR__|$(usrlibdir)|g' \
++	$(Q)perl -i -pe 's|__LIBDIR__|$(usrlibdir)|g' \
+ 		$(DESTDIR)$(pkgconfdir)/$(PKGFILE)
+-	perl -i -pe 's|__INCLUDEDIR__|$(includedir)|g' \
++	$(Q)perl -i -pe 's|__INCLUDEDIR__|$(includedir)|g' \
+ 		$(DESTDIR)$(pkgconfdir)/$(PKGFILE)
+-	$(INSTALL_PROGRAM) -d 755 $(DESTDIR)$(mandir)/man3
+-	$(INSTALL_PROGRAM) -m 644 -t $(DESTDIR)$(mandir)/man3 docs/man/*.3
++	$(Q)$(INSTALL_PROGRAM) -d 755 $(DESTDIR)$(mandir)/man3
++	$(Q)$(INSTALL_PROGRAM) -m 644 -t $(DESTDIR)$(mandir)/man3 docs/man/*.3
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(usrlibdir)/$(LIBS)
+-	$(RM) $(DESTDIR)$(includedir)/$(HEADERS)
+-	$(RM) $(DESTDIR)$(usrlibdir)/$(DEVLIB)
++	$(Q)$(RM) $(DESTDIR)$(usrlibdir)/$(LIBS)
++	$(Q)$(RM) $(DESTDIR)$(includedir)/$(HEADERS)
++	$(Q)$(RM) $(DESTDIR)$(usrlibdir)/$(DEVLIB)
+ 	@for file in $(DESTDIR)$(mandir)/man3/dmmp_*; do \
+ 		$(RM) $$file; \
+ 	done
+-	$(RM) $(DESTDIR)$(mandir)/man3/libdmmp.h*
+-	$(RM) $(DESTDIR)$(pkgconfdir)/$(PKGFILE)
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man3/libdmmp.h*
++	$(Q)$(RM) $(DESTDIR)$(pkgconfdir)/$(PKGFILE)
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.so *.so.* *.abi $(NV_VERSION_SCRIPT)
+-	$(MAKE) -C test clean
++	$(Q)$(RM) core *.a *.o *.so *.so.* *.abi $(NV_VERSION_SCRIPT)
++	@$(MAKE) -C test clean
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ check: all
+-	$(MAKE) -C test check
++	@$(MAKE) -C test check
+ 
+ speed_test: all
+-	$(MAKE) -C test speed_test
++	@$(MAKE) -C test speed_test
+ 
+ doc: docs/man/dmmp_strerror.3
+ 
+ docs/man/dmmp_strerror.3:	$(HEADERS)
+-	TEMPFILE=$(shell mktemp); \
++	$(Q)TEMPFILE=$(shell mktemp); \
+ 	cat $^ | perl docs/doc-preclean.pl >$$TEMPFILE; \
+ 	LC_ALL=C \
+ 	KBUILD_BUILD_TIMESTAMP=`git log -n1 --pretty=%cd --date=iso -- $^` \
+ 	perl docs/kernel-doc -man $$TEMPFILE | \
+ 	    perl docs/split-man.pl docs/man; \
+-	rm -f $$TEMPFILE
++	$(RM) -f $$TEMPFILE
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libdmmp/test/Makefile b/libdmmp/test/Makefile
+index 93de64a0..9d0817c8 100644
+--- a/libdmmp/test/Makefile
++++ b/libdmmp/test/Makefile
+@@ -16,7 +16,7 @@ LDFLAGS += -L$(_libdmmpdir) -ldmmp
+ all: $(TEST_EXEC) $(SPD_TEST_EXEC)
+ 
+ check: $(TEST_EXEC) $(SPD_TEST_EXEC)
+-	sudo env LD_LIBRARY_PATH=$(_libdmmpdir):$(_mpathcmddir) \
++	$(Q)sudo env LD_LIBRARY_PATH=$(_libdmmpdir):$(_mpathcmddir) \
+ 		valgrind --quiet --leak-check=full \
+ 		--show-reachable=no --show-possibly-lost=no \
+ 		--trace-children=yes --error-exitcode=1 \
+@@ -24,15 +24,15 @@ check: $(TEST_EXEC) $(SPD_TEST_EXEC)
+ 	$(MAKE) speed_test
+ 
+ speed_test: $(SPD_TEST_EXEC)
+-	sudo env LD_LIBRARY_PATH=$(_libdmmpdir):$(_mpathcmddir) \
++	$(Q)sudo env LD_LIBRARY_PATH=$(_libdmmpdir):$(_mpathcmddir) \
+ 		time -p ./$(SPD_TEST_EXEC)
+ 
+ clean: dep_clean
+-	rm -f $(TEST_EXEC) $(SPD_TEST_EXEC)
++	$(Q)$(RM) -f $(TEST_EXEC) $(SPD_TEST_EXEC)
+ 
+ OBJS = $(TEST_EXEC).o $(SPD_TEST_EXEC).o
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libmpathcmd/Makefile b/libmpathcmd/Makefile
+index cfb202b8..be615c2f 100644
+--- a/libmpathcmd/Makefile
++++ b/libmpathcmd/Makefile
+@@ -9,22 +9,22 @@ all:	$(DEVLIB)
+ include $(TOPDIR)/rules.mk
+ 
+ install: all
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(includedir)
+-	$(INSTALL_PROGRAM) -m 644 mpath_cmd.h $(DESTDIR)$(includedir)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(includedir)
++	$(Q)$(INSTALL_PROGRAM) -m 644 mpath_cmd.h $(DESTDIR)$(includedir)
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+-	$(RM) $(DESTDIR)$(includedir)/mpath_cmd.h
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(RM) $(DESTDIR)$(includedir)/mpath_cmd.h
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.so *.so.* *.abi $(NV_VERSION_SCRIPT)
++	$(Q)$(RM) core *.a *.o *.so *.so.* *.abi $(NV_VERSION_SCRIPT)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libmpathpersist/Makefile b/libmpathpersist/Makefile
+index 94672556..8f9a43f6 100644
+--- a/libmpathpersist/Makefile
++++ b/libmpathpersist/Makefile
+@@ -12,28 +12,28 @@ all: $(DEVLIB)
+ include $(TOPDIR)/rules.mk
+ 
+ install: all
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(syslibdir)
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(mandir)/man3
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(includedir)
+-	$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+-	$(INSTALL_PROGRAM) -m 644 mpath_persistent_reserve_in.3 $(DESTDIR)$(mandir)/man3
+-	$(INSTALL_PROGRAM) -m 644 mpath_persistent_reserve_out.3 $(DESTDIR)$(mandir)/man3
+-	$(INSTALL_PROGRAM) -m 644 mpath_persist.h $(DESTDIR)$(includedir)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(syslibdir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(mandir)/man3
++	$(Q)$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(includedir)
++	$(Q)$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(INSTALL_PROGRAM) -m 644 mpath_persistent_reserve_in.3 $(DESTDIR)$(mandir)/man3
++	$(Q)$(INSTALL_PROGRAM) -m 644 mpath_persistent_reserve_out.3 $(DESTDIR)$(mandir)/man3
++	$(Q)$(INSTALL_PROGRAM) -m 644 mpath_persist.h $(DESTDIR)$(includedir)
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(RM) $(DESTDIR)$(mandir)/man3/mpath_persistent_reserve_in.3
+-	$(RM) $(DESTDIR)$(mandir)/man3/mpath_persistent_reserve_out.3
+-	$(RM) $(DESTDIR)$(includedir)/mpath_persist.h
+-	$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man3/mpath_persistent_reserve_in.3
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man3/mpath_persistent_reserve_out.3
++	$(Q)$(RM) $(DESTDIR)$(includedir)/mpath_persist.h
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.so *.so.* *.abi $(NV_VERSION_SCRIPT)
++	$(Q)$(RM) core *.a *.o *.so *.so.* *.abi $(NV_VERSION_SCRIPT)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libmpathutil/Makefile b/libmpathutil/Makefile
+index 5ab33c09..f059de14 100644
+--- a/libmpathutil/Makefile
++++ b/libmpathutil/Makefile
+@@ -20,18 +20,18 @@ all:	$(DEVLIB)
+ include $(TOPDIR)/rules.mk
+ 
+ install: all
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.so *.so.* *.abi nvme-ioctl.c nvme-ioctl.h $(NV_VERSION_SCRIPT)
++	$(Q)$(RM) core *.a *.o *.so *.so.* *.abi nvme-ioctl.c nvme-ioctl.h $(NV_VERSION_SCRIPT)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libmpathvalid/Makefile b/libmpathvalid/Makefile
+index 88034df3..791a0398 100644
+--- a/libmpathvalid/Makefile
++++ b/libmpathvalid/Makefile
+@@ -13,21 +13,21 @@ all: $(DEVLIB)
+ include $(TOPDIR)/rules.mk
+ 
+ install: $(LIBS)
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(syslibdir)
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(includedir)
+-	$(INSTALL_PROGRAM) -m 644 mpath_valid.h $(DESTDIR)$(includedir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(syslibdir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(includedir)
++	$(Q)$(INSTALL_PROGRAM) -m 644 mpath_valid.h $(DESTDIR)$(includedir)
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+-	$(RM) $(DESTDIR)$(includedir)/mpath_valid.h
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(RM) $(DESTDIR)$(includedir)/mpath_valid.h
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.so *.so.* *.abi $(NV_VERSION_SCRIPT)
++	$(Q)$(RM) core *.a *.o *.so *.so.* *.abi $(NV_VERSION_SCRIPT)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libmultipath/Makefile b/libmultipath/Makefile
+index 1cc13577..3df851e2 100644
+--- a/libmultipath/Makefile
++++ b/libmultipath/Makefile
+@@ -31,47 +31,47 @@ all:	$(DEVLIB)
+ include $(TOPDIR)/rules.mk
+ 
+ nvme-lib.o: nvme-lib.c nvme-ioctl.c nvme-ioctl.h
+-	$(CC) $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -c -o $@ $<
++	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -c -o $@ $<
+ 
+ # there are lots of "unused parameters" in dict.c
+ # because not all handler / snprint methods need all parameters
+ dict.o:	dict.c
+-	$(CC) $(CPPFLAGS) $(CFLAGS) -Wno-unused-parameter -c -o $@ $<
++	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -Wno-unused-parameter -c -o $@ $<
+ 
+ make_static = $(shell sed '/^static/!s/^\([a-z]\{1,\} \)/static \1/' <$1 >$2)
+ 
+ nvme-ioctl.c: nvme/nvme-ioctl.c
+-	$(call make_static,$<,$@)
++	$(Q)$(call make_static,$<,$@)
+ 
+ nvme-ioctl.h: nvme/nvme-ioctl.h
+-	$(call make_static,$<,$@)
++	$(Q)$(call make_static,$<,$@)
+ 
+ ../tests/$(LIBS): $(OBJS-O) $(OBJS-T) $(VERSION_SCRIPT)
+-	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=`basename $@` \
++	$(Q)$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=`basename $@` \
+ 		-o $@ $(OBJS-O) $(OBJS-T) $(LIBDEPS)
+-	$(LN) $@ ${@:.so.0=.so}
++	$(Q)$(LN) $@ ${@:.so.0=.so}
+ 
+ # This rule is invoked from tests/Makefile, overriding configdir and plugindir
+ %-test.o: %.c
+ 	@echo building $@ because of $?
+-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
++	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+ 
+ test-lib:	../tests/$(LIBS)
+ 
+ install: all
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(plugindir)
+-	$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(plugindir)
++	$(Q)$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
++	$(Q)$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.so *.so.* *.abi nvme-ioctl.c nvme-ioctl.h autoconfig.h $(NV_VERSION_SCRIPT)
++	$(Q)$(RM) core *.a *.o *.so *.so.* *.abi nvme-ioctl.c nvme-ioctl.h autoconfig.h $(NV_VERSION_SCRIPT)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libmultipath/checkers/Makefile b/libmultipath/checkers/Makefile
+index 39ad76e0..b3120611 100644
+--- a/libmultipath/checkers/Makefile
++++ b/libmultipath/checkers/Makefile
+@@ -22,16 +22,16 @@ LIBS= \
+ all: $(LIBS)
+ 
+ libcheck%.so: %.o
+-	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
++	$(Q)$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
+ 
+ install:
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(plugindir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(plugindir)
+ 
+ uninstall:
+ 	for file in $(LIBS); do $(RM) $(DESTDIR)$(plugindir)/$$file; done
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.gz *.so
++	$(Q)$(RM) core *.a *.o *.gz *.so
+ 
+ OBJS := $(LIBS:libcheck%.so=%.o)
+ .SECONDARY: $(OBJS)
+@@ -39,4 +39,4 @@ OBJS := $(LIBS:libcheck%.so=%.o)
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libmultipath/foreign/Makefile b/libmultipath/foreign/Makefile
+index 8bf9047b..0e245d6f 100644
+--- a/libmultipath/foreign/Makefile
++++ b/libmultipath/foreign/Makefile
+@@ -14,16 +14,16 @@ LIBS = libforeign-nvme.so
+ all: $(LIBS)
+ 
+ libforeign-%.so: %.o
+-	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
++	$(Q)$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
+ 
+ install:
+-	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(plugindir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(plugindir)
+ 
+ uninstall:
+ 	for file in $(LIBS); do $(RM) $(DESTDIR)$(plugindir)/$$file; done
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.gz *.so
++	$(Q)$(RM) core *.a *.o *.gz *.so
+ 
+ OBJS := $(LIBS:libforeign-%.so=%.o)
+ .SECONDARY: $(OBJS)
+@@ -31,4 +31,4 @@ OBJS := $(LIBS:libforeign-%.so=%.o)
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/libmultipath/prioritizers/Makefile b/libmultipath/prioritizers/Makefile
+index a699e8a6..e1688163 100644
+--- a/libmultipath/prioritizers/Makefile
++++ b/libmultipath/prioritizers/Makefile
+@@ -34,16 +34,16 @@ endif
+ all: $(LIBS)
+ 
+ libprio%.so: %.o
+-	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
++	$(Q)$(CC) $(LDFLAGS) $(SHARED_FLAGS) -o $@ $^ $(LIBDEPS)
+ 
+ install: $(LIBS)
+-	$(INSTALL_PROGRAM) -m 755 libprio*.so $(DESTDIR)$(plugindir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 libprio*.so $(DESTDIR)$(plugindir)
+ 
+ uninstall:
+ 	for file in $(LIBS); do $(RM) $(DESTDIR)$(plugindir)/$$file; done
+ 
+ clean: dep_clean
+-	$(RM) core *.a *.o *.gz *.so
++	$(Q)$(RM) core *.a *.o *.gz *.so
+ 
+ OBJS = $(LIBS:libprio%.so=%.o) alua_rtpg.o
+ .SECONDARY: $(OBJS)
+@@ -51,4 +51,4 @@ OBJS = $(LIBS:libprio%.so=%.o) alua_rtpg.o
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/mpathpersist/Makefile b/mpathpersist/Makefile
+index d62537b5..f57c105c 100644
+--- a/mpathpersist/Makefile
++++ b/mpathpersist/Makefile
+@@ -14,22 +14,22 @@ OBJS = main.o
+ all: $(EXEC)
+ 
+ $(EXEC): $(OBJS)
+-	$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS) $(CFLAGS) $(LIBDEPS)
++	$(Q)$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS) $(CFLAGS) $(LIBDEPS)
+ 
+ install:
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
+-	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
+ 
+ clean: dep_clean
+-	$(RM) core *.o $(EXEC)
++	$(Q)$(RM) core *.o $(EXEC)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(bindir)/$(EXEC)
+-	$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
++	$(Q)$(RM) $(DESTDIR)$(bindir)/$(EXEC)
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/multipath/Makefile b/multipath/Makefile
+index 7f7b341d..73db991a 100644
+--- a/multipath/Makefile
++++ b/multipath/Makefile
+@@ -16,44 +16,46 @@ OBJS := main.o
+ all: $(EXEC) multipath.rules tmpfiles.conf
+ 
+ $(EXEC): $(OBJS) $(multipathdir)/libmultipath.so $(mpathcmddir)/libmpathcmd.so
+-	$(CC) $(CFLAGS) $(OBJS) -o $(EXEC) $(LDFLAGS) $(LIBDEPS)
++	@echo building $@ because of $?
++	$(Q)$(CC) $(CFLAGS) $(OBJS) -o $(EXEC) $(LDFLAGS) $(LIBDEPS)
+ 
+ install:
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
+-	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(udevrulesdir)
+-	$(INSTALL_PROGRAM) -m 644 11-dm-mpath.rules $(DESTDIR)$(udevrulesdir)
+-	$(INSTALL_PROGRAM) -m 644 multipath.rules $(DESTDIR)$(udevrulesdir)/56-multipath.rules
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(modulesloaddir)
+-	$(INSTALL_PROGRAM) -m 644 modules-load.conf $(DESTDIR)$(modulesloaddir)/multipath.conf
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(tmpfilesdir)
+-	$(INSTALL_PROGRAM) -m 644 tmpfiles.conf $(DESTDIR)$(tmpfilesdir)/multipath.conf
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man5
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5 $(DESTDIR)$(mandir)/man5
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(udevrulesdir)
++	$(Q)$(INSTALL_PROGRAM) -m 644 11-dm-mpath.rules $(DESTDIR)$(udevrulesdir)
++	$(Q)$(INSTALL_PROGRAM) -m 644 multipath.rules $(DESTDIR)$(udevrulesdir)/56-multipath.rules
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(modulesloaddir)
++	$(Q)$(INSTALL_PROGRAM) -m 644 modules-load.conf $(DESTDIR)$(modulesloaddir)/multipath.conf
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(tmpfilesdir)
++	$(Q)$(INSTALL_PROGRAM) -m 644 tmpfiles.conf $(DESTDIR)$(tmpfilesdir)/multipath.conf
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man5
++	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5 $(DESTDIR)$(mandir)/man5
+ ifneq ($(SCSI_DH_MODULES_PRELOAD),)
+-	$(INSTALL_PROGRAM) -m 644 scsi_dh.conf $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
+-	for _x in $(SCSI_DH_MODULES_PRELOAD); do echo "$$_x"; done \
++	$(Q)$(INSTALL_PROGRAM) -m 644 scsi_dh.conf $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
++	$(Q)for _x in $(SCSI_DH_MODULES_PRELOAD); do echo "$$_x"; done \
+ 	    >>$(DESTDIR)$(modulesloaddir)/scsi_dh.conf
+ endif
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(bindir)/$(EXEC)
+-	$(RM) $(DESTDIR)$(udevrulesdir)/11-dm-mpath.rules
+-	$(RM) $(DESTDIR)$(modulesloaddir)/multipath.conf
+-	$(RM) $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
+-	$(RM) $(DESTDIR)$(libudevdir)/rules.d/56-multipath.rules
+-	$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
+-	$(RM) $(DESTDIR)$(mandir)/man5/$(EXEC).conf.5
++	$(Q)$(RM) $(DESTDIR)$(bindir)/$(EXEC)
++	$(Q)$(RM) $(DESTDIR)$(udevrulesdir)/11-dm-mpath.rules
++	$(Q)$(RM) $(DESTDIR)$(modulesloaddir)/multipath.conf
++	$(Q)$(RM) $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
++	$(Q)$(RM) $(DESTDIR)$(libudevdir)/rules.d/56-multipath.rules
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man5/$(EXEC).conf.5
+ 
+ clean: dep_clean
+-	$(RM) core *.o $(EXEC) multipath.rules tmpfiles.conf
++	$(Q)$(RM) core *.o $(EXEC) multipath.rules tmpfiles.conf
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+ 
+ %:	%.in
+-	sed 's,@RUNTIME_DIR@,$(runtimedir),' $< >$@
++	@echo creating $@
++	$(Q)sed 's,@RUNTIME_DIR@,$(runtimedir),' $< >$@
+diff --git a/multipathd/Makefile b/multipathd/Makefile
+index 587bb916..9d531329 100644
+--- a/multipathd/Makefile
++++ b/multipathd/Makefile
+@@ -45,41 +45,43 @@ endif
+ all : $(EXEC) $(CLI)
+ 
+ $(EXEC): $(OBJS) $(multipathdir)/libmultipath.so $(mpathcmddir)/libmpathcmd.so
+-	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(EXEC) $(LIBDEPS)
++	@echo building $@ because of $?
++	$(Q)$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(EXEC) $(LIBDEPS)
+ 
+ multipathc.o:	multipathc.c
+-	$(CC) $(CPPFLAGS) $(RL_CPPFLAGS) $(CFLAGS) -Wno-unused-parameter -c -o $@ $<
++	$(Q)$(CC) $(CPPFLAGS) $(RL_CPPFLAGS) $(CFLAGS) -Wno-unused-parameter -c -o $@ $<
+ 
+ $(CLI):  $(CLI_OBJS)
+-	$(CC) $(CFLAGS) $(CLI_OBJS) $(LDFLAGS) -o $@ $(CLI_LIBDEPS) $(RL_LIBDEPS)
++	@echo building $@ because of $?
++	$(Q)$(CC) $(CFLAGS) $(CLI_OBJS) $(LDFLAGS) -o $@ $(CLI_LIBDEPS) $(RL_LIBDEPS)
+ 
+ cli_handlers.o:	cli_handlers.c
+-	$(CC) $(CPPFLAGS) $(CFLAGS) -Wno-unused-parameter -c -o $@ $<
++	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -Wno-unused-parameter -c -o $@ $<
+ 
+ install:
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
+-	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)
+-	$(INSTALL_PROGRAM) -m 755 $(CLI) $(DESTDIR)$(bindir)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)
++	$(Q)$(INSTALL_PROGRAM) -m 755 $(CLI) $(DESTDIR)$(bindir)
+ ifdef SYSTEMD
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(unitdir)
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).service $(DESTDIR)$(unitdir)
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).socket $(DESTDIR)$(unitdir)
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(unitdir)
++	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).service $(DESTDIR)$(unitdir)
++	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).socket $(DESTDIR)$(unitdir)
+ endif
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
+-	$(INSTALL_PROGRAM) -m 644 $(CLI).8 $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
++	$(Q)$(INSTALL_PROGRAM) -m 644 $(CLI).8 $(DESTDIR)$(mandir)/man8
+ 
+ uninstall:
+-	$(RM) $(DESTDIR)$(bindir)/$(EXEC) $(DESTDIR)$(bindir)/$(CLI)
+-	$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
+-	$(RM) $(DESTDIR)$(mandir)/man8/$(CLI).8
+-	$(RM) $(DESTDIR)$(unitdir)/$(EXEC).service
+-	$(RM) $(DESTDIR)$(unitdir)/$(EXEC).socket
++	$(Q)$(RM) $(DESTDIR)$(bindir)/$(EXEC) $(DESTDIR)$(bindir)/$(CLI)
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
++	$(Q)$(RM) $(DESTDIR)$(mandir)/man8/$(CLI).8
++	$(Q)$(RM) $(DESTDIR)$(unitdir)/$(EXEC).service
++	$(Q)$(RM) $(DESTDIR)$(unitdir)/$(EXEC).socket
+ 
+ clean: dep_clean
+-	$(RM) core *.o $(EXEC) $(CLI)
++	$(Q)$(RM) core *.o $(EXEC) $(CLI)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+diff --git a/rules.mk b/rules.mk
+index d8612527..c3a8e7ac 100644
+--- a/rules.mk
++++ b/rules.mk
+@@ -2,17 +2,17 @@
+ # SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ $(DEVLIB): $(LIBS)
+-	$(LN) $(LIBS) $@
++	$(Q)$(LN) $(LIBS) $@
+ 
+ $(LIBS): $(OBJS) $(VERSION_SCRIPT)
+-	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
++	$(Q)$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+ 
+ $(LIBS:%.so.$(SONAME)=%-nv.so):	$(OBJS) $(NV_VERSION_SCRIPT)
+-	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
++	$(Q)$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(NV_VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+ 
+ abi:    $(LIBS:%.so.$(SONAME)=%-nv.abi)
+ 
+ $(TOPDIR)/config.mk $(multipathdir)/autoconfig.h:
+-	$(MAKE) -C $(TOPDIR) -f create-config.mk
++	$(Q)$(MAKE) -C $(TOPDIR) -f create-config.mk
+diff --git a/tests/Makefile b/tests/Makefile
+index d9856d17..021da0b0 100644
+--- a/tests/Makefile
++++ b/tests/Makefile
+@@ -12,7 +12,6 @@ TESTS := uevent parser util dmevents hwtable blacklist unaligned vpd pgpolicy \
+ 	 alias directio valid devt mpathvalid strbuf sysfs features cli
+ HELPERS := test-lib.o test-log.o
+ 
+-.SILENT: $(TESTS:%=%.o)
+ .PRECIOUS: $(TESTS:%=%-test)
+ 
+ all:	$(TESTS:%=%.out)
+@@ -71,11 +70,12 @@ features-test_LIBDEPS := -ludev -lpthread
+ cli-test_OBJDEPS := $(daemondir)/cli.o
+ 
+ %.o: %.c
+-	$(CC) $(CPPFLAGS) $(CFLAGS) $($*-test_FLAGS) -c -o $@ $<
++	@echo building $@ because of $?
++	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) $($*-test_FLAGS) -c -o $@ $<
+ 
+ lib/libchecktur.so:
+-	mkdir -p lib
+-	cd lib && ln -s ../$(multipathdir)/*/*.so .
++	@mkdir -p lib
++	$(Q)cd lib && ln -s ../$(multipathdir)/*/*.so .
+ 
+ %.out:	%-test lib/libchecktur.so
+ 	@echo == running $< ==
+@@ -89,34 +89,35 @@ lib/libchecktur.so:
+ OBJS = $(TESTS:%=%.o) $(HELPERS)
+ 
+ test_clean:
+-	$(RM) $(TESTS:%=%.out) $(TESTS:%=%.vgr) *.so*
++	$(Q)$(RM) $(TESTS:%=%.out) $(TESTS:%=%.vgr) *.so*
+ 
+ valgrind_clean:
+-	$(RM) $(TESTS:%=%.vgr)
++	$(Q)$(RM) $(TESTS:%=%.vgr)
+ 
+ clean: test_clean valgrind_clean dep_clean
+-	$(RM) $(TESTS:%=%-test) $(OBJS) *.o.wrap
+-	$(RM) -rf lib conf.d
++	$(Q)$(RM) $(TESTS:%=%-test) $(OBJS) *.o.wrap
++	$(Q)$(RM) -rf lib conf.d
+ 
+ .SECONDARY: $(OBJS)
+ 
+ include $(wildcard $(OBJS:.o=.d))
+ 
+ dep_clean:
+-	$(RM) $(OBJS:.o=.d)
++	$(Q)$(RM) $(OBJS:.o=.d)
+ 
+ %.o.wrap:	%.c
+ 	@sed -n 's/^.*__wrap_\([a-zA-Z0-9_]*\).*$$/-Wl,--wrap=\1/p' $< | \
+ 		sort -u | tr '\n' ' ' >$@
+ 
+ libmultipath.so.0: $(multipathdir)/libmultipath.so.0
+-	make -C $(multipathdir) configdir=$(TESTDIR)/conf.d plugindir=$(TESTDIR)/lib test-lib
++	@make -C $(multipathdir) configdir=$(TESTDIR)/conf.d plugindir=$(TESTDIR)/lib test-lib
+ 
+ # COLON will get expanded during second expansion below
+ COLON:=:
+ .SECONDEXPANSION:
+ %-test:	%.o %.o.wrap $$($$@_OBJDEPS) $$($$@_TESTDEPS) $$($$@_TESTDEPS$$(COLON).o=.o.wrap) \
+ 		libmultipath.so.0 $(mpathutildir)/libmpathutil.so.0 $(mpathcmddir)/libmpathcmd.so.0 Makefile
+-	$(CC) $(CFLAGS) -o $@ $(LDFLAGS) $< $($@_TESTDEPS) $($@_OBJDEPS) \
++	@echo building $@
++	$(Q)$(CC) $(CFLAGS) -o $@ $(LDFLAGS) $< $($@_TESTDEPS) $($@_OBJDEPS) \
+ 		$(LIBDEPS) $($@_LIBDEPS) \
+ 		$(shell cat $<.wrap) $(foreach dep,$($@_TESTDEPS),$(shell cat $(dep).wrap))

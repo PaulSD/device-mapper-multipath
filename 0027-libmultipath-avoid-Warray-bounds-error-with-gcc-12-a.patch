@@ -1,0 +1,63 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 28 Oct 2022 21:10:41 +0200
+Subject: [PATCH] libmultipath: avoid -Warray-bounds error with gcc 12 and musl
+ libc
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The following error is observed with gcc 12, strangely only with
+MUSL libc:
+
+In function ‘__uatomic_inc’,
+     inlined from ‘lock’ at ../libmultipath/lock.h:24:2,
+     inlined from ‘child’ at main.c:3523:3,
+     inlined from ‘main’ at main.c:3755:11:
+/usr/include/urcu/uatomic/x86.h:439:17: error: array subscript ‘struct __uatomic_dummy[0]’ is partly outside array bounds of ‘unsigned char[72]’ [-Werror=array-bounds]
+
+The problem is that &(vecs->lock.waiters) is casted to a pointer to
+struct { long[10]; } which goes beyond the "struct vectors".
+We don't read or write from/to that memory, but the compiler complains either
+way.
+
+latest liburcu has a patch for it:
+
+http://git.liburcu.org/?p=userspace-rcu.git;a=commitdiff;h=835b9ab3ca3777fe42e37e92096226ebd19ca75b
+
+For now, just disable the warning in lock.h, using a pragma.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reported-by: Xose Vasquez Perez <xose.vasquez@gmail.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/lock.h | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/libmultipath/lock.h b/libmultipath/lock.h
+index 20ca77e6..9814be76 100644
+--- a/libmultipath/lock.h
++++ b/libmultipath/lock.h
+@@ -13,6 +13,11 @@ struct mutex_lock {
+ 	int waiters; /* uatomic access only */
+ };
+ 
++#if !defined(__GLIBC__) && defined(__GNUC__) && __GNUC__ == 12
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Warray-bounds"
++#endif
++
+ static inline void init_lock(struct mutex_lock *a)
+ {
+ 	pthread_mutex_init(&a->mutex, NULL);
+@@ -46,6 +51,10 @@ static inline bool lock_has_waiters(struct mutex_lock *a)
+ 	return (uatomic_read(&a->waiters) > 0);
+ }
+ 
++#if !defined(__GLIBC__) && defined(__GNUC__) && __GNUC__ == 12
++#pragma GCC diagnostic pop
++#endif
++
+ #define lock_cleanup_pop(a) pthread_cleanup_pop(1)
+ 
+ void cleanup_lock (void * data);

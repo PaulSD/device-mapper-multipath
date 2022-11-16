@@ -1,0 +1,185 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 16:25:04 +0200
+Subject: [PATCH] multipath-tools: Makefiles: use $(mandir)
+
+Simply use $(mandir) rather than 3 different variables.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc             |  4 +---
+ kpartx/Makefile          |  6 +++---
+ libdmmp/Makefile         |  8 ++++----
+ libmpathpersist/Makefile | 10 +++++-----
+ mpathpersist/Makefile    |  6 +++---
+ multipath/Makefile       | 12 ++++++------
+ multipathd/Makefile      | 10 +++++-----
+ 7 files changed, 27 insertions(+), 29 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 38bd1d80..f3c84771 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -58,9 +58,7 @@ bindir		= $(exec_prefix)/sbin
+ multipathdir	= $(TOPDIR)/libmultipath
+ daemondir       = $(TOPDIR)/multipathd
+ mpathutildir	= $(TOPDIR)/libmpathutil
+-man8dir		= $(usr_prefix)/share/man/man8
+-man5dir		= $(usr_prefix)/share/man/man5
+-man3dir		= $(usr_prefix)/share/man/man3
++mandir		:= $(usr_prefix)/share/man
+ LIB		:= $(if $(shell test -d /lib64 && echo 1),lib64,lib)
+ syslibdir	= $(prefix)/$(LIB)
+ usrlibdir	= $(usr_prefix)/$(LIB)
+diff --git a/kpartx/Makefile b/kpartx/Makefile
+index bdf2d035..464925ad 100644
+--- a/kpartx/Makefile
++++ b/kpartx/Makefile
+@@ -32,12 +32,12 @@ install: $(EXEC) $(EXEC).8
+ 	$(INSTALL_PROGRAM) -m 644 dm-parts.rules $(DESTDIR)$(libudevdir)/rules.d/11-dm-parts.rules
+ 	$(INSTALL_PROGRAM) -m 644 kpartx.rules $(DESTDIR)$(libudevdir)/rules.d/66-kpartx.rules
+ 	$(INSTALL_PROGRAM) -m 644 del-part-nodes.rules $(DESTDIR)$(libudevdir)/rules.d/68-del-part-nodes.rules
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man8dir)
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(man8dir)
++	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
++	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
+ 
+ uninstall:
+ 	$(RM) $(DESTDIR)$(bindir)/$(EXEC)
+-	$(RM) $(DESTDIR)$(man8dir)/$(EXEC).8
++	$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
+ 	$(RM) $(DESTDIR)$(libudevdir)/kpartx_id
+ 	$(RM) $(DESTDIR)$(libudevdir)/rules.d/11-dm-parts.rules
+ 	$(RM) $(DESTDIR)$(libudevdir)/rules.d/66-kpartx.rules
+diff --git a/libdmmp/Makefile b/libdmmp/Makefile
+index e4589250..985b694b 100644
+--- a/libdmmp/Makefile
++++ b/libdmmp/Makefile
+@@ -45,17 +45,17 @@ install:
+ 		$(DESTDIR)$(pkgconfdir)/$(PKGFILE)
+ 	perl -i -pe 's|__INCLUDEDIR__|$(includedir)|g' \
+ 		$(DESTDIR)$(pkgconfdir)/$(PKGFILE)
+-	$(INSTALL_PROGRAM) -d 755 $(DESTDIR)$(man3dir)
+-	$(INSTALL_PROGRAM) -m 644 -t $(DESTDIR)$(man3dir) docs/man/*.3
++	$(INSTALL_PROGRAM) -d 755 $(DESTDIR)$(mandir)/man3
++	$(INSTALL_PROGRAM) -m 644 -t $(DESTDIR)$(mandir)/man3 docs/man/*.3
+ 
+ uninstall:
+ 	$(RM) $(DESTDIR)$(usrlibdir)/$(LIBS)
+ 	$(RM) $(DESTDIR)$(includedir)/$(HEADERS)
+ 	$(RM) $(DESTDIR)$(usrlibdir)/$(DEVLIB)
+-	@for file in $(DESTDIR)$(man3dir)/dmmp_*; do \
++	@for file in $(DESTDIR)$(mandir)/man3/dmmp_*; do \
+ 		$(RM) $$file; \
+ 	done
+-	$(RM) $(DESTDIR)$(man3dir)/libdmmp.h*
++	$(RM) $(DESTDIR)$(mandir)/man3/libdmmp.h*
+ 	$(RM) $(DESTDIR)$(pkgconfdir)/$(PKGFILE)
+ 
+ clean: dep_clean
+diff --git a/libmpathpersist/Makefile b/libmpathpersist/Makefile
+index 4e1717ef..479524d4 100644
+--- a/libmpathpersist/Makefile
++++ b/libmpathpersist/Makefile
+@@ -36,17 +36,17 @@ install: all
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(syslibdir)
+ 	$(INSTALL_PROGRAM) -m 755 $(LIBS) $(DESTDIR)$(syslibdir)/$(LIBS)
+ 	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(syslibdir)
+-	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(man3dir)
++	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(mandir)/man3
+ 	$(INSTALL_PROGRAM) -m 755 -d $(DESTDIR)$(includedir)
+ 	$(LN) $(LIBS) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+-	$(INSTALL_PROGRAM) -m 644 mpath_persistent_reserve_in.3 $(DESTDIR)$(man3dir)
+-	$(INSTALL_PROGRAM) -m 644 mpath_persistent_reserve_out.3 $(DESTDIR)$(man3dir)
++	$(INSTALL_PROGRAM) -m 644 mpath_persistent_reserve_in.3 $(DESTDIR)$(mandir)/man3
++	$(INSTALL_PROGRAM) -m 644 mpath_persistent_reserve_out.3 $(DESTDIR)$(mandir)/man3
+ 	$(INSTALL_PROGRAM) -m 644 mpath_persist.h $(DESTDIR)$(includedir)
+ 
+ uninstall:
+ 	$(RM) $(DESTDIR)$(syslibdir)/$(LIBS)
+-	$(RM) $(DESTDIR)$(man3dir)/mpath_persistent_reserve_in.3
+-	$(RM) $(DESTDIR)$(man3dir)/mpath_persistent_reserve_out.3
++	$(RM) $(DESTDIR)$(mandir)/man3/mpath_persistent_reserve_in.3
++	$(RM) $(DESTDIR)$(mandir)/man3/mpath_persistent_reserve_out.3
+ 	$(RM) $(DESTDIR)$(includedir)/mpath_persist.h
+ 	$(RM) $(DESTDIR)$(syslibdir)/$(DEVLIB)
+ 
+diff --git a/mpathpersist/Makefile b/mpathpersist/Makefile
+index 2219c86a..d62537b5 100644
+--- a/mpathpersist/Makefile
++++ b/mpathpersist/Makefile
+@@ -19,8 +19,8 @@ $(EXEC): $(OBJS)
+ install:
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
+ 	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man8dir)
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(man8dir)
++	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
++	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
+ 
+ clean: dep_clean
+ 	$(RM) core *.o $(EXEC)
+@@ -29,7 +29,7 @@ include $(wildcard $(OBJS:.o=.d))
+ 
+ uninstall:
+ 	$(RM) $(DESTDIR)$(bindir)/$(EXEC)
+-	$(RM) $(DESTDIR)$(man8dir)/$(EXEC).8
++	$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
+ 
+ dep_clean:
+ 	$(RM) $(OBJS:.o=.d)
+diff --git a/multipath/Makefile b/multipath/Makefile
+index 116348e2..1c4e7a52 100644
+--- a/multipath/Makefile
++++ b/multipath/Makefile
+@@ -28,10 +28,10 @@ install:
+ 	$(INSTALL_PROGRAM) -m 644 modules-load.conf $(DESTDIR)$(modulesloaddir)/multipath.conf
+ 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(tmpfilesdir)
+ 	$(INSTALL_PROGRAM) -m 644 tmpfiles.conf $(DESTDIR)$(tmpfilesdir)/multipath.conf
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man8dir)
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(man8dir)
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man5dir)
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5 $(DESTDIR)$(man5dir)
++	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
++	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
++	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man5
++	$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5 $(DESTDIR)$(mandir)/man5
+ ifneq ($(SCSI_DH_MODULES_PRELOAD),)
+ 	$(INSTALL_PROGRAM) -m 644 scsi_dh.conf $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
+ 	for _x in $(SCSI_DH_MODULES_PRELOAD); do echo "$$_x"; done \
+@@ -44,8 +44,8 @@ uninstall:
+ 	$(RM) $(DESTDIR)$(modulesloaddir)/multipath.conf
+ 	$(RM) $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
+ 	$(RM) $(DESTDIR)$(libudevdir)/rules.d/56-multipath.rules
+-	$(RM) $(DESTDIR)$(man8dir)/$(EXEC).8
+-	$(RM) $(DESTDIR)$(man5dir)/$(EXEC).conf.5
++	$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
++	$(RM) $(DESTDIR)$(mandir)/man5/$(EXEC).conf.5
+ 
+ clean: dep_clean
+ 	$(RM) core *.o $(EXEC) multipath.rules tmpfiles.conf
+diff --git a/multipathd/Makefile b/multipathd/Makefile
+index c462d7b1..78aefee0 100644
+--- a/multipathd/Makefile
++++ b/multipathd/Makefile
+@@ -89,14 +89,14 @@ ifdef SYSTEMD
+ 	$(INSTALL_PROGRAM) -m 644 $(EXEC).service $(DESTDIR)$(unitdir)
+ 	$(INSTALL_PROGRAM) -m 644 $(EXEC).socket $(DESTDIR)$(unitdir)
+ endif
+-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(man8dir)
+-	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(man8dir)
+-	$(INSTALL_PROGRAM) -m 644 $(CLI).8 $(DESTDIR)$(man8dir)
++	$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
++	$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
++	$(INSTALL_PROGRAM) -m 644 $(CLI).8 $(DESTDIR)$(mandir)/man8
+ 
+ uninstall:
+ 	$(RM) $(DESTDIR)$(bindir)/$(EXEC) $(DESTDIR)$(bindir)/$(CLI)
+-	$(RM) $(DESTDIR)$(man8dir)/$(EXEC).8
+-	$(RM) $(DESTDIR)$(man8dir)/$(CLI).8
++	$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
++	$(RM) $(DESTDIR)$(mandir)/man8/$(CLI).8
+ 	$(RM) $(DESTDIR)$(unitdir)/$(EXEC).service
+ 	$(RM) $(DESTDIR)$(unitdir)/$(EXEC).socket
+ 

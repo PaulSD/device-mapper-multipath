@@ -1,0 +1,63 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 15:25:31 +0200
+Subject: [PATCH] multipath-tools: Makefile.inc: get rid of RUN
+
+Just use $(runtimedir). Also, make the code more compact by using
+the "if" function instead of a conditional.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc            | 10 ++--------
+ libmultipath/defaults.h |  2 +-
+ 2 files changed, 3 insertions(+), 9 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index d897ac7a..b4ec647c 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -34,12 +34,6 @@ else
+ 	LIB=lib
+ endif
+ 
+-ifeq ($(shell test -L /var/run -o ! -d /var/run && echo 1),1)
+-	RUN=run
+-else
+-	RUN=var/run
+-endif
+-
+ ifeq ($(shell $(PKGCONFIG) --modversion libsystemd >/dev/null 2>&1 && echo 1), 1)
+ 	SYSTEMD = $(shell $(PKGCONFIG) --modversion libsystemd | awk '{print $$1}')
+ else
+@@ -99,7 +93,7 @@ includedir	= $(usr_prefix)/include
+ pkgconfdir	= $(usrlibdir)/pkgconfig
+ plugindir       := $(prefix)/$(LIB)/multipath
+ configdir       := $(prefix)/etc/multipath/conf.d
+-runtimedir      := /$(RUN)
++runtimedir      := $(if $(shell test -L /var/run -o ! -d /var/run && echo 1),/run,/var/run)
+ 
+ GZIP_PROG	= gzip -9 -c
+ RM		= rm -f
+@@ -143,7 +137,7 @@ WARNFLAGS	:= -Werror -Wall -Wextra -Wformat=2 $(WFORMATOVERFLOW) -Werror=implici
+ 		  -Werror=implicit-function-declaration -Werror=format-security \
+ 		  $(WNOCLOBBERED) -Werror=cast-qual $(ERROR_DISCARDED_QUALIFIERS)
+ CPPFLAGS	:= $(FORTIFY_OPT) \
+-		   -DBIN_DIR=\"$(bindir)\" -DMULTIPATH_DIR=\"$(plugindir)\" -DRUN_DIR=\"${RUN}\" \
++		   -DBIN_DIR=\"$(bindir)\" -DMULTIPATH_DIR=\"$(plugindir)\" \
+ 		   -DRUNTIME_DIR=\"$(runtimedir)\" \
+ 		   -DCONFIG_DIR=\"$(configdir)\" -DEXTRAVERSION=\"$(EXTRAVERSION)\" -MMD -MP
+ CFLAGS		:= --std=gnu99 $(CFLAGS) $(OPTFLAGS) $(WARNFLAGS) -pipe
+diff --git a/libmultipath/defaults.h b/libmultipath/defaults.h
+index 3d552b33..a5e9ea0c 100644
+--- a/libmultipath/defaults.h
++++ b/libmultipath/defaults.h
+@@ -62,7 +62,7 @@
+ 
+ #define DEV_LOSS_TMO_UNSET	0U
+ #define MAX_DEV_LOSS_TMO	UINT_MAX
+-#define DEFAULT_PIDFILE		"/" RUN_DIR "/multipathd.pid"
++#define DEFAULT_PIDFILE		RUNTIME_DIR "/multipathd.pid"
+ #define DEFAULT_SOCKET		"/org/kernel/linux/storage/multipathd"
+ #define DEFAULT_CONFIGFILE	"/etc/multipath.conf"
+ #define DEFAULT_BINDINGS_FILE	"/etc/multipath/bindings"

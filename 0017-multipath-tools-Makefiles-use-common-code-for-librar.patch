@@ -1,0 +1,261 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 21:52:06 +0200
+Subject: [PATCH] multipath-tools: Makefiles: use common code for libraries
+
+Move shared code to Makefile.inc as far as possible. Use simple
+make variables where possible.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc             | 15 ++++++++++++++-
+ libdmmp/Makefile         | 17 ++++++++---------
+ libmpathcmd/Makefile     | 14 ++------------
+ libmpathpersist/Makefile | 14 ++------------
+ libmpathutil/Makefile    | 14 +-------------
+ libmpathvalid/Makefile   | 14 ++------------
+ libmultipath/Makefile    | 12 +-----------
+ 7 files changed, 30 insertions(+), 70 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 2cf25745..fe6bc088 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -64,7 +64,6 @@ GZIP_PROG	:= gzip -9 -c
+ RM		:= rm -f
+ LN		:= ln -sf
+ INSTALL_PROGRAM	:= install
+-NV_VERSION_SCRIPT = $(VERSION_SCRIPT:%.version=%-nv.version)
+ 
+ # $(call TEST_CC_OPTION,option,fallback)
+ # Test if the C compiler supports the option.
+@@ -127,6 +126,13 @@ thirdpartydir	:= $(TOPDIR)/third-party
+ libdmmpdir	:= $(TOPDIR)/libdmmp
+ nvmedir		:= $(TOPDIR)/libmultipath/nvme
+ 
++# Common code for libraries - library Makefiles just set DEVLIB
++# SONAME defaults to 0 (we use version scripts)
++SONAME := 0
++LIBS = $(DEVLIB).$(SONAME)
++VERSION_SCRIPT = $(DEVLIB:%.so=%.version)
++NV_VERSION_SCRIPT = $(DEVLIB:%.so=%-nv.version)
++
+ # Check whether a function with name $1 has been declared in header file $2.
+ check_func = $(shell \
+ 	if grep -Eq "^[^[:blank:]]+[[:blank:]]+$1[[:blank:]]*(.*)*" "$2"; then \
+@@ -175,3 +181,10 @@ check_var = $(shell \
+ 
+ %.abi:  %.so
+ 	abidw $< >$@
++
++%-nv.version:	%.version
++	@echo creating $@ from $<
++	@printf 'NOVERSION {\nglobal:\n' >$@
++	@grep -P '^[ \t]+[a-zA-Z_][a-zA-Z0-9_]*;' $< >>$@
++	@printf 'local:\n\t*;\n};\n' >>$@
++
+diff --git a/libdmmp/Makefile b/libdmmp/Makefile
+index 985b694b..67b6f86f 100644
+--- a/libdmmp/Makefile
++++ b/libdmmp/Makefile
+@@ -5,15 +5,14 @@
+ #
+ include ../Makefile.inc
+ 
+-LIBDMMP_VERSION=0.2.0
+-SONAME=$(LIBDMMP_VERSION)
+-DEVLIB = libdmmp.so
+-LIBS = $(DEVLIB).$(SONAME)
+-PKGFILE = libdmmp.pc
+-EXTRA_MAN_FILES = libdmmp.h.3
+-HEADERS = libdmmp/libdmmp.h
+-
+-OBJS = libdmmp.o libdmmp_mp.o libdmmp_pg.o libdmmp_path.o libdmmp_misc.o
++LIBDMMP_VERSION := 0.2.0
++SONAME := $(LIBDMMP_VERSION)
++DEVLIB := libdmmp.so
++PKGFILE := libdmmp.pc
++EXTRA_MAN_FILES := libdmmp.h.3
++HEADERS := libdmmp/libdmmp.h
++
++OBJS := libdmmp.o libdmmp_mp.o libdmmp_pg.o libdmmp_path.o libdmmp_misc.o
+ 
+ CPPFLAGS += -I$(libdmmpdir) -I$(mpathcmddir) $(shell $(PKGCONFIG) --cflags json-c)
+ CFLAGS += $(LIB_CFLAGS) -fvisibility=hidden
+diff --git a/libmpathcmd/Makefile b/libmpathcmd/Makefile
+index 0f83fe7b..f705c7f0 100644
+--- a/libmpathcmd/Makefile
++++ b/libmpathcmd/Makefile
+@@ -1,13 +1,8 @@
+ include ../Makefile.inc
+ 
+-SONAME = 0
+-DEVLIB = libmpathcmd.so
+-LIBS = $(DEVLIB).$(SONAME)
+-VERSION_SCRIPT := libmpathcmd.version
+-
++DEVLIB := libmpathcmd.so
+ CFLAGS += $(LIB_CFLAGS)
+-
+-OBJS = mpath_cmd.o
++OBJS := mpath_cmd.o
+ 
+ all:	$(DEVLIB)
+ 
+@@ -15,11 +10,6 @@ $(LIBS): $(OBJS) $(VERSION_SCRIPT)
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+ 
+-$(NV_VERSION_SCRIPT):	$(VERSION_SCRIPT)
+-	@printf 'NOVERSION {\nglobal:\n' >$@
+-	@grep -P '^[ \t]+[a-zA-Z_][a-zA-Z0-9_]*;' $< >>$@
+-	@printf 'local:\n\t*;\n};\n' >>$@
+-
+ $(LIBS:%.so.$(SONAME)=%-nv.so):	$(OBJS) $(NV_VERSION_SCRIPT)
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(NV_VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+diff --git a/libmpathpersist/Makefile b/libmpathpersist/Makefile
+index 479524d4..6f69168f 100644
+--- a/libmpathpersist/Makefile
++++ b/libmpathpersist/Makefile
+@@ -1,16 +1,11 @@
+ include ../Makefile.inc
+ 
+-SONAME = 0
+-DEVLIB = libmpathpersist.so
+-LIBS = $(DEVLIB).$(SONAME)
+-VERSION_SCRIPT:= libmpathpersist.version
+-
++DEVLIB := libmpathpersist.so
+ CFLAGS += $(LIB_CFLAGS) -I$(multipathdir) -I$(mpathutildir) -I$(mpathpersistdir) -I$(mpathcmddir)
+ LDFLAGS += -L$(multipathdir) -L$(mpathutildir) -L$(mpathcmddir)
+-
+ LIBDEPS += -lmultipath -lmpathutil -lmpathcmd -ldevmapper -lpthread -ldl
+ 
+-OBJS = mpath_persist.o mpath_updatepr.o mpath_pr_ioctl.o mpath_persist_int.o
++OBJS := mpath_persist.o mpath_updatepr.o mpath_pr_ioctl.o mpath_persist_int.o
+ 
+ all: $(DEVLIB)
+ 
+@@ -18,11 +13,6 @@ $(LIBS): $(OBJS) $(VERSION_SCRIPT)
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+ 
+-$(NV_VERSION_SCRIPT):	$(VERSION_SCRIPT)
+-	@printf 'NOVERSION {\nglobal:\n' >$@
+-	@grep -P '^[ \t]+[a-zA-Z_][a-zA-Z0-9_]*;' $< >>$@
+-	@printf 'local:\n\t*;\n};\n' >>$@
+-
+ $(LIBS:%.so.$(SONAME)=%-nv.so):	$(OBJS) $(NV_VERSION_SCRIPT)
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(NV_VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+diff --git a/libmpathutil/Makefile b/libmpathutil/Makefile
+index 4be75d2d..5665af28 100644
+--- a/libmpathutil/Makefile
++++ b/libmpathutil/Makefile
+@@ -3,14 +3,9 @@
+ #
+ include ../Makefile.inc
+ 
+-SONAME = 0
+-DEVLIB = libmpathutil.so
+-LIBS = $(DEVLIB).$(SONAME)
+-VERSION_SCRIPT := libmpathutil.version
+-
++DEVLIB := libmpathutil.so
+ CPPFLAGS += -I. -I$(multipathdir) -I$(mpathcmddir) $(SYSTEMD_CPPFLAGS)
+ CFLAGS += $(LIB_CFLAGS) -D_GNU_SOURCE
+-
+ LIBDEPS += -lpthread -ldl -ludev -L$(mpathcmddir) -lmpathcmd $(SYSTEMD_LIBDEPS)
+ 
+ # object files referencing MULTIPATH_DIR or CONFIG_DIR
+@@ -22,8 +17,6 @@ OBJS := parser.o vector.o util.o debug.o time-util.o \
+ 
+ all:	$(DEVLIB)
+ 
+-make_static = $(shell sed '/^static/!s/^\([a-z]\{1,\} \)/static \1/' <$1 >$2)
+-
+ $(LIBS): $(OBJS) $(VERSION_SCRIPT)
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+@@ -31,11 +24,6 @@ $(LIBS): $(OBJS) $(VERSION_SCRIPT)
+ $(DEVLIB): $(LIBS)
+ 	$(LN) $(LIBS) $@
+ 
+-$(NV_VERSION_SCRIPT):	$(VERSION_SCRIPT)
+-	@printf 'NOVERSION {\nglobal:\n' >$@
+-	@grep -P '^[ \t]+[a-zA-Z_][a-zA-Z0-9_]*;' $< >>$@
+-	@printf 'local:\n\t*;\n};\n' >>$@
+-
+ $(LIBS:%.so.$(SONAME)=%-nv.so):	$(OBJS) $(NV_VERSION_SCRIPT)
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(NV_VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+diff --git a/libmpathvalid/Makefile b/libmpathvalid/Makefile
+index 5dbfb923..bd4ccc0d 100644
+--- a/libmpathvalid/Makefile
++++ b/libmpathvalid/Makefile
+@@ -1,17 +1,12 @@
+ include ../Makefile.inc
+ 
+-SONAME = 0
+-DEVLIB = libmpathvalid.so
+-LIBS = $(DEVLIB).$(SONAME)
+-VERSION_SCRIPT := libmpathvalid.version
+-
++DEVLIB := libmpathvalid.so
+ CPPFLAGS += -I$(multipathdir) -I$(mpathutildir) -I$(mpathcmddir)
+ CFLAGS += $(LIB_CFLAGS)
+-
+ LIBDEPS += -lpthread -ldevmapper -ldl -L$(multipathdir) -lmultipath \
+ 	   -L$(mpathutildir) -lmpathutil -L$(mpathcmddir) -lmpathcmd -ludev
+ 
+-OBJS = mpath_valid.o
++OBJS := mpath_valid.o
+ 
+ all: $(LIBS)
+ 
+@@ -20,11 +15,6 @@ $(LIBS): $(OBJS) $(VERSION_SCRIPT)
+ 		-Wl,--version-script=$(VERSION_SCRIPT)
+ 	$(LN) $(LIBS) $(DEVLIB)
+ 
+-$(NV_VERSION_SCRIPT):	$(VERSION_SCRIPT)
+-	@printf 'NOVERSION {\nglobal:\n' >$@
+-	@grep -P '^[ \t]+[a-zA-Z_][a-zA-Z0-9_]*;' $< >>$@
+-	@printf 'local:\n\t*;\n};\n' >>$@
+-
+ $(LIBS:%.so.$(SONAME)=%-nv.so):	$(OBJS) $(NV_VERSION_SCRIPT)
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(NV_VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)
+diff --git a/libmultipath/Makefile b/libmultipath/Makefile
+index 009f26a3..9dc229ae 100644
+--- a/libmultipath/Makefile
++++ b/libmultipath/Makefile
+@@ -3,14 +3,9 @@
+ #
+ include ../Makefile.inc
+ 
+-SONAME = 0
+-DEVLIB = libmultipath.so
+-LIBS = $(DEVLIB).$(SONAME)
+-VERSION_SCRIPT := libmultipath.version
+-
++DEVLIB := libmultipath.so
+ CPPFLAGS += -I$(mpathutildir) -I$(mpathcmddir) -I$(nvmedir) -D_GNU_SOURCE $(SYSTEMD_CPPFLAGS)
+ CFLAGS += $(LIB_CFLAGS)
+-
+ LIBDEPS += -lpthread -ldl -ldevmapper -ludev -L$(mpathutildir) -lmpathutil -L$(mpathcmddir) -lmpathcmd \
+ 	-lurcu -laio $(SYSTEMD_LIBDEPS)
+ 
+@@ -85,11 +80,6 @@ $(LIBS): $(OBJS) $(VERSION_SCRIPT)
+ $(DEVLIB): $(LIBS)
+ 	$(LN) $(LIBS) $@
+ 
+-$(NV_VERSION_SCRIPT):	$(VERSION_SCRIPT)
+-	@printf 'NOVERSION {\nglobal:\n' >$@
+-	@grep -P '^[ \t]+[a-zA-Z_][a-zA-Z0-9_]*;' $< >>$@
+-	@printf 'local:\n\t*;\n};\n' >>$@
+-
+ $(LIBS:%.so.$(SONAME)=%-nv.so):	$(OBJS) $(NV_VERSION_SCRIPT)
+ 	$(CC) $(LDFLAGS) $(SHARED_FLAGS) -Wl,-soname=$@ \
+ 		-Wl,--version-script=$(NV_VERSION_SCRIPT) -o $@ $(OBJS) $(LIBDEPS)

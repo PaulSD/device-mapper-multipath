@@ -1,0 +1,129 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 16:40:27 +0200
+Subject: [PATCH] multipath-tools: Makefile.inc: set systemd-specific flags
+
+Define SYSTEMD_CPPFLAGS and SYSTEMD_LIBDEPS, and use them in Makefiles.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc          |  3 +++
+ libmpathutil/Makefile | 13 ++-----------
+ libmultipath/Makefile | 14 +++-----------
+ multipathd/Makefile   | 25 ++++++++-----------------
+ 4 files changed, 16 insertions(+), 39 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 77790ddf..2cf25745 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -97,6 +97,9 @@ ERROR_DISCARDED_QUALIFIERS := $(call TEST_CC_OPTION,-Werror=discarded-qualifiers
+ WNOCLOBBERED := $(call TEST_CC_OPTION,-Wno-clobbered -Wno-error=clobbered,)
+ WFORMATOVERFLOW := $(call TEST_CC_OPTION,-Wformat-overflow=2,)
+ 
++SYSTEMD_CPPFLAGS := $(if $(SYSTEMD),-DUSE_SYSTEMD=$(SYSTEMD))
++SYSTEMD_LIBDEPS := $(if $(SYSTEMD),$(if $(shell test $(SYSTEMD) -gt 209 && echo 1),-lsystemd,-lsystemd-daemon))
++
+ OPTFLAGS	:= -O2 -g $(STACKPROT) --param=ssp-buffer-size=4
+ WARNFLAGS	:= -Werror -Wall -Wextra -Wformat=2 $(WFORMATOVERFLOW) -Werror=implicit-int \
+ 		  -Werror=implicit-function-declaration -Werror=format-security \
+diff --git a/libmpathutil/Makefile b/libmpathutil/Makefile
+index c913c761..4be75d2d 100644
+--- a/libmpathutil/Makefile
++++ b/libmpathutil/Makefile
+@@ -8,19 +8,10 @@ DEVLIB = libmpathutil.so
+ LIBS = $(DEVLIB).$(SONAME)
+ VERSION_SCRIPT := libmpathutil.version
+ 
+-CPPFLAGS += -I. -I$(multipathdir) -I$(mpathcmddir)
++CPPFLAGS += -I. -I$(multipathdir) -I$(mpathcmddir) $(SYSTEMD_CPPFLAGS)
+ CFLAGS += $(LIB_CFLAGS) -D_GNU_SOURCE
+ 
+-LIBDEPS += -lpthread -ldl -ludev -L$(mpathcmddir) -lmpathcmd
+-
+-ifdef SYSTEMD
+-	CPPFLAGS += -DUSE_SYSTEMD=$(SYSTEMD)
+-	ifeq ($(shell test $(SYSTEMD) -gt 209 && echo 1), 1)
+-		LIBDEPS += -lsystemd
+-	else
+-		LIBDEPS += -lsystemd-daemon
+-	endif
+-endif
++LIBDEPS += -lpthread -ldl -ludev -L$(mpathcmddir) -lmpathcmd $(SYSTEMD_LIBDEPS)
+ 
+ # object files referencing MULTIPATH_DIR or CONFIG_DIR
+ # they need to be recompiled for unit tests
+diff --git a/libmultipath/Makefile b/libmultipath/Makefile
+index c7d4fc99..009f26a3 100644
+--- a/libmultipath/Makefile
++++ b/libmultipath/Makefile
+@@ -8,19 +8,11 @@ DEVLIB = libmultipath.so
+ LIBS = $(DEVLIB).$(SONAME)
+ VERSION_SCRIPT := libmultipath.version
+ 
+-CPPFLAGS += -I$(mpathutildir) -I$(mpathcmddir) -I$(nvmedir) -D_GNU_SOURCE
++CPPFLAGS += -I$(mpathutildir) -I$(mpathcmddir) -I$(nvmedir) -D_GNU_SOURCE $(SYSTEMD_CPPFLAGS)
+ CFLAGS += $(LIB_CFLAGS)
+ 
+-LIBDEPS += -lpthread -ldl -ldevmapper -ludev -L$(mpathutildir) -lmpathutil -L$(mpathcmddir) -lmpathcmd -lurcu -laio
+-
+-ifdef SYSTEMD
+-	CPPFLAGS += -DUSE_SYSTEMD=$(SYSTEMD)
+-	ifeq ($(shell test $(SYSTEMD) -gt 209 && echo 1), 1)
+-		LIBDEPS += -lsystemd
+-	else
+-		LIBDEPS += -lsystemd-daemon
+-	endif
+-endif
++LIBDEPS += -lpthread -ldl -ldevmapper -ludev -L$(mpathutildir) -lmpathutil -L$(mpathcmddir) -lmpathcmd \
++	-lurcu -laio $(SYSTEMD_LIBDEPS)
+ 
+ ifneq ($(call check_func,dm_task_no_flush,$(devmapper_incdir)/libdevmapper.h),0)
+ 	CPPFLAGS += -DLIBDM_API_FLUSH
+diff --git a/multipathd/Makefile b/multipathd/Makefile
+index 78aefee0..cdda371b 100644
+--- a/multipathd/Makefile
++++ b/multipathd/Makefile
+@@ -18,14 +18,17 @@ endif
+ CPPFLAGS += -I$(multipathdir) -I$(mpathutildir) -I$(mpathpersistdir) -I$(mpathcmddir) -I$(thirdpartydir) \
+ 	$(shell $(PKGCONFIG) --modversion liburcu 2>/dev/null | \
+ 		awk -F. '{ printf("-DURCU_VERSION=0x%06x", 256 * ( 256 * $$1 + $$2) + $$3); }') \
+-	-DBINDIR='"$(bindir)"'
++	-DBINDIR='"$(bindir)"' $(SYSTEMD_CPPFLAGS)
++ifeq ($(ENABLE_DMEVENTS_POLL),0)
++	CPPFLAGS += -DNO_DMEVENTS_POLL
++endif
+ CFLAGS += $(BIN_CFLAGS)
+ LDFLAGS += $(BIN_LDFLAGS)
+ 
+-CLI_LIBDEPS :=  -L$(mpathutildir) -lmpathutil -L$(mpathcmddir) -lmpathcmd -ludev -ldl -lurcu -lpthread
+-LIBDEPS += -L$(multipathdir) -lmultipath -L$(mpathpersistdir) -lmpathpersist \
+-	   -ldevmapper $(CLI_LIBDEPS)
+-
++CLI_LIBDEPS	:=  -L$(mpathutildir) -lmpathutil -L$(mpathcmddir) -lmpathcmd \
++		-ludev -ldl -lurcu -lpthread $(SYSTEMD_LIBDEPS)
++LIBDEPS		:= -L$(multipathdir) -lmultipath -L$(mpathpersistdir) -lmpathpersist \
++	  	-ldevmapper $(CLI_LIBDEPS)
+ 
+ ifeq ($(READLINE),libedit)
+ RL_CPPFLAGS = -DUSE_LIBEDIT
+@@ -40,18 +43,6 @@ RL_CPPFLAGS += -DBROKEN_RL_COMPLETION_FUNC
+ endif
+ endif
+ 
+-ifdef SYSTEMD
+-	CPPFLAGS += -DUSE_SYSTEMD=$(SYSTEMD)
+-	ifeq ($(shell test $(SYSTEMD) -gt 209 && echo 1), 1)
+-		CLI_LIBDEPS += -lsystemd
+-	else
+-		CLI_LIBDEPS += -lsystemd-daemon
+-	endif
+-endif
+-ifeq ($(ENABLE_DMEVENTS_POLL),0)
+-	CPPFLAGS += -DNO_DMEVENTS_POLL
+-endif
+-
+ OBJS = main.o pidfile.o uxlsnr.o uxclnt.o cli.o cli_handlers.o waiter.o \
+        dmevents.o init_unwinder.o
+ 

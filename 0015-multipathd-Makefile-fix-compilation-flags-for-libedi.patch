@@ -1,0 +1,54 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 18:51:52 +0200
+Subject: [PATCH] multipathd: Makefile: fix compilation flags for libedit
+
+The workaround for the wrong prototype in older libedit versions
+had ended up in the code for libreadline. Fix it, and use simple
+make variables.
+
+Fixes: 2bd80f6 ("multipathd: fix incompatible pointer type error with libedit")
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipathd/Makefile | 16 +++++++---------
+ 1 file changed, 7 insertions(+), 9 deletions(-)
+
+diff --git a/multipathd/Makefile b/multipathd/Makefile
+index cdda371b..7221b6af 100644
+--- a/multipathd/Makefile
++++ b/multipathd/Makefile
+@@ -31,17 +31,17 @@ LIBDEPS		:= -L$(multipathdir) -lmultipath -L$(mpathpersistdir) -lmpathpersist \
+ 	  	-ldevmapper $(CLI_LIBDEPS)
+ 
+ ifeq ($(READLINE),libedit)
+-RL_CPPFLAGS = -DUSE_LIBEDIT
+-RL_LIBDEPS += -ledit
+-endif
+-ifeq ($(READLINE),libreadline)
+-RL_CPPFLAGS += -DUSE_LIBREADLINE
+-RL_LIBDEPS += -lreadline
+-# See comment in uxclnt.c
++RL_CPPFLAGS	:= -DUSE_LIBEDIT
++RL_LIBDEPS	:= -ledit
++# See comment in multipathc.c
+ ifeq ($(shell sed -En 's/.*\<Function\s*\*rl_completion_entry_function;.*/yes/p' /usr/include/editline/readline.h),yes)
+ RL_CPPFLAGS += -DBROKEN_RL_COMPLETION_FUNC
+ endif
+ endif
++ifeq ($(READLINE),libreadline)
++RL_CPPFLAGS	:= -DUSE_LIBREADLINE
++RL_LIBDEPS	:= -lreadline
++endif
+ 
+ OBJS = main.o pidfile.o uxlsnr.o uxclnt.o cli.o cli_handlers.o waiter.o \
+        dmevents.o init_unwinder.o
+@@ -52,8 +52,6 @@ ifeq ($(FPIN_SUPPORT),1)
+ OBJS += fpin_handlers.o
+ endif
+ 
+-
+-
+ EXEC = multipathd
+ CLI = multipathc
+ 

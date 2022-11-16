@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 28 Oct 2022 18:22:59 +0200
+Subject: [PATCH] fixup! Makefile.inc: fix man and include paths
+
+Paths would now be wrong with the default (empty) prefix.
+Fix it.
+
+Fixes: 2b2885c ("Makefile.inc: fix man and include paths")
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 4d843ce5..32001434 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -89,9 +89,9 @@ modulesloaddir  = $(prefix)/$(SYSTEMDPATH)/modules-load.d
+ multipathdir	= $(TOPDIR)/libmultipath
+ daemondir       = $(TOPDIR)/multipathd
+ mpathutildir	= $(TOPDIR)/libmpathutil
+-man8dir		= $(prefix)/share/man/man8
+-man5dir		= $(prefix)/share/man/man5
+-man3dir		= $(prefix)/share/man/man3
++man8dir		= $(usr_prefix)/share/man/man8
++man5dir		= $(usr_prefix)/share/man/man5
++man3dir		= $(usr_prefix)/share/man/man3
+ syslibdir	= $(prefix)/$(LIB)
+ usrlibdir	= $(usr_prefix)/$(LIB)
+ libdir		= $(prefix)/$(LIB)/multipath
+@@ -102,7 +102,7 @@ mpathvaliddir	= $(TOPDIR)/libmpathvalid
+ thirdpartydir	= $(TOPDIR)/third-party
+ libdmmpdir	= $(TOPDIR)/libdmmp
+ nvmedir		= $(TOPDIR)/libmultipath/nvme
+-includedir	= $(prefix)/include
++includedir	= $(usr_prefix)/include
+ pkgconfdir	= $(usrlibdir)/pkgconfig
+ plugindir       := $(prefix)/$(LIB)/multipath
+ configdir       := $(prefix)/etc/multipath/conf.d

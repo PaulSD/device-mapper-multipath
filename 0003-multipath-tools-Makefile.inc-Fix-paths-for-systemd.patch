@@ -1,0 +1,65 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 27 Oct 2022 17:09:52 +0200
+Subject: [PATCH] multipath-tools: Makefile.inc: Fix paths for systemd
+
+With prefix=/usr, systemd files were installed under /usr/usr/lib,
+which is bogus. Clean this up, and document how to handle systemd's
+"rootprefix" options. Remove the previous SYSTEMDPATH option.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc | 21 ++++++++++++---------
+ 1 file changed, 12 insertions(+), 9 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 32001434..351358a9 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -53,10 +53,6 @@ ifndef SYSTEMD
+ 	endif
+ endif
+ 
+-ifndef SYSTEMDPATH
+-	SYSTEMDPATH=usr/lib
+-endif
+-
+ ifndef DEVMAPPER_INCDIR
+ 	ifeq ($(shell $(PKGCONFIG) --modversion devmapper >/dev/null 2>&1 && echo 1), 1)
+ 		DEVMAPPER_INCDIR = $(shell $(PKGCONFIG) --variable=includedir devmapper)
+@@ -78,14 +74,22 @@ ifndef LINUX_HEADERS_INCDIR
+ 	LINUX_HEADERS_INCDIR = /usr/include
+ endif
+ 
++# Paths. All these can be overridden on the "make" command line.
+ prefix		=
++# Prefix for binaries
+ exec_prefix	= $(prefix)
++# Prefix for non-essential libraries (libdmmp)
+ usr_prefix	= $(prefix)
++# Where to install systemd-related files. systemd is usually installed under /usr
++# Note: some systemd installations use separate "prefix" and "rootprefix".
++# In this case, override only unitdir to use systemd's "rootprefix" instead of $(systemd_prefix)
++systemd_prefix  := /usr
++unitdir		:= $(systemd_prefix)/lib/systemd/system
++tmpfilesdir	:= $(systemd_prefix)/lib/tmpfiles.d
++modulesloaddir	:= $(systemd_prefix)/lib/modules-load.d
++libudevdir	:= $(systemd_prefix)/lib/udev
++udevrulesdir	:= $(libudevdir)/rules.d
+ bindir		= $(exec_prefix)/sbin
+-libudevdir	= $(prefix)/$(SYSTEMDPATH)/udev
+-tmpfilesdir	= $(prefix)/$(SYSTEMDPATH)/tmpfiles.d
+-udevrulesdir	= $(libudevdir)/rules.d
+-modulesloaddir  = $(prefix)/$(SYSTEMDPATH)/modules-load.d
+ multipathdir	= $(TOPDIR)/libmultipath
+ daemondir       = $(TOPDIR)/multipathd
+ mpathutildir	= $(TOPDIR)/libmpathutil
+@@ -95,7 +99,6 @@ man3dir		= $(usr_prefix)/share/man/man3
+ syslibdir	= $(prefix)/$(LIB)
+ usrlibdir	= $(usr_prefix)/$(LIB)
+ libdir		= $(prefix)/$(LIB)/multipath
+-unitdir		= $(prefix)/$(SYSTEMDPATH)/systemd/system
+ mpathpersistdir	= $(TOPDIR)/libmpathpersist
+ mpathcmddir	= $(TOPDIR)/libmpathcmd
+ mpathvaliddir	= $(TOPDIR)/libmpathvalid
