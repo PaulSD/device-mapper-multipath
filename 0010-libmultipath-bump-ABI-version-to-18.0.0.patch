@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Wed, 25 Jan 2023 11:35:38 +0100
+Subject: [PATCH] libmultipath: bump ABI version to 18.0.0
+
+Commit 6b81153 ("libmultipath: make prflag an enum") changed
+the size and member offsets of struct multipath.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/libmultipath.version | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmultipath/libmultipath.version b/libmultipath/libmultipath.version
+index faef2a2d..015623cc 100644
+--- a/libmultipath/libmultipath.version
++++ b/libmultipath/libmultipath.version
+@@ -43,7 +43,7 @@ LIBMPATHCOMMON_1.0.0 {
+ 	put_multipath_config;
+ };
+ 
+-LIBMULTIPATH_17.0.0 {
++LIBMULTIPATH_18.0.0 {
+ global:
+ 	/* symbols referenced by multipath and multipathd */
+ 	add_foreign;

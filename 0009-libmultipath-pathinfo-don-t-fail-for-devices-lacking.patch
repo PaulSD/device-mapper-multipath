@@ -1,0 +1,77 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Wed, 30 Nov 2022 21:07:45 +0100
+Subject: [PATCH] libmultipath: pathinfo: don't fail for devices lacking
+ INQUIRY properties
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Some SAS devices (e.g. Seagate factory recertified 'white label' drives) may
+come with the Vendor field blank. This causes Multipath to fail to
+complete the discovery of those devices.
+
+Such devices violate the SCSI Spec. From the SPC-6, §6.7.2:
+"The T10 VENDOR IDENTIFICATION field contains eight bytes of left-aligned
+ASCII data (see 4.3.1) identifying the manufacturer of the logical unit. The
+T10 vendor identification shall be one assigned by INCITS.".
+
+But as we don't identify WWIDs by vendor and product, we don't need to discard
+these devices right away. We can go ahead fingers crossed, and hope that the
+the other VPD pages for the device are correct.
+
+We obviously can't look up reasonable device properties for such devices in
+our hwtable. It would be up to the user to deal with that.
+
+Reported by: Allyn Malventano (github.com/opensvc/multipath-tools/issues/56)
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/discovery.c | 22 +++++++++++++---------
+ 1 file changed, 13 insertions(+), 9 deletions(-)
+
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index d9ee2cb9..67ac0e6d 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -1472,6 +1472,7 @@ scsi_sysfs_pathinfo (struct path *pp, const struct _vector *hwtable)
+ {
+ 	struct udev_device *parent;
+ 	const char *attr_path = NULL;
++	static const char unknown[] = "UNKNOWN";
+ 
+ 	parent = pp->udev;
+ 	while (parent) {
+@@ -1492,19 +1493,22 @@ scsi_sysfs_pathinfo (struct path *pp, const struct _vector *hwtable)
+ 	if (!attr_path || pp->sg_id.host_no == -1)
+ 		return PATHINFO_FAILED;
+ 
+-	if (sysfs_get_vendor(parent, pp->vendor_id, SCSI_VENDOR_SIZE) <= 0)
+-		return PATHINFO_FAILED;;
+-
++	if (sysfs_get_vendor(parent, pp->vendor_id, SCSI_VENDOR_SIZE) <= 0) {
++		condlog(1, "%s: broken device without vendor ID", pp->dev);
++		strlcpy(pp->vendor_id, unknown, SCSI_VENDOR_SIZE);
++	}
+ 	condlog(3, "%s: vendor = %s", pp->dev, pp->vendor_id);
+ 
+-	if (sysfs_get_model(parent, pp->product_id, PATH_PRODUCT_SIZE) <= 0)
+-		return PATHINFO_FAILED;;
+-
++	if (sysfs_get_model(parent, pp->product_id, PATH_PRODUCT_SIZE) <= 0) {
++		condlog(1, "%s: broken device without product ID", pp->dev);
++		strlcpy(pp->product_id, unknown, PATH_PRODUCT_SIZE);
++	}
+ 	condlog(3, "%s: product = %s", pp->dev, pp->product_id);
+ 
+-	if (sysfs_get_rev(parent, pp->rev, PATH_REV_SIZE) < 0)
+-		return PATHINFO_FAILED;;
+-
++	if (sysfs_get_rev(parent, pp->rev, PATH_REV_SIZE) < 0) {
++		condlog(2, "%s: broken device without revision", pp->dev);
++		strlcpy(pp->rev, unknown, PATH_REV_SIZE);
++	}
+ 	condlog(3, "%s: rev = %s", pp->dev, pp->rev);
+ 
+ 	/*

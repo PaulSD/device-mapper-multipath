@@ -43,10 +43,10 @@ index 8d15d2ea..eff690fd 100644
  				udev_device_get_properties_list_entry(udev)) {
  
 diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
-index 1fea9d5a..eef3c605 100644
+index b4dccd1b..284282c6 100644
 --- a/multipath/multipath.conf.5
 +++ b/multipath/multipath.conf.5
-@@ -1353,9 +1353,14 @@ keywords. Both are regular expressions. For a full description of these keywords
+@@ -1367,9 +1367,14 @@ keywords. Both are regular expressions. For a full description of these keywords
  Regular expression for an udev property. All
  devices that have matching udev properties will be excluded/included.
  The handling of the \fIproperty\fR keyword is special,
@@ -62,7 +62,7 @@ index 1fea9d5a..eef3c605 100644
  .
  .RS
  .PP
-@@ -1366,10 +1371,6 @@ Blacklisting by missing properties is only applied to devices which do have the
+@@ -1380,10 +1385,6 @@ Blacklisting by missing properties is only applied to devices which do have the
  property specified by \fIuid_attribute\fR (e.g. \fIID_SERIAL\fR)
  set. Previously, it was applied to every device, possibly causing devices to be
  blacklisted because of temporary I/O error conditions.

@@ -12,7 +12,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index 15f0b9f6..881c1d52 100644
+index c07bcb0c..e59313c6 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
 @@ -12,7 +12,7 @@

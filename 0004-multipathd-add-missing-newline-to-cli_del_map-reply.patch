@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Tue, 20 Dec 2022 17:41:13 -0600
+Subject: [PATCH] multipathd: add missing newline to cli_del_map reply
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+---
+ multipathd/cli_handlers.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/multipathd/cli_handlers.c b/multipathd/cli_handlers.c
+index ec5db1b8..44bf43df 100644
+--- a/multipathd/cli_handlers.c
++++ b/multipathd/cli_handlers.c
+@@ -760,7 +760,7 @@ cli_del_map (void * v, struct strbuf *reply, void * data)
+ 	}
+ 	rc = ev_remove_map(param, alias, minor, vecs);
+ 	if (rc == 2)
+-		append_strbuf_str(reply, "delayed");
++		append_strbuf_str(reply, "delayed\n");
+ 
+ 	free(alias);
+ 	return rc;

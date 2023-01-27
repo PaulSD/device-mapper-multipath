@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Benjamin Marzinski <bmarzins@redhat.com>
+Date: Tue, 20 Dec 2022 17:41:14 -0600
+Subject: [PATCH] libmultipath: skip extra vector work in remove_maps
+
+Instead of repeatedly removing the first vector element, and shifting
+the rest to fill in, call remove_map() without a vector, so it just
+frees the devices. The vector will be completely cleaned up by
+vector_free() immediately afterwards.
+
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+---
+ libmultipath/structs_vec.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/libmultipath/structs_vec.c b/libmultipath/structs_vec.c
+index 5a618767..f3fdc5a6 100644
+--- a/libmultipath/structs_vec.c
++++ b/libmultipath/structs_vec.c
+@@ -392,10 +392,8 @@ remove_maps(struct vectors * vecs)
+ 	if (!vecs)
+ 		return;
+ 
+-	vector_foreach_slot (vecs->mpvec, mpp, i) {
+-		remove_map(mpp, vecs->pathvec, vecs->mpvec);
+-		i--;
+-	}
++	vector_foreach_slot (vecs->mpvec, mpp, i)
++		remove_map(mpp, vecs->pathvec, NULL);
+ 
+ 	vector_free(vecs->mpvec);
+ 	vecs->mpvec = NULL;
