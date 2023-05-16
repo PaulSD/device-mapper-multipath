@@ -57,7 +57,7 @@ index 87947469..0dc89c16 100644
  enum devtypes {
  	DEV_NONE,
 diff --git a/multipath/multipath.rules.in b/multipath/multipath.rules.in
-index 8d3cf33a..5c4447a2 100644
+index 6f123760..70b69a06 100644
 --- a/multipath/multipath.rules.in
 +++ b/multipath/multipath.rules.in
 @@ -9,6 +9,7 @@ IMPORT{cmdline}="nompath"
@@ -82,7 +82,7 @@ index bdf102eb..a16a0bd5 100644
  .
  .\" ----------------------------------------------------------------------------
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
-index aec62dbb..d76f94f9 100644
+index 5a9cde12..311f49c7 100644
 --- a/multipathd/multipathd.service
 +++ b/multipathd/multipathd.service
 @@ -6,6 +6,7 @@ Wants=systemd-udevd-kernel.socket

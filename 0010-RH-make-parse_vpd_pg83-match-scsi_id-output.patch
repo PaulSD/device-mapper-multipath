@@ -14,7 +14,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  2 files changed, 8 insertions(+), 10 deletions(-)
 
 diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
-index 67ac0e6d..7fdbc1c3 100644
+index 6865cd92..72825829 100644
 --- a/libmultipath/discovery.c
 +++ b/libmultipath/discovery.c
 @@ -1177,13 +1177,9 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,
@@ -45,7 +45,7 @@ index 67ac0e6d..7fdbc1c3 100644
  		case 0x1:
  			/* T-10 Vendor ID: Prio 2 */
 diff --git a/tests/vpd.c b/tests/vpd.c
-index a7d2092c..2366cfba 100644
+index 1b2d62d6..7309b5c5 100644
 --- a/tests/vpd.c
 +++ b/tests/vpd.c
 @@ -231,11 +231,13 @@ static const char * const str_prefix[] = {

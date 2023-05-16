@@ -20,7 +20,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 59 insertions(+), 3 deletions(-)
 
 diff --git a/multipath/main.c b/multipath/main.c
-index b9f360b4..5eb752ee 100644
+index 90f940f1..3549740a 100644
 --- a/multipath/main.c
 +++ b/multipath/main.c
 @@ -120,7 +120,7 @@ usage (char * progname)
@@ -92,7 +92,7 @@ index b9f360b4..5eb752ee 100644
  static int
  configure (struct config *conf, enum mpath_cmds cmd,
  	   enum devtypes dev_type, char *devpath)
-@@ -840,7 +886,7 @@ main (int argc, char *argv[])
+@@ -842,7 +888,7 @@ main (int argc, char *argv[])
  	conf->force_sync = 1;
  	if (atexit(cleanup_vecs))
  		condlog(1, "failed to register cleanup handler for vecs: %m");
@@ -101,7 +101,7 @@ index b9f360b4..5eb752ee 100644
  		switch(arg) {
  		case 'v':
  			if (!isdigit(optarg[0])) {
-@@ -911,6 +957,10 @@ main (int argc, char *argv[])
+@@ -913,6 +959,10 @@ main (int argc, char *argv[])
  		case 'T':
  			cmd = CMD_DUMP_CONFIG;
  			break;
@@ -138,7 +138,7 @@ index 88149d53..072a03ee 100644
  Remove the WWID for the specified device from the WWIDs file.
  .
 diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
-index d76f94f9..bb5f383a 100644
+index 311f49c7..5324f4bc 100644
 --- a/multipathd/multipathd.service
 +++ b/multipathd/multipathd.service
 @@ -17,6 +17,7 @@ ConditionVirtualization=!container
