@@ -1,0 +1,109 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 22 Aug 2023 15:32:17 +0200
+Subject: [PATCH] libmultipath: add global variable for current bindings
+
+Add a variable global_bindings that holds the currently active vector of
+bindings. This variable is freed at program exit.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/alias.c              | 11 +++++++++--
+ libmultipath/alias.h              |  1 +
+ libmultipath/libmultipath.version |  1 +
+ multipath/main.c                  |  2 ++
+ multipathd/main.c                 |  1 +
+ 5 files changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/libmultipath/alias.c b/libmultipath/alias.c
+index 9e9ac563..dd363fd8 100644
+--- a/libmultipath/alias.c
++++ b/libmultipath/alias.c
+@@ -511,6 +511,7 @@ static void _free_binding(struct binding *bdg)
+  * an abstract type.
+  */
+ typedef struct _vector Bindings;
++static Bindings global_bindings = { .allocated = 0 };
+ 
+ static void free_bindings(Bindings *bindings)
+ {
+@@ -522,6 +523,11 @@ static void free_bindings(Bindings *bindings)
+ 	vector_reset(bindings);
+ }
+ 
++void cleanup_bindings(void)
++{
++	free_bindings(&global_bindings);
++}
++
+ enum {
+ 	BINDING_EXISTS,
+ 	BINDING_CONFLICT,
+@@ -751,7 +757,6 @@ int check_alias_settings(const struct config *conf)
+ 	pthread_cleanup_pop(1);
+ 	pthread_cleanup_pop(1);
+ 
+-	pthread_cleanup_push_cast(free_bindings, &bindings);
+ 	fd = open_file(conf->bindings_file, &can_write, BINDINGS_FILE_HEADER);
+ 	if (fd != -1) {
+ 		FILE *file = fdopen(fd, "r");
+@@ -771,6 +776,8 @@ int check_alias_settings(const struct config *conf)
+ 			close(fd);
+ 		}
+ 	}
+-	pthread_cleanup_pop(1);
++
++	cleanup_bindings();
++	global_bindings = bindings;
+ 	return rc;
+ }
+diff --git a/libmultipath/alias.h b/libmultipath/alias.h
+index fa332233..37b49d9c 100644
+--- a/libmultipath/alias.h
++++ b/libmultipath/alias.h
+@@ -9,5 +9,6 @@ char *get_user_friendly_alias(const char *wwid, const char *file,
+ 
+ struct config;
+ int check_alias_settings(const struct config *);
++void cleanup_bindings(void);
+ 
+ #endif /* _ALIAS_H */
+diff --git a/libmultipath/libmultipath.version b/libmultipath/libmultipath.version
+index a7b8c337..ddd302f5 100644
+--- a/libmultipath/libmultipath.version
++++ b/libmultipath/libmultipath.version
+@@ -64,6 +64,7 @@ global:
+ 	checker_name;
+ 	checker_state_name;
+ 	check_foreign;
++	cleanup_bindings;
+ 	cleanup_lock;
+ 	coalesce_paths;
+ 	count_active_paths;
+diff --git a/multipath/main.c b/multipath/main.c
+index b78f3162..45e9745f 100644
+--- a/multipath/main.c
++++ b/multipath/main.c
+@@ -843,6 +843,8 @@ main (int argc, char *argv[])
+ 	conf->force_sync = 1;
+ 	if (atexit(cleanup_vecs))
+ 		condlog(1, "failed to register cleanup handler for vecs: %m");
++	if (atexit(cleanup_bindings))
++		condlog(1, "failed to register cleanup handler for bindings: %m");
+ 	while ((arg = getopt(argc, argv, ":adDcChl::eFfM:v:p:b:BrR:itTquUwW")) != EOF ) {
+ 		switch(arg) {
+ 		case 'v':
+diff --git a/multipathd/main.c b/multipathd/main.c
+index 2e02a548..214ed4ae 100644
+--- a/multipathd/main.c
++++ b/multipathd/main.c
+@@ -3325,6 +3325,7 @@ static void cleanup_child(void)
+ {
+ 	cleanup_threads();
+ 	cleanup_vecs();
++	cleanup_bindings();
+ 	if (poll_dmevents)
+ 		cleanup_dmevent_waiter();
+ 

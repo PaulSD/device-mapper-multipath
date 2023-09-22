@@ -13,7 +13,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 29 insertions(+), 2 deletions(-)
 
 diff --git a/libmultipath/prioritizers/ana.c b/libmultipath/prioritizers/ana.c
-index b5c7873d..e139360c 100644
+index e9827dca..80a32aa3 100644
 --- a/libmultipath/prioritizers/ana.c
 +++ b/libmultipath/prioritizers/ana.c
 @@ -24,6 +24,7 @@
@@ -68,7 +68,7 @@ index b5c7873d..e139360c 100644
  static int get_ana_info(struct path * pp)
  {
  	int	rc;
-@@ -210,8 +234,11 @@ int getprio(struct path *pp, __attribute__((unused)) char *args,
+@@ -209,8 +233,11 @@ int getprio(struct path *pp, __attribute__((unused)) char *args)
  
  	if (pp->fd < 0)
  		rc = -ANA_ERR_NO_INFORMATION;

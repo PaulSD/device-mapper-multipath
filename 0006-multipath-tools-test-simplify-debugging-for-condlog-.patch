@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Wed, 23 Aug 2023 22:56:41 +0200
+Subject: [PATCH] multipath-tools test: simplify debugging for condlog mismatch
+
+If there's a mismatch between expected and actual log message,
+print both messages.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ tests/test-log.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/tests/test-log.c b/tests/test-log.c
+index c1745872..63516999 100644
+--- a/tests/test-log.c
++++ b/tests/test-log.c
+@@ -16,12 +16,14 @@ void __wrap_dlog (int prio, const char * fmt, ...)
+ 	va_list ap;
+ 	char *expected;
+ 
+-	check_expected(prio);
+ 	va_start(ap, fmt);
+ 	vsnprintf(buff, MAX_MSG_SIZE, fmt, ap);
+ 	va_end(ap);
+ 	fprintf(stderr, "%s(%d): %s", __func__, prio, buff);
+ 	expected = mock_ptr_type(char *);
++	if (memcmp(expected, buff, strlen(expected)))
++		fprintf(stderr, "%s(expected): %s", __func__, expected);
++	check_expected(prio);
+ 	assert_memory_equal(buff, expected, strlen(expected));
+ }
+ 

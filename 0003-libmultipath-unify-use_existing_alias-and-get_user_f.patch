@@ -1,0 +1,207 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 22 Aug 2023 22:00:58 +0200
+Subject: [PATCH] libmultipath: unify use_existing_alias() and
+ get_user_friendly_alias()
+
+These functions are only called from select_alias(). The logic
+is more obvious when unified in a single function.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/alias.c   | 82 ++++++++++++------------------------------
+ libmultipath/alias.h   |  9 ++---
+ libmultipath/propsel.c | 19 +++++-----
+ 3 files changed, 34 insertions(+), 76 deletions(-)
+
+diff --git a/libmultipath/alias.c b/libmultipath/alias.c
+index 83ded886..68f5d848 100644
+--- a/libmultipath/alias.c
++++ b/libmultipath/alias.c
+@@ -329,13 +329,13 @@ allocate_binding(int fd, const char *wwid, int id, const char *prefix)
+ 	return alias;
+ }
+ 
+-char *
+-use_existing_alias (const char *wwid, const char *file, const char *alias_old,
+-		    const char *prefix, int bindings_read_only)
++char *get_user_friendly_alias(const char *wwid, const char *file, const char *alias_old,
++			      const char *prefix, bool bindings_read_only)
+ {
+ 	char *alias = NULL;
+ 	int id = 0;
+ 	int fd, can_write;
++	bool new_binding = false;
+ 	char buff[WWID_SIZE];
+ 	FILE *f;
+ 
+@@ -349,6 +349,10 @@ use_existing_alias (const char *wwid, const char *file, const char *alias_old,
+ 		close(fd);
+ 		return NULL;
+ 	}
++
++	if (!strlen(alias_old))
++		goto new_alias;
++
+ 	/* lookup the binding. if it exists, the wwid will be in buff
+ 	 * either way, id contains the id for the alias
+ 	 */
+@@ -358,14 +362,14 @@ use_existing_alias (const char *wwid, const char *file, const char *alias_old,
+ 		/* if buff is our wwid, it's already
+ 		 * allocated correctly
+ 		 */
+-		if (strcmp(buff, wwid) == 0)
++		if (strcmp(buff, wwid) == 0) {
+ 			alias = strdup(alias_old);
+-		else {
+-			alias = NULL;
++			goto out;
++		} else {
+ 			condlog(0, "alias %s already bound to wwid %s, cannot reuse",
+ 				alias_old, buff);
++			goto new_alias;
+ 		}
+-		goto out;
+ 	}
+ 
+ 	id = lookup_binding(f, wwid, &alias, NULL, 0);
+@@ -377,8 +381,15 @@ use_existing_alias (const char *wwid, const char *file, const char *alias_old,
+ 
+ 	/* allocate the existing alias in the bindings file */
+ 	id = scan_devname(alias_old, prefix);
+-	if (id <= 0)
+-		goto out;
++
++new_alias:
++	if (id <= 0) {
++		id = lookup_binding(f, wwid, &alias, prefix, 1);
++		if (id <= 0)
++			goto out;
++		else
++			new_binding = true;
++	}
+ 
+ 	if (fflush(f) != 0) {
+ 		condlog(0, "cannot fflush bindings file stream : %s",
+@@ -388,8 +399,9 @@ use_existing_alias (const char *wwid, const char *file, const char *alias_old,
+ 
+ 	if (can_write && !bindings_read_only) {
+ 		alias = allocate_binding(fd, wwid, id, prefix);
+-		condlog(0, "Allocated existing binding [%s] for WWID [%s]",
+-			alias, wwid);
++		if (alias && !new_binding)
++			condlog(2, "Allocated existing binding [%s] for WWID [%s]",
++				alias, wwid);
+ 	}
+ 
+ out:
+@@ -399,54 +411,6 @@ out:
+ 	return alias;
+ }
+ 
+-char *
+-get_user_friendly_alias(const char *wwid, const char *file, const char *prefix,
+-			int bindings_read_only)
+-{
+-	char *alias;
+-	int fd, id;
+-	FILE *f;
+-	int can_write;
+-
+-	if (!wwid || *wwid == '\0') {
+-		condlog(3, "Cannot find binding for empty WWID");
+-		return NULL;
+-	}
+-
+-	fd = open_file(file, &can_write, bindings_file_header);
+-	if (fd < 0)
+-		return NULL;
+-
+-	f = fdopen(fd, "r");
+-	if (!f) {
+-		condlog(0, "cannot fdopen on bindings file descriptor : %s",
+-			strerror(errno));
+-		close(fd);
+-		return NULL;
+-	}
+-
+-	id = lookup_binding(f, wwid, &alias, prefix, 1);
+-	if (id < 0) {
+-		fclose(f);
+-		return NULL;
+-	}
+-
+-	pthread_cleanup_push(free, alias);
+-
+-	if (fflush(f) != 0) {
+-		condlog(0, "cannot fflush bindings file stream : %s",
+-			strerror(errno));
+-		free(alias);
+-		alias = NULL;
+-	} else if (can_write && !bindings_read_only && !alias)
+-		alias = allocate_binding(fd, wwid, id, prefix);
+-
+-	fclose(f);
+-
+-	pthread_cleanup_pop(0);
+-	return alias;
+-}
+-
+ int
+ get_user_friendly_wwid(const char *alias, char *buff, const char *file)
+ {
+diff --git a/libmultipath/alias.h b/libmultipath/alias.h
+index dbc950c4..fa332233 100644
+--- a/libmultipath/alias.h
++++ b/libmultipath/alias.h
+@@ -2,13 +2,10 @@
+ #define _ALIAS_H
+ 
+ int valid_alias(const char *alias);
+-char *get_user_friendly_alias(const char *wwid, const char *file,
+-			      const char *prefix,
+-			      int bindings_readonly);
+ int get_user_friendly_wwid(const char *alias, char *buff, const char *file);
+-char *use_existing_alias (const char *wwid, const char *file,
+-			  const char *alias_old,
+-			  const char *prefix, int bindings_read_only);
++char *get_user_friendly_alias(const char *wwid, const char *file,
++			      const char *alias_old,
++			      const char *prefix, bool bindings_read_only);
+ 
+ struct config;
+ int check_alias_settings(const struct config *);
+diff --git a/libmultipath/propsel.c b/libmultipath/propsel.c
+index d6bce129..354e883f 100644
+--- a/libmultipath/propsel.c
++++ b/libmultipath/propsel.c
+@@ -401,19 +401,16 @@ int select_alias(struct config *conf, struct multipath * mp)
+ 
+ 	select_alias_prefix(conf, mp);
+ 
+-	if (strlen(mp->alias_old) > 0) {
+-		mp->alias = use_existing_alias(mp->wwid, conf->bindings_file,
+-				mp->alias_old, mp->alias_prefix,
+-				conf->bindings_read_only);
+-		memset (mp->alias_old, 0, WWID_SIZE);
+-		origin = "(setting: using existing alias)";
+-	}
++	mp->alias = get_user_friendly_alias(mp->wwid, conf->bindings_file,
++					    mp->alias_old, mp->alias_prefix,
++					    conf->bindings_read_only);
+ 
+-	if (mp->alias == NULL) {
+-		mp->alias = get_user_friendly_alias(mp->wwid,
+-				conf->bindings_file, mp->alias_prefix, conf->bindings_read_only);
++	if (mp->alias && !strncmp(mp->alias, mp->alias_old, WWID_SIZE))
++		origin = "(setting: using existing alias)";
++	else if (mp->alias)
+ 		origin = "(setting: user_friendly_name)";
+-	}
++	memset (mp->alias_old, 0, WWID_SIZE);
++
+ out:
+ 	if (mp->alias == NULL) {
+ 		mp->alias = strdup(mp->wwid);

@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 22 Aug 2023 16:21:43 +0200
+Subject: [PATCH] libmultipath: sysfs_set_scsi_tmo: do nothing for ACT_DRY_RUN
+
+"multipath -d" might change sysfs timeouts of SCSI devices.
+Make sure it doesn't.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Cc: Jehan Singh <jehan.singh@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/configure.c | 4 ++--
+ libmultipath/discovery.c | 3 +++
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/libmultipath/configure.c b/libmultipath/configure.c
+index 9513baae..029fbbd2 100644
+--- a/libmultipath/configure.c
++++ b/libmultipath/configure.c
+@@ -1193,13 +1193,13 @@ int coalesce_paths (struct vectors *vecs, vector mpvec, char *refwwid,
+ 
+ 		if (cmpp)
+ 			mpp->queue_mode = cmpp->queue_mode;
++		if (cmd == CMD_DRY_RUN && mpp->action == ACT_UNDEF)
++			mpp->action = ACT_DRY_RUN;
+ 		if (setup_map(mpp, &params, vecs)) {
+ 			remove_map(mpp, vecs->pathvec, NULL);
+ 			continue;
+ 		}
+ 
+-		if (cmd == CMD_DRY_RUN)
+-			mpp->action = ACT_DRY_RUN;
+ 		if (mpp->action == ACT_UNDEF)
+ 			select_action(mpp, curmp,
+ 				      force_reload == FORCE_RELOAD_YES ? 1 : 0);
+diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
+index e4de48e7..84ce5fe7 100644
+--- a/libmultipath/discovery.c
++++ b/libmultipath/discovery.c
+@@ -857,6 +857,9 @@ sysfs_set_scsi_tmo (struct config *conf, struct multipath *mpp)
+ 	bool warn_dev_loss = false;
+ 	bool warn_fast_io_fail = false;
+ 
++	if (mpp->action == ACT_DRY_RUN || mpp->action == ACT_REJECT)
++		return 0;
++
+ 	if (mpp->no_path_retry > 0) {
+ 		uint64_t no_path_retry_tmo =
+ 			(uint64_t)mpp->no_path_retry * conf->checkint;

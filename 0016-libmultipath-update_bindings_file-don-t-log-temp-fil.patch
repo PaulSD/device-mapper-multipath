@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Thu, 24 Aug 2023 22:33:39 +0200
+Subject: [PATCH] libmultipath: update_bindings_file: don't log temp file name
+
+The name of the temp file is unlikely to be helpful for users,
+and hard to predict in the unit test. Omit it.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/alias.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/libmultipath/alias.c b/libmultipath/alias.c
+index 92f90f05..afa5879e 100644
+--- a/libmultipath/alias.c
++++ b/libmultipath/alias.c
+@@ -167,8 +167,7 @@ static int update_bindings_file(const Bindings *bindings,
+ 	rc = write_bindings_file(bindings, fd);
+ 	pthread_cleanup_pop(1);
+ 	if (rc == -1) {
+-		condlog(1, "failed to write new bindings file %s",
+-			tempname);
++		condlog(1, "failed to write new bindings file");
+ 		unlink(tempname);
+ 		return rc;
+ 	}

@@ -14,17 +14,18 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
 ---
  libmultipath/config.c         | 13 +++++++++++++
  libmultipath/config.h         |  1 +
+ multipath/main.c              |  6 ++++++
  multipath/multipath.rules.in  |  1 +
- multipathd/multipathd.8       |  2 ++
+ multipathd/multipathd.8.in    |  2 ++
  multipathd/multipathd.service |  1 +
  multipathd/multipathd.socket  |  1 +
- 6 files changed, 19 insertions(+)
+ 7 files changed, 25 insertions(+)
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 5c5c0726..183b319d 100644
+index b7dbc6f5..3a374b3d 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -966,6 +966,19 @@ int _init_config (const char *file, struct config *conf)
+@@ -958,6 +958,19 @@ int _init_config (const char *file, struct config *conf)
  		}
  		factorize_hwtable(conf->hwtable, builtin_hwtable_size, file);
  		validate_pctable(conf->overrides, 0, file);
@@ -45,7 +46,7 @@ index 5c5c0726..183b319d 100644
  
  	conf->processed_main_config = 1;
 diff --git a/libmultipath/config.h b/libmultipath/config.h
-index 87947469..0dc89c16 100644
+index 8c22ce75..92f3a0df 100644
 --- a/libmultipath/config.h
 +++ b/libmultipath/config.h
 @@ -10,6 +10,7 @@
@@ -56,6 +57,35 @@ index 87947469..0dc89c16 100644
  
  enum devtypes {
  	DEV_NONE,
+diff --git a/multipath/main.c b/multipath/main.c
+index 9e1c5052..46944589 100644
+--- a/multipath/main.c
++++ b/multipath/main.c
+@@ -829,11 +829,14 @@ main (int argc, char *argv[])
+ 	struct config *conf;
+ 	int retries = -1;
+ 	bool enable_foreign = false;
++	bool have_config;
++	struct stat buf;
+ 
+ 	libmultipath_init();
+ 	if (atexit(dm_lib_exit) || atexit(libmultipath_exit))
+ 		condlog(1, "failed to register cleanup handler for libmultipath: %m");
+ 	logsink = LOGSINK_STDERR_WITH_TIME;
++	have_config = (stat(DEFAULT_CONFIGFILE, &buf) == 0);
+ 	if (init_config(DEFAULT_CONFIGFILE))
+ 		exit(RTVL_FAIL);
+ 	if (atexit(uninit_config))
+@@ -1081,6 +1084,9 @@ main (int argc, char *argv[])
+ 	while ((r = configure(conf, cmd, dev_type, dev)) == RTVL_RETRY)
+ 		condlog(3, "restart multipath configuration process");
+ 
++	if (!have_config && r == RTVL_OK &&
++            (cmd == CMD_LIST_SHORT || cmd == CMD_LIST_LONG))
++		r = RTVL_FAIL;
+ out:
+ 	put_multipath_config(conf);
+ 	if (dev)
 diff --git a/multipath/multipath.rules.in b/multipath/multipath.rules.in
 index 6f123760..70b69a06 100644
 --- a/multipath/multipath.rules.in
@@ -68,11 +98,11 @@ index 6f123760..70b69a06 100644
  
  ENV{DEVTYPE}!="partition", GOTO="test_dev"
  IMPORT{parent}="DM_MULTIPATH_DEVICE_PATH"
-diff --git a/multipathd/multipathd.8 b/multipathd/multipathd.8
-index bdf102eb..a16a0bd5 100644
---- a/multipathd/multipathd.8
-+++ b/multipathd/multipathd.8
-@@ -48,6 +48,8 @@ map regains its maximum performance and redundancy.
+diff --git a/multipathd/multipathd.8.in b/multipathd/multipathd.8.in
+index e98c27fd..fd2061e5 100644
+--- a/multipathd/multipathd.8.in
++++ b/multipathd/multipathd.8.in
+@@ -49,6 +49,8 @@ map regains its maximum performance and redundancy.
  With the \fB-k\fR option, \fBmultipathd\fR acts as a client utility that
  sends commands to a running instance of the multipathd daemon (see
  \fBCOMMANDS\fR below).

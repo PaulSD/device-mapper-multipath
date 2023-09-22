@@ -1,0 +1,101 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 22 Aug 2023 22:23:29 +0200
+Subject: [PATCH] libmultipath: never allocate an alias that's already taken
+
+If the bindings file is changed in a way that multipathd can't handle
+(e.g. by swapping the aliases of two maps), multipathd must not try
+to re-use an alias that is already used by another map. Creating
+or renaming a map with such an alias will fail. We already avoid
+this for some cases, but not for all. Fix it.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Cc: David Bond <dbond@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/alias.c | 31 +++++++++++++++++++++++--------
+ tests/alias.c        |  2 +-
+ 2 files changed, 24 insertions(+), 9 deletions(-)
+
+diff --git a/libmultipath/alias.c b/libmultipath/alias.c
+index 68f5d848..3e3dfe98 100644
+--- a/libmultipath/alias.c
++++ b/libmultipath/alias.c
+@@ -120,7 +120,7 @@ static bool alias_already_taken(const char *alias, const char *map_wwid)
+ 		if (dm_get_uuid(alias, wwid, sizeof(wwid)) == 0 &&
+ 		    strncmp(map_wwid, wwid, sizeof(wwid)) == 0)
+ 			return false;
+-		condlog(3, "%s: alias '%s' already taken, but not in bindings file. reselecting alias",
++		condlog(3, "%s: alias '%s' already taken, reselecting alias",
+ 			map_wwid, alias);
+ 		return true;
+ 	}
+@@ -359,12 +359,11 @@ char *get_user_friendly_alias(const char *wwid, const char *file, const char *al
+ 	rlookup_binding(f, buff, alias_old);
+ 
+ 	if (strlen(buff) > 0) {
+-		/* if buff is our wwid, it's already
+-		 * allocated correctly
+-		 */
++		/* If buff is our wwid, it's already allocated correctly. */
+ 		if (strcmp(buff, wwid) == 0) {
+ 			alias = strdup(alias_old);
+ 			goto out;
++
+ 		} else {
+ 			condlog(0, "alias %s already bound to wwid %s, cannot reuse",
+ 				alias_old, buff);
+@@ -372,19 +371,35 @@ char *get_user_friendly_alias(const char *wwid, const char *file, const char *al
+ 		}
+ 	}
+ 
+-	id = lookup_binding(f, wwid, &alias, NULL, 0);
++	/*
++	 * Look for an existing alias in the bindings file.
++	 * Pass prefix = NULL, so lookup_binding() won't try to allocate a new id.
++	 */
++	lookup_binding(f, wwid, &alias, NULL, 0);
+ 	if (alias) {
+-		condlog(3, "Use existing binding [%s] for WWID [%s]",
+-			alias, wwid);
++		if (alias_already_taken(alias, wwid)) {
++			free(alias);
++			alias = NULL;
++		} else
++			condlog(3, "Use existing binding [%s] for WWID [%s]",
++				alias, wwid);
+ 		goto out;
+ 	}
+ 
+-	/* allocate the existing alias in the bindings file */
++	/* alias_old is already taken by our WWID, update bindings file. */
+ 	id = scan_devname(alias_old, prefix);
+ 
+ new_alias:
+ 	if (id <= 0) {
++		/*
++		 * no existing alias was provided, or allocating it
++		 * failed. Try a new one.
++		 */
+ 		id = lookup_binding(f, wwid, &alias, prefix, 1);
++		if (id == 0 && alias_already_taken(alias, wwid)) {
++			free(alias);
++			alias = NULL;
++		}
+ 		if (id <= 0)
+ 			goto out;
+ 		else
+diff --git a/tests/alias.c b/tests/alias.c
+index 3ca6c28b..11f209e0 100644
+--- a/tests/alias.c
++++ b/tests/alias.c
+@@ -398,7 +398,7 @@ static void mock_self_alias(const char *alias, const char *wwid)
+ 	will_return(__wrap_dm_get_uuid, wwid);
+ }
+ 
+-#define USED_STR(alias_str, wwid_str) wwid_str ": alias '" alias_str "' already taken, but not in bindings file. reselecting alias\n"
++#define USED_STR(alias_str, wwid_str) wwid_str ": alias '" alias_str "' already taken, reselecting alias\n"
+ 
+ static void mock_failed_alias(const char *alias, char *msg)
+ {

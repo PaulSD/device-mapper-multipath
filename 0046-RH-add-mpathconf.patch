@@ -21,10 +21,10 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  create mode 100644 multipath/mpathconf.8
 
 diff --git a/libmultipath/config.c b/libmultipath/config.c
-index 183b319d..01f36a4f 100644
+index 3a374b3d..4544f484 100644
 --- a/libmultipath/config.c
 +++ b/libmultipath/config.c
-@@ -968,6 +968,8 @@ int _init_config (const char *file, struct config *conf)
+@@ -960,6 +960,8 @@ int _init_config (const char *file, struct config *conf)
  		validate_pctable(conf->overrides, 0, file);
  	} else {
  		condlog(0, "/etc/multipath.conf does not exist, blacklisting all devices.");
@@ -34,10 +34,10 @@ index 183b319d..01f36a4f 100644
  			conf->blist_devnode = vector_alloc();
  			if (!conf->blist_devnode) {
 diff --git a/multipath/Makefile b/multipath/Makefile
-index b3c2cc81..413294ef 100644
+index f70e64ec..9942d1a9 100644
 --- a/multipath/Makefile
 +++ b/multipath/Makefile
-@@ -22,6 +22,7 @@ $(EXEC): $(OBJS) $(multipathdir)/libmultipath.so $(mpathcmddir)/libmpathcmd.so
+@@ -24,6 +24,7 @@ $(EXEC): $(OBJS) $(multipathdir)/libmultipath.so $(mpathcmddir)/libmpathcmd.so
  install:
  	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
  	$(Q)$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
@@ -45,7 +45,7 @@ index b3c2cc81..413294ef 100644
  	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(udevrulesdir)
  	$(Q)$(INSTALL_PROGRAM) -m 644 11-dm-mpath.rules $(DESTDIR)$(udevrulesdir)
  	$(Q)$(INSTALL_PROGRAM) -m 644 multipath.rules $(DESTDIR)$(udevrulesdir)/62-multipath.rules
-@@ -31,6 +32,7 @@ install:
+@@ -33,6 +34,7 @@ install:
  	$(Q)$(INSTALL_PROGRAM) -m 644 tmpfiles.conf $(DESTDIR)$(tmpfilesdir)/multipath.conf
  	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man8
  	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).8 $(DESTDIR)$(mandir)/man8
@@ -53,7 +53,7 @@ index b3c2cc81..413294ef 100644
  	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(mandir)/man5
  	$(Q)$(INSTALL_PROGRAM) -m 644 $(EXEC).conf.5 $(DESTDIR)$(mandir)/man5
  ifneq ($(SCSI_DH_MODULES_PRELOAD),)
-@@ -41,11 +43,13 @@ endif
+@@ -43,11 +45,13 @@ endif
  
  uninstall:
  	$(Q)$(RM) $(DESTDIR)$(bindir)/$(EXEC)
@@ -65,8 +65,8 @@ index b3c2cc81..413294ef 100644
  	$(Q)$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
 +	$(Q)$(RM) $(DESTDIR)$(mandir)/man8/mpathconf.8
  	$(Q)$(RM) $(DESTDIR)$(mandir)/man5/$(EXEC).conf.5
+ 	$(Q)$(RM) $(DESTDIR)$(tmpfilesdir)/multipath.conf
  
- clean: dep_clean
 diff --git a/multipath/mpathconf b/multipath/mpathconf
 new file mode 100644
 index 00000000..319664b1

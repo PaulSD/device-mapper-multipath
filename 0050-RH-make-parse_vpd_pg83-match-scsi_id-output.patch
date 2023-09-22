@@ -14,7 +14,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  2 files changed, 8 insertions(+), 10 deletions(-)
 
 diff --git a/libmultipath/discovery.c b/libmultipath/discovery.c
-index 6865cd92..72825829 100644
+index 84ce5fe7..104fdd5a 100644
 --- a/libmultipath/discovery.c
 +++ b/libmultipath/discovery.c
 @@ -1177,13 +1177,9 @@ parse_vpd_pg83(const unsigned char *in, size_t in_len,

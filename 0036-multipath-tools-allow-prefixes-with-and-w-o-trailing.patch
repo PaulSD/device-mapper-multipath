@@ -1,0 +1,66 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Mon, 11 Sep 2023 16:03:34 +0200
+Subject: [PATCH] multipath-tools: allow prefixes with and w/o trailing slash
+
+Add some logic to Makefile.inc that leads to the same result
+for "prefix=" and "prefix=/", or "prefix=/usr" and "prefix=/usr/".
+The logic does not work for multiple trailing slashes. It applies
+to all XYZ_prefix variables in Makefile.inc.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc | 35 ++++++++++++++++++++++-------------
+ 1 file changed, 22 insertions(+), 13 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 79e521e1..6e384e68 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -43,22 +43,31 @@ etc_prefix	:= $(prefix)
+ # Note: some systemd installations use separate "prefix" and "rootprefix".
+ # In this case, override only unitdir to use systemd's "rootprefix" instead of $(systemd_prefix)
+ systemd_prefix  := /usr
+-unitdir		:= $(systemd_prefix)/lib/systemd/system
+-tmpfilesdir	:= $(systemd_prefix)/lib/tmpfiles.d
+-modulesloaddir	:= $(systemd_prefix)/lib/modules-load.d
+-libudevdir	:= $(systemd_prefix)/lib/udev
++
++# Make sure all prefix variables end in "/"
++append-slash = $(1)$(if $(filter %/,$(1)),,/)
++override prefix          := $(call append-slash,$(prefix))
++override exec_prefix     := $(call append-slash,$(exec_prefix))
++override usr_prefix      := $(call append-slash,$(usr_prefix))
++override etc_prefix      := $(call append-slash,$(etc_prefix))
++override systemd_prefix  := $(call append-slash,$(systemd_prefix))
++
++unitdir		:= $(systemd_prefix)lib/systemd/system
++tmpfilesdir	:= $(systemd_prefix)lib/tmpfiles.d
++modulesloaddir	:= $(systemd_prefix)lib/modules-load.d
++libudevdir	:= $(systemd_prefix)lib/udev
+ udevrulesdir	:= $(libudevdir)/rules.d
+-bindir		:= $(exec_prefix)/sbin
+-mandir		:= $(usr_prefix)/share/man
++bindir		:= $(exec_prefix)sbin
++mandir		:= $(usr_prefix)share/man
+ LIB		:= $(if $(shell test -d /lib64 && echo 1),lib64,lib)
+-syslibdir	:= $(prefix)/$(LIB)
+-usrlibdir	:= $(usr_prefix)/$(LIB)
+-includedir	:= $(usr_prefix)/include
++syslibdir	:= $(prefix)$(LIB)
++usrlibdir	:= $(usr_prefix)$(LIB)
++includedir	:= $(usr_prefix)include
+ pkgconfdir	:= $(usrlibdir)/pkgconfig
+-plugindir       := $(prefix)/$(LIB)/multipath
+-configdir       := $(etc_prefix)/etc/multipath/conf.d
+-configfile      := $(etc_prefix)/etc/multipath.conf
+-statedir        := $(etc_prefix)/etc/multipath
++plugindir       := $(prefix)$(LIB)/multipath
++configdir       := $(etc_prefix)etc/multipath/conf.d
++configfile      := $(etc_prefix)etc/multipath.conf
++statedir        := $(etc_prefix)etc/multipath
+ runtimedir      := $(if $(shell test -L /var/run -o ! -d /var/run && echo 1),/run,/var/run)
+ devmapper_incdir := $(or $(shell $(PKG_CONFIG) --variable=includedir devmapper),/usr/include)
+ libudev_incdir	:= $(or $(shell $(PKG_CONFIG) --variable=includedir libudev),/usr/include)

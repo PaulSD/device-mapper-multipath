@@ -15,7 +15,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  3 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/Makefile.inc b/Makefile.inc
-index 2e25d2ea..540e1dfc 100644
+index 04bfa56e..62d3d5cc 100644
 --- a/Makefile.inc
 +++ b/Makefile.inc
 @@ -34,9 +34,9 @@ endif
@@ -27,9 +27,9 @@ index 2e25d2ea..540e1dfc 100644
  # Prefix for non-essential libraries (libdmmp)
 -usr_prefix	:= $(prefix)
 +usr_prefix	:= $(prefix)/usr
+ # Prefix for configfuration files (multipath.conf)
+ etc_prefix	:= $(prefix)
  # Where to install systemd-related files. systemd is usually installed under /usr
- # Note: some systemd installations use separate "prefix" and "rootprefix".
- # In this case, override only unitdir to use systemd's "rootprefix" instead of $(systemd_prefix)
 diff --git a/kpartx/kpartx.rules b/kpartx/kpartx.rules
 index 1969dee0..d2b28233 100644
 --- a/kpartx/kpartx.rules
@@ -43,10 +43,10 @@ index 1969dee0..d2b28233 100644
  
  LABEL="kpartx_end"
 diff --git a/multipath/Makefile b/multipath/Makefile
-index 73db991a..b3c2cc81 100644
+index 68cb5ce7..f70e64ec 100644
 --- a/multipath/Makefile
 +++ b/multipath/Makefile
-@@ -24,7 +24,7 @@ install:
+@@ -26,7 +26,7 @@ install:
  	$(Q)$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/
  	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(udevrulesdir)
  	$(Q)$(INSTALL_PROGRAM) -m 644 11-dm-mpath.rules $(DESTDIR)$(udevrulesdir)
@@ -55,7 +55,7 @@ index 73db991a..b3c2cc81 100644
  	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(modulesloaddir)
  	$(Q)$(INSTALL_PROGRAM) -m 644 modules-load.conf $(DESTDIR)$(modulesloaddir)/multipath.conf
  	$(Q)$(INSTALL_PROGRAM) -d $(DESTDIR)$(tmpfilesdir)
-@@ -44,7 +44,7 @@ uninstall:
+@@ -46,7 +46,7 @@ uninstall:
  	$(Q)$(RM) $(DESTDIR)$(udevrulesdir)/11-dm-mpath.rules
  	$(Q)$(RM) $(DESTDIR)$(modulesloaddir)/multipath.conf
  	$(Q)$(RM) $(DESTDIR)$(modulesloaddir)/scsi_dh.conf
@@ -63,4 +63,4 @@ index 73db991a..b3c2cc81 100644
 +	$(Q)$(RM) $(DESTDIR)$(libudevdir)/rules.d/62-multipath.rules
  	$(Q)$(RM) $(DESTDIR)$(mandir)/man8/$(EXEC).8
  	$(Q)$(RM) $(DESTDIR)$(mandir)/man5/$(EXEC).conf.5
- 
+ 	$(Q)$(RM) $(DESTDIR)$(tmpfilesdir)/multipath.conf

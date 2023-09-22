@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Mon, 11 Sep 2023 11:37:37 +0200
+Subject: [PATCH] multipath: add a missing newline
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ multipath/main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/multipath/main.c b/multipath/main.c
+index 45e9745f..b91289e8 100644
+--- a/multipath/main.c
++++ b/multipath/main.c
+@@ -1025,7 +1025,7 @@ main (int argc, char *argv[])
+ 	}
+ 
+ 	if (check_alias_settings(conf)) {
+-		fprintf(stderr, "fatal configuration error, aborting");
++		fprintf(stderr, "fatal configuration error, aborting\n");
+ 		exit(RTVL_FAIL);
+ 	}
+ 

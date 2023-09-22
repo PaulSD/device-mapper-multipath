@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Date: Fri, 15 Sep 2023 22:22:06 +0200
+Subject: [PATCH] multipath-tools: fix spelling
+
+Cc: Martin Wilck <mwilck@suse.com>
+Cc: Benjamin Marzinski <bmarzins@redhat.com>
+Cc: Christophe Varoqui <christophe.varoqui@opensvc.com>
+Cc: DM-DEVEL ML <dm-devel@redhat.com>
+Signed-off-by: Xose Vazquez Perez <xose.vazquez@gmail.com>
+Reviewed-by: Martin Wilck <mwilck@suse.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ README.md                     | 4 ++--
+ multipath/multipath.conf.5.in | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/README.md b/README.md
+index 679e55bf..524c9fb1 100644
+--- a/README.md
++++ b/README.md
+@@ -92,7 +92,7 @@ The following variables can be passed to the `make` command line:
+    The default is `$(prefix)/$(LIB)/multipath`, where `$(LIB)` is `lib64` on
+    systems that have `/lib64`, and `lib` otherwise.
+  * `configfile="/some/path`": The path to the main configuration file.
+-    The defalt is `$(etc_prefix)/etc/multipath.conf`.
++    The default is `$(etc_prefix)/etc/multipath.conf`.
+  * `configdir="/some/path"` : directory to search for additional configuration files.
+     This used to be the run-time option `config_dir` in earlier versions.
+ 	The default is `$(etc_prefix)/etc/multipath/conf.d`.
+@@ -141,7 +141,7 @@ The following variables can be passed to the `make` command line:
+    found on the build system, and `/lib` otherwise.
+    
+ The options `configdir`, `plugindir`, `configfile`, and `statedir` above can
+-be used for setting indvidual paths where the `prefix` variables don't provide
++be used for setting individual paths where the `prefix` variables don't provide
+ sufficient control. See `Makefile.inc` for even more fine-grained control.
+ 
+ [^systemd]: Some systemd installations use separate `prefix` and `rootprefix`. 
+diff --git a/multipath/multipath.conf.5.in b/multipath/multipath.conf.5.in
+index d320a88f..226d0019 100644
+--- a/multipath/multipath.conf.5.in
++++ b/multipath/multipath.conf.5.in
+@@ -36,7 +36,7 @@ Files ending in \fI.conf\fR in this directory are read
+ in alphabetical order, after reading \fI@CONFIGFILE@\fR.
+ They use the same syntax as \fI@CONFIGFILE@\fR itself,
+ and support all sections and keywords. If a keyword occurs in the same section
+-in multiple files, the last occurence will take precedence over all others.
++in multiple files, the last occurrence will take precedence over all others.
+ .
+ .
+ .\" ----------------------------------------------------------------------------

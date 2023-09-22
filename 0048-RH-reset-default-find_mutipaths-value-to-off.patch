@@ -12,7 +12,7 @@ Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libmultipath/defaults.h b/libmultipath/defaults.h
-index a5e9ea0c..514fd880 100644
+index d01f9712..ee2e13a9 100644
 --- a/libmultipath/defaults.h
 +++ b/libmultipath/defaults.h
 @@ -23,7 +23,7 @@

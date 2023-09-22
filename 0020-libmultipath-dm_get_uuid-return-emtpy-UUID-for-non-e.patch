@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Fri, 25 Aug 2023 20:35:19 +0200
+Subject: [PATCH] libmultipath: dm_get_uuid(): return emtpy UUID for
+ non-existing maps
+
+libdevmapper will most probably not return a UUID for non-existing
+maps anyway. But it's cheap to double-check here.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/devmapper.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/libmultipath/devmapper.c b/libmultipath/devmapper.c
+index 248c3734..9be82f4e 100644
+--- a/libmultipath/devmapper.c
++++ b/libmultipath/devmapper.c
+@@ -706,12 +706,16 @@ dm_get_prefixed_uuid(const char *name, char *uuid, int uuid_len)
+ {
+ 	struct dm_task *dmt;
+ 	const char *uuidtmp;
++	struct dm_info info;
+ 	int r = 1;
+ 
+ 	dmt = libmp_dm_task_create(DM_DEVICE_INFO);
+ 	if (!dmt)
+ 		return 1;
+ 
++	if (uuid_len > 0)
++		uuid[0] = '\0';
++
+ 	if (!dm_task_set_name (dmt, name))
+ 		goto uuidout;
+ 
+@@ -720,11 +724,13 @@ dm_get_prefixed_uuid(const char *name, char *uuid, int uuid_len)
+ 		goto uuidout;
+ 	}
+ 
++	if (!dm_task_get_info(dmt, &info) ||
++	    !info.exists)
++		goto uuidout;
++
+ 	uuidtmp = dm_task_get_uuid(dmt);
+ 	if (uuidtmp)
+ 		strlcpy(uuid, uuidtmp, uuid_len);
+-	else
+-		uuid[0] = '\0';
+ 
+ 	r = 0;
+ uuidout:

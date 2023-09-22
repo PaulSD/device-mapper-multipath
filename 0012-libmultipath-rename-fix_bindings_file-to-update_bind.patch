@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 22 Aug 2023 15:37:15 +0200
+Subject: [PATCH] libmultipath: rename fix_bindings_file() to
+ update_bindings_file()
+
+We will use this function in a more generic way, give it a more
+generic name.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ libmultipath/alias.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/libmultipath/alias.c b/libmultipath/alias.c
+index dd363fd8..0aac2393 100644
+--- a/libmultipath/alias.c
++++ b/libmultipath/alias.c
+@@ -595,8 +595,8 @@ static int write_bindings_file(const Bindings *bindings, int fd)
+ 	return 0;
+ }
+ 
+-static int fix_bindings_file(const struct config *conf,
+-			     const Bindings *bindings)
++static int update_bindings_file(const struct config *conf,
++				const Bindings *bindings)
+ {
+ 	int rc;
+ 	int fd = -1;
+@@ -766,7 +766,7 @@ int check_alias_settings(const struct config *conf)
+ 			rc = _check_bindings_file(conf, file, &bindings);
+ 			pthread_cleanup_pop(1);
+ 			if (rc == -1 && can_write && !conf->bindings_read_only)
+-				rc = fix_bindings_file(conf, &bindings);
++				rc = update_bindings_file(conf, &bindings);
+ 			else if (rc == -1)
+ 				condlog(0, "ERROR: bad settings in read-only bindings file %s",
+ 					conf->bindings_file);

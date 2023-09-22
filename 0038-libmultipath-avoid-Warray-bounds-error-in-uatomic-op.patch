@@ -1,0 +1,158 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <mwilck@suse.com>
+Date: Tue, 12 Sep 2023 11:54:47 +0200
+Subject: [PATCH] libmultipath: avoid -Warray-bounds error in uatomic
+ operations
+
+The use of uatomic_xchg() in alias.c causes a -Warray-bounds error
+on distributions using gcc 12, such as Fedora 37. This is a similar
+error to 2534c4f ("libmultipath: avoid -Warray-bounds error with gcc
+12 and musl libc"). This happens only with liburcu 0.13 and earlier,
+and only with certain gcc versions. See liburcu commit 835b9ab
+("Fix: x86 and s390 uatomic: __hp() macro warning with gcc 11").
+
+Enhance the fix for 2534c4f by a adding a workaround for uatomic_xchg(),
+and introduce the macro URCU_VERSION (originally only used for multipathd)
+globally.
+
+Signed-off-by: Martin Wilck <mwilck@suse.com>
+Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+Signed-off-by: Benjamin Marzinski <bmarzins@redhat.com>
+---
+ Makefile.inc         |  2 +-
+ create-config.mk     |  5 +++++
+ libmultipath/alias.c |  5 +++--
+ libmultipath/lock.h  | 21 +++++++++++++--------
+ multipathd/Makefile  |  2 --
+ 5 files changed, 22 insertions(+), 13 deletions(-)
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 6e384e68..04bfa56e 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -95,7 +95,7 @@ OPTFLAGS	:= -O2 -g $(STACKPROT) --param=ssp-buffer-size=4
+ WARNFLAGS	:= -Werror -Wall -Wextra -Wformat=2 $(WFORMATOVERFLOW) -Werror=implicit-int \
+ 		  -Werror=implicit-function-declaration -Werror=format-security \
+ 		  $(WNOCLOBBERED) -Werror=cast-qual $(ERROR_DISCARDED_QUALIFIERS) $(W_URCU_TYPE_LIMITS)
+-CPPFLAGS	:= $(FORTIFY_OPT) $(CPPFLAGS) \
++CPPFLAGS	:= $(FORTIFY_OPT) $(CPPFLAGS) $(D_URCU_VERSION) \
+ 		   -DBIN_DIR=\"$(bindir)\" -DMULTIPATH_DIR=\"$(plugindir)\" \
+ 		   -DRUNTIME_DIR=\"$(runtimedir)\" -DCONFIG_DIR=\"$(configdir)\" \
+ 		   -DDEFAULT_CONFIGFILE=\"$(configfile)\" -DSTATE_DIR=\"$(statedir)\" \
+diff --git a/create-config.mk b/create-config.mk
+index d1255971..4d318b96 100644
+--- a/create-config.mk
++++ b/create-config.mk
+@@ -73,6 +73,10 @@ TEST_URCU_TYPE_LIMITS = $(shell \
+ 		$(CC) -c -Werror=type-limits -o /dev/null -xc - 2>/dev/null  \
+ 	|| echo -Wno-type-limits )
+ 
++URCU_VERSION = $(shell \
++	$(PKG_CONFIG) --modversion liburcu 2>/dev/null | \
++			awk -F. '{ printf("-DURCU_VERSION=0x%06x", 256 * ( 256 * $$1 + $$2) + $$3); }')
++
+ DEFINES :=
+ 
+ ifneq ($(call check_func,dm_task_no_flush,$(devmapper_incdir)/libdevmapper.h),0)
+@@ -168,6 +172,7 @@ $(TOPDIR)/config.mk:	$(multipathdir)/autoconfig.h
+ 	@echo creating $@
+ 	@echo "FPIN_SUPPORT := $(FPIN_SUPPORT)" >$@
+ 	@echo "FORTIFY_OPT := $(FORTIFY_OPT)" >>$@
++	@echo "D_URCU_VERSION := $(call URCU_VERSION)" >>$@
+ 	@echo "SYSTEMD := $(SYSTEMD)" >>$@
+ 	@echo "ANA_SUPPORT := $(ANA_SUPPORT)" >>$@
+ 	@echo "STACKPROT := $(call TEST_CC_OPTION,-fstack-protector-strong,-fstack-protector)" >>$@
+diff --git a/libmultipath/alias.c b/libmultipath/alias.c
+index e5d3f151..74431f3f 100644
+--- a/libmultipath/alias.c
++++ b/libmultipath/alias.c
+@@ -24,6 +24,7 @@
+ #include "devmapper.h"
+ #include "strbuf.h"
+ #include "time-util.h"
++#include "lock.h"
+ 
+ /*
+  * significant parts of this file were taken from iscsi-bindings.c of the
+@@ -300,7 +301,7 @@ void handle_bindings_file_inotify(const struct inotify_event *event)
+ 	pthread_mutex_unlock(&timestamp_mutex);
+ 
+ 	if (changed) {
+-		uatomic_xchg(&bindings_file_changed, 1);
++		uatomic_xchg_int(&bindings_file_changed, 1);
+ 		condlog(3, "%s: bindings file must be re-read, new timestamp: %ld.%06ld",
+ 			__func__, (long)ts.tv_sec, (long)ts.tv_nsec / 1000);
+ 	} else
+@@ -775,7 +776,7 @@ static int _read_bindings_file(const struct config *conf, Bindings *bindings,
+ 	int rc = 0, ret, fd;
+ 	FILE *file;
+ 	struct stat st;
+-	int has_changed = uatomic_xchg(&bindings_file_changed, 0);
++	int has_changed = uatomic_xchg_int(&bindings_file_changed, 0);
+ 
+ 	if (!force) {
+ 		if (!has_changed) {
+diff --git a/libmultipath/lock.h b/libmultipath/lock.h
+index 9814be76..ac80d1d8 100644
+--- a/libmultipath/lock.h
++++ b/libmultipath/lock.h
+@@ -13,15 +13,20 @@ struct mutex_lock {
+ 	int waiters; /* uatomic access only */
+ };
+ 
+-#if !defined(__GLIBC__) && defined(__GNUC__) && __GNUC__ == 12
++static inline void init_lock(struct mutex_lock *a)
++{
++	pthread_mutex_init(&a->mutex, NULL);
++	uatomic_set(&a->waiters, 0);
++}
++
++#if defined(__GNUC__) && __GNUC__ == 12 && URCU_VERSION < 0xe00
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Warray-bounds"
+ #endif
+ 
+-static inline void init_lock(struct mutex_lock *a)
++static inline int uatomic_xchg_int(int *ptr, int val)
+ {
+-	pthread_mutex_init(&a->mutex, NULL);
+-	uatomic_set(&a->waiters, 0);
++	return uatomic_xchg(ptr, val);
+ }
+ 
+ static inline void lock(struct mutex_lock *a)
+@@ -31,6 +36,10 @@ static inline void lock(struct mutex_lock *a)
+ 	uatomic_dec(&a->waiters);
+ }
+ 
++#if defined(__GNUC__) && __GNUC__ == 12 && URCU_VERSION < 0xe00
++#pragma GCC diagnostic pop
++#endif
++
+ static inline int trylock(struct mutex_lock *a)
+ {
+ 	return pthread_mutex_trylock(&a->mutex);
+@@ -51,10 +60,6 @@ static inline bool lock_has_waiters(struct mutex_lock *a)
+ 	return (uatomic_read(&a->waiters) > 0);
+ }
+ 
+-#if !defined(__GLIBC__) && defined(__GNUC__) && __GNUC__ == 12
+-#pragma GCC diagnostic pop
+-#endif
+-
+ #define lock_cleanup_pop(a) pthread_cleanup_pop(1)
+ 
+ void cleanup_lock (void * data);
+diff --git a/multipathd/Makefile b/multipathd/Makefile
+index cdba3db1..0ba6ecb7 100644
+--- a/multipathd/Makefile
++++ b/multipathd/Makefile
+@@ -5,8 +5,6 @@ CLI      := multipathc
+ MANPAGES := multipathd.8
+ 
+ CPPFLAGS += -I$(multipathdir) -I$(mpathutildir) -I$(mpathpersistdir) -I$(mpathcmddir) -I$(thirdpartydir) \
+-	$(shell $(PKG_CONFIG) --modversion liburcu 2>/dev/null | \
+-		awk -F. '{ printf("-DURCU_VERSION=0x%06x", 256 * ( 256 * $$1 + $$2) + $$3); }') \
+ 	-DBINDIR='"$(bindir)"' $(SYSTEMD_CPPFLAGS)
+ 
+ #
