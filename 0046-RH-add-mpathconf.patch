@@ -106,7 +106,7 @@ index 00000000..319664b1
 +
 +defaults {
 +	user_friendly_names yes
-+	find_multipaths yes
++	find_multipaths on
 +}"
 +
 +CONFIGFILE="/etc/multipath.conf"
@@ -124,7 +124,7 @@ index 00000000..319664b1
 +	echo "Disable: --disable"
 +	echo "Only allow certain wwids (instead of enable): --allow <WWID>"
 +	echo "Set user_friendly_names (Default y): --user_friendly_names <y|n>"
-+	echo "Set find_multipaths (Default y): --find_multipaths <yes|no|strict|greedy|smart>"
++	echo "Set find_multipaths (Default on): --find_multipaths <on|yes|y|off|no|n|strict|greedy|smart>"
 +	echo "Set default property blacklist (Default n): --property_blacklist <y|n>"
 +	echo "Set enable_foreign to show foreign devices (Default n): --enable_foreign <y|n>"
 +	echo "Set recheck_wwid (Defaut n): --recheck_wwid <y|n>"
@@ -328,11 +328,11 @@ index 00000000..319664b1
 +		exit 1
 +	fi
 +	if [ "$FIND" = "y" ]; then
-+		FIND="yes"
++		FIND="on"
 +	elif [ "$FIND" = "n" ]; then
-+		FIND="no"
-+	elif [ -n "$FIND" ] && [ "$FIND" != "yes" -a "$FIND" != "no" -a "$FIND" != "strict" -a "$FIND" != "greedy" -a "$FIND" != "smart" ]; then
-+		echo "--find_multipaths must be one of 'yes' 'no' 'strict' 'greedy' or 'smart'"
++		FIND="off"
++	elif [ -n "$FIND" ] && [ "$FIND" != "on" -a "$FIND" != "yes" -a "$FIND" != "off" -a "$FIND" != "no" -a "$FIND" != "strict" -a "$FIND" != "greedy" -a "$FIND" != "smart" ]; then
++		echo "--find_multipaths must be one of 'on' 'yes' 'y' 'off' 'no' 'n' 'strict' 'greedy' or 'smart'"
 +		exit 1
 +	fi
 +	if [ -n "$PROPERTY" ] && [ "$PROPERTY" != "y" -a "$PROPERTY" != "n" ]; then
@@ -497,7 +497,7 @@ index 00000000..319664b1
 +		echo "multipath is disabled"
 +	fi
 +	if [ -z "$HAVE_FIND" ]; then
-+		echo "find_multipaths is no"
++		echo "find_multipaths is off"
 +	else
 +		echo "find_multipaths is $HAVE_FIND"
 +	fi
@@ -779,10 +779,10 @@ index 00000000..9c2fb835
 +.B user_friendly_names
 +set and
 +.B find_multipaths
-+set to \fByes\fP. To disable these, use the
++set to \fBon\fP. To disable these, use the
 +.B --user_friendly_names n
 +and
-+.B --find_multipaths n
++.B --find_multipaths off
 +options
 +.SH COMMANDS
 +.TP
@@ -825,7 +825,7 @@ index 00000000..9c2fb835
 +sets an existing \fBrecheck_wwid\fP line to \fBno\fP. This command can be used
 +along with any other command.
 +.TP
-+.B --find_multipaths\fP { \fByes\fP | \fBno\fP | \fBstrict\fP | \fBgreedy\fP | \fBsmart\fP }
++.B --find_multipaths\fP { \fBon\fP | \fByes\fP | \fBy\fP | \fBoff\fP | \fBno\fP | \fBn\fP | \fBstrict\fP | \fBgreedy\fP | \fBsmart\fP }
 +If set to \fB<value>\fP, this adds the line
 +.B find_multipaths <value>
 +to the
