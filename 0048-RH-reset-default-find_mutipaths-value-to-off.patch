@@ -24,3 +24,16 @@ index d01f9712..ee2e13a9 100644
  #define DEFAULT_FAST_IO_FAIL	5
  #define DEFAULT_DEV_LOSS_TMO	600
  #define DEFAULT_RETAIN_HWHANDLER RETAIN_HWHANDLER_ON
+diff --git a/multipath/multipath.conf.5 b/multipath/multipath.conf.5
+index 5e447e6..e5235b7 100644
+--- a/multipath/multipath.conf.5
++++ b/multipath/multipath.conf.5
+@@ -1160,7 +1160,7 @@ as non-multipath and passed on to upper layers.
+ \fBNote:\fR this may cause delays during device detection if
+ there are single-path devices which aren\'t blacklisted.
+ .TP
+-The default is: \fBstrict\fR
++The default is: \fBoff\fR
+ .RE
+ .
+ .
